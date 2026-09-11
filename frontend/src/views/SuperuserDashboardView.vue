@@ -172,7 +172,6 @@ const router =
   flex: 1;
   min-width: 0;
   padding: 27px;
-  overflow-x: hidden;
 }
 
 
@@ -206,11 +205,14 @@ const router =
 .quick-grid {
   display: grid;
   grid-template-columns: repeat(2,1fr);
-  gap: 15px;
+  gap: 18px;
+  padding: 6px;
 }
 
 
 .quick-card {
+  position: relative;
+  z-index: 1;
   min-height: 105px;
   display: flex;
   align-items: center;
@@ -221,21 +223,32 @@ const router =
   background: var(--sigta-azul-tenue);
   text-align: left;
   cursor: pointer;
+  transform-origin: center;
   transition:
-    border-color .2s,
-    box-shadow .2s,
-    transform .1s;
+    border-color .25s ease,
+    background .25s ease,
+    box-shadow .25s ease,
+    transform .32s cubic-bezier(.34, 1.55, .5, 1);
 }
 
 
 .quick-card:hover {
-  border-color: var(--sigta-azul);
-  box-shadow: 0 5px 14px rgba(0,0,0,.07);
+  z-index: 5;
+  border-color: #FF9F00;
+  background: #FFB300;
+  box-shadow: 0 22px 48px rgba(255, 159, 0, .6);
+  transform: scale(1.12);
+}
+
+
+.quick-card:hover strong,
+.quick-card:hover span {
+  color: var(--sigta-azul);
 }
 
 
 .quick-card:active {
-  transform: scale(.995);
+  transform: scale(1.05);
 }
 
 
@@ -260,10 +273,10 @@ const router =
 
 
 .quick-card:hover .quick-icon {
-  background: var(--sigta-mostaza);
+  background: var(--sigta-blanco, #fff);
   color: var(--sigta-azul);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(7,35,60,.2);
+  transform: scale(1.1);
+  box-shadow: 0 8px 18px rgba(7,35,60,.22);
 }
 
 

@@ -1423,13 +1423,27 @@ class RequerimientoMantenimientoViewSet(
     @action(detail=True, methods=["post"], url_path="verificar-funcionamiento")
     def verificar_funcionamiento(self, request, pk=None):
 
-        if not (es_admin(request.user) or tiene_rol(request.user, "SERVICIOS_GENERALES")):
+        requerimiento = self.get_object()
+
+        # El solicitante es quien prueba su propio requerimiento.
+        # El Jefe/admin conservan la opción de verificarlo también
+        # (por ejemplo si el solicitante no responde).
+        es_solicitante = requerimiento.solicitante_id == request.user.id
+
+        if not (
+            es_admin(request.user)
+            or tiene_rol(request.user, "SERVICIOS_GENERALES")
+            or es_solicitante
+        ):
             return Response(
-                {"detalle": "Solo el Jefe de Mantenimiento puede verificar el funcionamiento."},
+                {
+                    "detalle": (
+                        "Solo el solicitante o el Jefe de Mantenimiento "
+                        "pueden verificar el funcionamiento."
+                    )
+                },
                 status=status.HTTP_403_FORBIDDEN
             )
-
-        requerimiento = self.get_object()
 
         if not estado_permitido(requerimiento, ["INFORME_REGISTRADO"]):
             return Response(

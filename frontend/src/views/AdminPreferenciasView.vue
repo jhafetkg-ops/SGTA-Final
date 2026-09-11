@@ -81,12 +81,13 @@
              IDENTIDAD
         ============================================= -->
 
-        <article class="setting-card">
+        <article class="setting-card" style="border-top-color:#3E7BD6">
 
           <div class="card-header">
 
-            <span>
-              01
+            <span class="ch-num" style="background:#3E7BD6">01</span>
+            <span class="ch-icon" style="background:#3E7BD626;color:#3E7BD6" aria-hidden="true">
+              <IconoSigta nombre="edificio" :tamano="18" />
             </span>
 
             <div>
@@ -160,12 +161,13 @@
              PROCESOS
         ============================================= -->
 
-        <article class="setting-card">
+        <article class="setting-card" style="border-top-color:#7B6FD9">
 
           <div class="card-header">
 
-            <span>
-              02
+            <span class="ch-num" style="background:#7B6FD9">02</span>
+            <span class="ch-icon" style="background:#7B6FD926;color:#7B6FD9" aria-hidden="true">
+              <IconoSigta nombre="configuracion" :tamano="18" />
             </span>
 
             <div>
@@ -252,12 +254,13 @@
              SEGURIDAD
         ============================================= -->
 
-        <article class="setting-card">
+        <article class="setting-card" style="border-top-color:#1FA396">
 
           <div class="card-header">
 
-            <span>
-              03
+            <span class="ch-num" style="background:#1FA396">03</span>
+            <span class="ch-icon" style="background:#1FA39626;color:#1FA396" aria-hidden="true">
+              <IconoSigta nombre="escudo" :tamano="18" />
             </span>
 
             <div>
@@ -367,6 +370,8 @@
 
     </main>
 
+    <TarjetaGuardado :visible="mostrarGuardadoOk" :texto="textoGuardado" />
+
   </div>
 
 </template>
@@ -387,9 +392,24 @@ import {
 import SuperuserMenu
   from '../components/SuperuserMenu.vue'
 
+import IconoSigta
+  from '../components/IconoSigta.vue'
+
+import TarjetaGuardado
+  from '../components/TarjetaGuardado.vue'
+
+import { usarGuardado }
+  from '../utils/guardado.js'
+
 
 const router =
   useRouter()
+
+const {
+  mostrar: mostrarGuardadoOk,
+  texto: textoGuardado,
+  animar: animarGuardado,
+} = usarGuardado()
 
 
 // ==========================================================
@@ -641,19 +661,9 @@ async function guardar() {
     )
 
 
-    mensaje.value =
-      'Preferencias actualizadas correctamente.'
+    guardando.value = false
 
-
-    setTimeout(
-      () => {
-
-        mensaje.value =
-          ''
-
-      },
-      3500
-    )
+    await animarGuardado('Preferencias guardadas')
 
 
   } catch (err) {
@@ -671,6 +681,9 @@ async function guardar() {
   } finally {
 
     guardando.value =
+      false
+
+    mostrarGuardadoOk.value =
       false
   }
 }
@@ -831,9 +844,16 @@ function cerrarSesion() {
   min-height: 310px;
   padding: 18px;
   border-top: 4px solid var(--sigta-mostaza);
-  border-radius: 9px;
+  border-radius: 11px;
   background: white;
   box-shadow: 0 4px 14px rgba(0,0,0,.04);
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+
+
+.setting-card:hover {
+  box-shadow: 0 10px 26px rgba(0,0,0,.09);
+  transform: translateY(-2px);
 }
 
 
@@ -844,23 +864,32 @@ function cerrarSesion() {
 .card-header {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 18px;
 }
 
 
-.card-header > span {
-  width: 32px;
-  height: 32px;
+.card-header .ch-num,
+.card-header .ch-icon {
+  width: 30px;
+  height: 30px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 7px;
-  background: var(--sigta-azul-tenue);
-  color: var(--sigta-azul);
-  font-size: 14px;
+  border-radius: 8px;
+}
+
+
+.card-header .ch-num {
+  color: #fff;
+  font-size: 13px;
   font-weight: 900;
+}
+
+
+.card-header .ch-icon {
+  margin-right: 4px;
 }
 
 

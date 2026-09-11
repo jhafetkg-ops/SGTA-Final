@@ -17,63 +17,102 @@
 
 
       <!-- =================================================
+           BARRA SUPERIOR: BUSCADOR · NOTIFICACIONES · PERFIL
+      ================================================== -->
+
+      <div class="dash-strip">
+
+        <div class="dash-search">
+          <IconoSigta nombre="buscar" :tamano="17" />
+          <input
+            v-model="busqueda"
+            type="text"
+            placeholder="Buscar solicitudes por código, descripción o área…"
+          />
+        </div>
+
+        <div class="dash-strip-right">
+
+          <div class="dash-notif">
+            <button
+              type="button"
+              class="dash-bell"
+              :aria-expanded="notifAbierta"
+              aria-label="Notificaciones"
+              @click="notifAbierta = !notifAbierta"
+            >
+              <IconoSigta nombre="notificaciones" :tamano="20" />
+              <em v-if="pendientesAprobacion.length">{{ pendientesAprobacion.length }}</em>
+            </button>
+
+            <div v-if="notifAbierta" class="dash-notif-panel">
+              <header>
+                <strong>Notificaciones</strong>
+                <button type="button" @click="notifAbierta = false">✕</button>
+              </header>
+              <p v-if="!pendientesAprobacion.length" class="dash-notif-vacio">
+                No tiene solicitudes esperando su decisión.
+              </p>
+              <ul v-else>
+                <li v-for="p in pendientesAprobacion.slice(0, 6)" :key="p.id">
+                  <IconoSigta nombre="reloj" :tamano="15" />
+                  <div>
+                    <strong>{{ p.codigo }}</strong>
+                    <span>{{ p.descripcion }}</span>
+                  </div>
+                  <button type="button" @click="notifAbierta = false; router.push('/admin/compras')">Revisar</button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="user-box">
+            <div class="user-avatar">{{ inicialesUsuario }}</div>
+            <div>
+              <strong>{{ usuario?.nombre || usuario?.nombre_completo || 'Director' }}</strong>
+              <span>{{ usuario?.email || 'admin@emi.edu.bo' }}</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- =================================================
            ENCABEZADO
       ================================================== -->
 
-      <header class="topbar">
-
-        <div>
-
-          <h1>
-            Panel de Administración
-          </h1>
-
-          <p>
-            Supervisión general de los procesos y
-            configuración del Sistema Integral de Gestión.
-          </p>
-          <label>Proceso
-            <select v-model="filtroProceso" @change="actualizarResumen">
-              <option value="">Ambos procesos</option>
-              <option value="MANTENIMIENTO">Mantenimiento</option>
-              <option value="SOPORTE">Soporte técnico</option>
-            </select>
-          </label>
-
-        </div>
-
-
-        <div class="user-box">
-
-          <div class="user-avatar">
-            {{ inicialesUsuario }}
-          </div>
-
-          <div>
-
-            <strong>
-              {{
-                usuario?.nombre
-                ||
-                usuario?.nombre_completo
-                ||
-                'Administrador'
-              }}
-            </strong>
-
-            <span>
-              {{
-                usuario?.email
-                ||
-                'admin@emi.edu.bo'
-              }}
-            </span>
-
-          </div>
-
-        </div>
-
+      <header class="dash-head">
+        <h1>Panel de Administración</h1>
+        <p>
+          Supervisión general de los procesos y
+          configuración del Sistema Integral de Gestión.
+        </p>
       </header>
+
+
+      <!-- =================================================
+           FILTROS
+      ================================================== -->
+
+      <div class="dash-filtros">
+        <label>
+          <IconoSigta nombre="filtro" :tamano="15" />
+          <span>Proceso</span>
+          <select v-model="filtroProceso" @change="actualizarResumen">
+            <option value="">Ambos procesos</option>
+            <option value="MANTENIMIENTO">Mantenimiento</option>
+            <option value="SOPORTE">Soporte técnico</option>
+          </select>
+        </label>
+        <label class="dash-rango">
+          <IconoSigta nombre="reloj" :tamano="15" />
+          <span>Periodo</span>
+          <input type="date" v-model="rango.desde" :max="rango.hasta" aria-label="Fecha desde">
+          <b>–</b>
+          <input type="date" v-model="rango.hasta" :min="rango.desde" :max="isoHoy" aria-label="Fecha hasta">
+        </label>
+      </div>
 
 
       <!-- =================================================
@@ -82,114 +121,62 @@
 
       <section class="stats-grid">
 
-
-        <!-- ACTIVIDADES -->
-
-        <article
-          class="stat-card"
-          @click="$router.push('/admin/actividades')"
-        >
-
-          <span>
-            Actividades
-          </span>
-
-          <strong>
-            {{ resumen.actividades }}
-          </strong>
-
-          <small>
-            Informes remitidos por las jefaturas
-          </small>
-
+        <article class="stat-card t-azul" @click="$router.push('/admin/actividades')">
+          <i class="stat-ico"><IconoSigta nombre="actividades" :tamano="20" /></i>
+          <div class="stat-body">
+            <span>Actividades</span>
+            <strong>{{ resumen.actividades }}</strong>
+            <small>Informes remitidos por las jefaturas</small>
+          </div>
+          <b v-if="tendencias.actividades !== null" class="stat-delta" :class="tendencias.actividades >= 0 ? 'sube' : 'baja'">
+            {{ tendencias.actividades >= 0 ? '▲' : '▼' }} {{ Math.abs(tendencias.actividades) }}%
+          </b>
         </article>
 
-
-        <!-- PENDIENTES -->
-
-        <article
-          class="stat-card"
-          @click="$router.push({path:'/admin/compras',query:{proceso:filtroProceso}})"
-        >
-
-          <span>
-            Pendientes
-          </span>
-
-          <strong>
-            {{ resumen.pendientes }}
-          </strong>
-
-          <small>
-            Solicitudes que esperan su decisión
-          </small>
-
+        <article class="stat-card t-oro" @click="$router.push({path:'/admin/compras',query:{proceso:filtroProceso}})">
+          <i class="stat-ico"><IconoSigta nombre="reloj" :tamano="20" /></i>
+          <div class="stat-body">
+            <span>Pendientes</span>
+            <strong>{{ resumen.pendientes }}</strong>
+            <small>Solicitudes que esperan su decisión</small>
+          </div>
+          <b class="stat-delta neutro">—</b>
         </article>
 
-
-        <!-- COMPRAS -->
-
-        <article
-          class="stat-card"
-          @click="abrirStatModal('compras')"
-        >
-
-          <span>
-            Solicitudes de compra
-          </span>
-
-          <strong>
-            {{ resumen.compras }}
-          </strong>
-
-          <small>
-            Registradas en el proceso de Compras
-          </small>
-
+        <article class="stat-card t-azul" @click="abrirStatModal('compras')">
+          <i class="stat-ico"><IconoSigta nombre="compras" :tamano="20" /></i>
+          <div class="stat-body">
+            <span>Solicitudes de compra</span>
+            <strong>{{ resumen.compras }}</strong>
+            <small>Registradas en el proceso de Compras</small>
+          </div>
+          <b v-if="tendencias.compras !== null" class="stat-delta" :class="tendencias.compras >= 0 ? 'sube' : 'baja'">
+            {{ tendencias.compras >= 0 ? '▲' : '▼' }} {{ Math.abs(tendencias.compras) }}%
+          </b>
         </article>
 
-
-        <!-- ACEPTADAS -->
-
-        <article
-          class="stat-card"
-          @click="$router.push({path:'/admin/historial',query:{proceso:filtroProceso}})"
-        >
-
-          <span>
-            Aceptadas
-          </span>
-
-          <strong>
-            {{ resumen.aceptadas }}
-          </strong>
-
-          <small>
-            Solicitudes aprobadas
-          </small>
-
+        <article class="stat-card t-verde" @click="$router.push({path:'/admin/historial',query:{proceso:filtroProceso}})">
+          <i class="stat-ico"><IconoSigta nombre="validar" :tamano="20" /></i>
+          <div class="stat-body">
+            <span>Aceptadas</span>
+            <strong>{{ resumen.aceptadas }}</strong>
+            <small>Solicitudes aprobadas</small>
+          </div>
+          <b v-if="tendencias.aceptadas !== null" class="stat-delta" :class="tendencias.aceptadas >= 0 ? 'sube' : 'baja'">
+            {{ tendencias.aceptadas >= 0 ? '▲' : '▼' }} {{ Math.abs(tendencias.aceptadas) }}%
+          </b>
         </article>
 
-
-        <!-- RECHAZADAS -->
-
-        <article
-          class="stat-card"
-          @click="$router.push({path:'/admin/historial',query:{proceso:filtroProceso}})"
-        >
-
-          <span>
-            Rechazadas
-          </span>
-
-          <strong>
-            {{ resumen.rechazadas }}
-          </strong>
-
-          <small>
-            Solicitudes rechazadas
-          </small>
-
+        <article class="stat-card t-rojo" @click="$router.push({path:'/admin/historial',query:{proceso:filtroProceso}})">
+          <i class="stat-ico"><IconoSigta nombre="error" :tamano="20" /></i>
+          <div class="stat-body">
+            <span>Rechazadas</span>
+            <strong>{{ resumen.rechazadas }}</strong>
+            <small>Solicitudes rechazadas</small>
+          </div>
+          <b v-if="tendencias.rechazadas !== null" class="stat-delta" :class="tendencias.rechazadas > 0 ? 'baja' : 'sube'">
+            {{ tendencias.rechazadas >= 0 ? '▲' : '▼' }} {{ Math.abs(tendencias.rechazadas) }}%
+          </b>
         </article>
 
       </section>
@@ -293,6 +280,207 @@
       </section>
 
 
+      <!-- =================================================
+           GRÁFICO · ACTIVIDADES · ACCIONES
+      ================================================== -->
+
+      <section class="dash-fila">
+
+        <!-- TENDENCIA -->
+        <article class="dash-card dash-grafico">
+          <header>
+            <div>
+              <span class="dash-card-kicker">SEGUIMIENTO</span>
+              <h2>Tendencia de solicitudes</h2>
+            </div>
+            <span class="grafico-rango">{{ rangoTexto }}</span>
+          </header>
+
+          <div class="grafico-caja">
+            <svg
+              :viewBox="`0 0 ${graficoLineas.w} ${graficoLineas.h}`"
+              class="grafico-svg"
+              preserveAspectRatio="none"
+              role="img"
+              aria-label="Solicitudes registradas y aprobadas por día"
+            >
+              <!-- rejilla -->
+              <g class="g-rejilla">
+                <line
+                  v-for="(r, i) in graficoLineas.rejilla"
+                  :key="'r' + i"
+                  :x1="graficoLineas.mx" :x2="graficoLineas.w - graficoLineas.mx"
+                  :y1="r.y" :y2="r.y"
+                />
+                <text
+                  v-for="(r, i) in graficoLineas.rejilla"
+                  :key="'rt' + i"
+                  :x="graficoLineas.mx - 8" :y="r.y + 3"
+                  text-anchor="end"
+                >{{ r.v }}</text>
+              </g>
+
+              <!-- líneas -->
+              <path :d="graficoLineas.dReg" class="g-linea g-reg" />
+              <path :d="graficoLineas.dApr" class="g-linea g-apr" />
+
+              <!-- puntos (todos si son pocos; si hay muchos, solo el señalado) -->
+              <template v-if="graficoLineas.dias.length <= 20">
+                <circle
+                  v-for="(p, i) in graficoLineas.reg" :key="'pr' + i"
+                  :cx="p.x" :cy="p.y" r="4" class="g-punto g-reg"
+                  :class="{ activo: graficoHover === i }"
+                />
+                <circle
+                  v-for="(p, i) in graficoLineas.apr" :key="'pa' + i"
+                  :cx="p.x" :cy="p.y" r="4" class="g-punto g-apr"
+                  :class="{ activo: graficoHover === i }"
+                />
+              </template>
+              <template v-else-if="graficoHover !== null">
+                <circle :cx="graficoLineas.reg[graficoHover].x" :cy="graficoLineas.reg[graficoHover].y" r="4.5" class="g-punto g-reg activo" />
+                <circle :cx="graficoLineas.apr[graficoHover].x" :cy="graficoLineas.apr[graficoHover].y" r="4.5" class="g-punto g-apr activo" />
+              </template>
+
+              <!-- crosshair -->
+              <line
+                v-if="graficoHover !== null"
+                class="g-cross"
+                :x1="graficoLineas.reg[graficoHover].x" :x2="graficoLineas.reg[graficoHover].x"
+                :y1="graficoLineas.my" :y2="graficoLineas.h - graficoLineas.my"
+              />
+
+              <!-- etiquetas x -->
+              <text
+                v-for="p in graficoLineas.ejeX" :key="'x' + p.i"
+                :x="p.x" :y="graficoLineas.h - 4"
+                text-anchor="middle" class="g-eje-x"
+              >{{ p.etiqueta }}</text>
+
+              <!-- zonas de hover -->
+              <rect
+                v-for="(d, i) in graficoLineas.dias" :key="'h' + i"
+                :x="i === 0 ? 0 : (graficoLineas.reg[i - 1].x + graficoLineas.reg[i].x) / 2"
+                :width="i === 0 || i === graficoLineas.dias.length - 1 ? (graficoLineas.w / graficoLineas.dias.length) : (graficoLineas.reg[i + 1] ? (graficoLineas.reg[i + 1].x - graficoLineas.reg[i - 1].x) / 2 : graficoLineas.w)"
+                y="0" :height="graficoLineas.h" fill="transparent"
+                @mouseenter="graficoHover = i" @mouseleave="graficoHover = null"
+              />
+            </svg>
+
+            <div
+              v-if="graficoHover !== null"
+              class="grafico-tip"
+              :style="{ left: (graficoLineas.reg[graficoHover].x / graficoLineas.w * 100) + '%' }"
+            >
+              <strong>{{ graficoLineas.dias[graficoHover].etiqueta }}</strong>
+              <span><i class="pt pt-reg"></i>Registradas: {{ graficoLineas.dias[graficoHover].registradas }}</span>
+              <span><i class="pt pt-apr"></i>Aprobadas: {{ graficoLineas.dias[graficoHover].aprobadas }}</span>
+            </div>
+          </div>
+
+          <div class="grafico-leyenda">
+            <span><i class="pt pt-reg"></i>Solicitudes registradas</span>
+            <span><i class="pt pt-apr"></i>Solicitudes aprobadas</span>
+          </div>
+        </article>
+
+        <!-- ACTIVIDADES RECIENTES -->
+        <article class="dash-card dash-recientes">
+          <header>
+            <h2>Actividades recientes</h2>
+            <button type="button" class="dash-ver" @click="router.push('/admin/actividades')">
+              Ver todas →
+            </button>
+          </header>
+
+          <p v-if="!actividadesRecientes.length" class="dash-vacio">
+            Todavía no hay movimientos registrados.
+          </p>
+          <ul v-else class="recientes-lista">
+            <li v-for="a in actividadesRecientes" :key="a.id">
+              <i class="rec-ico" :class="'tono-' + a.tono"><IconoSigta :nombre="a.icono" :tamano="15" /></i>
+              <div>
+                <strong>{{ a.titulo }}</strong>
+                <span>{{ a.detalle }}</span>
+              </div>
+              <small>{{ a.cuando }}</small>
+            </li>
+          </ul>
+        </article>
+
+        <!-- ACCIONES RÁPIDAS -->
+        <article class="dash-card dash-acciones">
+          <header><h2>Acciones rápidas</h2></header>
+          <button
+            v-for="ac in accionesRapidas"
+            :key="ac.titulo"
+            type="button"
+            class="accion"
+            :class="'a-' + ac.tono"
+            @click="router.push(ac.ruta)"
+          >
+            <i><IconoSigta :nombre="ac.icono" :tamano="17" /></i>
+            <div>
+              <strong>{{ ac.titulo }}</strong>
+              <span>{{ ac.desc }}</span>
+            </div>
+            <b>›</b>
+          </button>
+        </article>
+
+      </section>
+
+
+      <!-- =================================================
+           SOLICITUDES PENDIENTES DE APROBACIÓN
+      ================================================== -->
+
+      <article class="dash-card dash-tabla">
+        <header>
+          <div>
+            <h2>Solicitudes pendientes de aprobación</h2>
+            <p>{{ pendientesFiltradas.length }} solicitud(es){{ busqueda ? ' que coinciden con la búsqueda' : ' esperan su decisión' }}</p>
+          </div>
+          <button type="button" class="dash-ver" @click="router.push('/admin/compras')">
+            Ver todas las solicitudes →
+          </button>
+        </header>
+
+        <p v-if="!pendientesFiltradas.length" class="dash-vacio">
+          {{ pendientesAprobacion.length ? 'Ninguna solicitud coincide con la búsqueda.' : 'No hay solicitudes esperando su autorización.' }}
+        </p>
+
+        <div v-else class="tabla-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>N°</th>
+                <th>Código</th>
+                <th>Descripción</th>
+                <th>Área solicitante</th>
+                <th class="num">Monto estimado (Bs.)</th>
+                <th>Fecha de solicitud</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(p, i) in pendientesFiltradas" :key="p.id">
+                <td>{{ i + 1 }}</td>
+                <td class="cod">{{ p.codigo }}</td>
+                <td>{{ p.descripcion }}</td>
+                <td>{{ p.area }}</td>
+                <td class="num">{{ montoBs(p.monto) }}</td>
+                <td>{{ fechaCorta(p.fecha) }}</td>
+                <td><span class="pill-pend"><IconoSigta nombre="reloj" :tamano="12" /> {{ p.estado }}</span></td>
+                <td><button type="button" class="btn-revisar" @click="router.push('/admin/compras')">Revisar</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+
     </main>
 
   </div>
@@ -320,6 +508,9 @@ import {
 
 import AdminMenu
   from '../components/AdminMenu.vue'
+
+import IconoSigta
+  from '../components/IconoSigta.vue'
 
 import { coincideProceso } from '../utils/portal'
 
@@ -1098,6 +1289,273 @@ function cerrarStatModal() {
 
 
 /* =========================================================
+   ENCABEZADO: SALUDO Y FECHA
+========================================================= */
+
+const saludo = computed(() => {
+  const h = new Date().getHours()
+  return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'
+})
+
+const primerNombre = computed(() => {
+  const n = usuario.value?.nombre || usuario.value?.nombre_completo || 'Director'
+  return n.trim().split(/\s+/)[0]
+})
+
+const fechaLarga = computed(() => {
+  const f = new Date().toLocaleDateString('es-BO', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  })
+  return f.charAt(0).toUpperCase() + f.slice(1)
+})
+
+
+/* =========================================================
+   PERIODO Y TENDENCIAS
+========================================================= */
+
+function isoDia(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+/* Rango de fechas que elige el Director (por defecto: últimos 30 días). */
+const hoyRef = new Date()
+const rango = reactive({
+  desde: isoDia(new Date(+hoyRef - 29 * 86400000)),
+  hasta: isoDia(hoyRef),
+})
+
+const isoHoy = isoDia(hoyRef)
+
+const rangoTexto = computed(() => {
+  const f = (d) => d.toLocaleDateString('es-BO', { day: 'numeric', month: 'short', year: 'numeric' })
+  const { desde, hasta } = rangoFechas.value
+  return `${f(desde)} – ${f(hasta)}`
+})
+
+const rangoFechas = computed(() => {
+  let d = new Date(rango.desde + 'T00:00:00')
+  let h = new Date(rango.hasta + 'T23:59:59.999')
+  if (isNaN(d)) d = new Date(+new Date() - 29 * 86400000)
+  if (isNaN(h)) h = new Date()
+  if (d > h) [d, h] = [h, d]
+  const dias = Math.max(1, Math.round((+h - +d) / 86400000) + 1)
+  return { desde: d, hasta: h, dias }
+})
+
+function fechaDe(valor) {
+  const d = valor ? new Date(valor) : null
+  return d && !isNaN(d) ? d : null
+}
+
+function claveDia(d) {
+  return isoDia(d)
+}
+
+/* Cuenta registros cuya fecha cae en [desde, hasta] */
+function contarEnRango(lista, campoFecha, desde, hasta, filtro) {
+  return lista.filter(item => {
+    if (filtro && !filtro(item)) return false
+    const f = fechaDe(item[campoFecha])
+    return f && f >= desde && f <= hasta
+  }).length
+}
+
+/* Variación % del rango elegido contra el rango anterior de igual duración.
+   null = el rango anterior no tiene registros (no hay base de comparación). */
+function variacion(lista, campoFecha, filtro) {
+  const { desde, hasta } = rangoFechas.value
+  const dur = +hasta - +desde
+  const actual = contarEnRango(lista, campoFecha, desde, hasta, filtro)
+  const previo = contarEnRango(lista, campoFecha, new Date(+desde - dur - 1), new Date(+desde - 1), filtro)
+  if (previo === 0) return null
+  return Math.round(((actual - previo) / previo) * 100)
+}
+
+const tendencias = computed(() => ({
+  actividades: variacion(ticketsLista.value, 'informe_elevado_en', t => t.informe_elevado_en && t.informe_final),
+  pendientes: null,
+  compras: variacion(comprasLista.value, 'creado_en', c => grupoCompra(c) !== 'EN_REVISION_DAF'),
+  aceptadas: variacion(comprasLista.value, 'actualizado_en', c => grupoCompra(c) === 'APROBADA'),
+  rechazadas: variacion(comprasLista.value, 'actualizado_en', c => grupoCompra(c) === 'RECHAZADA'),
+}))
+
+
+/* =========================================================
+   GRÁFICO: SOLICITUDES POR DÍA
+========================================================= */
+
+const serieTendencia = computed(() => {
+  const { desde, dias: total } = rangoFechas.value
+  const n = Math.min(total, 120)          // tope de puntos para no saturar el SVG
+  const inicio = new Date(desde)
+  inicio.setHours(0, 0, 0, 0)
+
+  const dias = []
+  for (let i = 0; i < n; i++) {
+    const d = new Date(+inicio + i * 86400000)
+    dias.push({
+      clave: claveDia(d),
+      etiqueta: d.toLocaleDateString('es-BO', { day: 'numeric', month: 'short' }),
+      registradas: 0,
+      aprobadas: 0,
+    })
+  }
+  const indice = Object.fromEntries(dias.map((d, i) => [d.clave, i]))
+
+  for (const c of comprasLista.value) {
+    if (grupoCompra(c) === 'EN_REVISION_DAF') continue
+    const creado = fechaDe(c.creado_en)
+    if (creado) {
+      const k = claveDia(creado)
+      if (k in indice) dias[indice[k]].registradas++
+    }
+    if (grupoCompra(c) === 'APROBADA') {
+      const aprob = fechaDe(c.actualizado_en) || creado
+      if (aprob) {
+        const k = claveDia(aprob)
+        if (k in indice) dias[indice[k]].aprobadas++
+      }
+    }
+  }
+  return dias
+})
+
+/* Geometría del SVG (viewBox 0 0 100 100, se estira con CSS) */
+const GRAFICO = { w: 680, h: 210, mx: 34, my: 18 }
+
+const graficoLineas = computed(() => {
+  const s = serieTendencia.value
+  const maxVal = Math.max(3, ...s.flatMap(d => [d.registradas, d.aprobadas]))
+  const { w, h, mx, my } = GRAFICO
+  const px = (i) => s.length <= 1 ? mx : mx + (i * (w - 2 * mx)) / (s.length - 1)
+  const py = (v) => h - my - (v / maxVal) * (h - 2 * my)
+
+  const puntos = (campo) => s.map((d, i) => ({ x: px(i), y: py(d[campo]), v: d[campo], etiqueta: d.etiqueta }))
+  const linea = (pts) => pts.map((p, i) => `${i ? 'L' : 'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
+
+  const reg = puntos('registradas')
+  const apr = puntos('aprobadas')
+  const rejilla = [0, 0.5, 1].map(f => ({ y: py(maxVal * f), v: Math.round(maxVal * f) }))
+
+  // Con muchos días, solo se rotula 1 de cada N para no encimar el eje X.
+  const paso = Math.max(1, Math.ceil(s.length / 8))
+  const ejeX = s
+    .map((d, i) => ({ x: reg[i].x, etiqueta: d.etiqueta, i }))
+    .filter(p => p.i % paso === 0 || p.i === s.length - 1)
+
+  return { w, h, mx, my, maxVal, reg, apr, dReg: linea(reg), dApr: linea(apr), rejilla, ejeX, dias: s }
+})
+
+const graficoHover = ref(null)   // índice del día señalado
+
+
+/* =========================================================
+   ACTIVIDADES RECIENTES
+========================================================= */
+
+function haceCuanto(valor) {
+  const f = fechaDe(valor)
+  if (!f) return ''
+  const min = Math.round((Date.now() - +f) / 60000)
+  if (min < 1) return 'hace un momento'
+  if (min < 60) return `hace ${min} min`
+  const hrs = Math.round(min / 60)
+  if (hrs < 24) return `hace ${hrs} h`
+  const dias = Math.round(hrs / 24)
+  return dias === 1 ? 'hace 1 día' : `hace ${dias} días`
+}
+
+const actividadesRecientes = computed(() => {
+  const items = comprasLista.value.map(c => {
+    const g = grupoCompra(c)
+    const cfg = g === 'APROBADA'
+      ? { titulo: 'Solicitud de compra aprobada', icono: 'validar', tono: 'ok' }
+      : g === 'RECHAZADA'
+        ? { titulo: 'Solicitud rechazada', icono: 'error', tono: 'mal' }
+        : g === 'EN_ESPERA'
+          ? { titulo: 'Solicitud enviada a su verificación', icono: 'reloj', tono: 'espera' }
+          : { titulo: 'Solicitud registrada en Compras', icono: 'solicitudes', tono: 'info' }
+    return {
+      id: 'c' + c.id,
+      ...cfg,
+      detalle: `${c.codigo || 'S/C'} · ${c.titulo || 'Sin título'}`,
+      fecha: fechaDe(c.actualizado_en) || fechaDe(c.creado_en),
+    }
+  })
+  return items
+    .filter(i => i.fecha)
+    .sort((a, b) => b.fecha - a.fecha)
+    .slice(0, 6)
+    .map(i => ({ ...i, cuando: haceCuanto(i.fecha) }))
+})
+
+
+/* =========================================================
+   BUSCADOR
+========================================================= */
+
+const busqueda = ref('')
+
+
+/* =========================================================
+   SOLICITUDES PENDIENTES DE APROBACIÓN
+========================================================= */
+
+function montoBs(valor) {
+  const n = Number(valor)
+  return isNaN(n) ? '—' : n.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
+function fechaCorta(valor) {
+  const f = fechaDe(valor)
+  return f ? f.toLocaleDateString('es-BO', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'
+}
+
+const pendientesAprobacion = computed(() =>
+  comprasLista.value
+    .filter(c => grupoCompra(c) === 'EN_ESPERA')
+    .map(c => ({
+      id: c.id,
+      codigo: c.codigo || 'S/C',
+      descripcion: c.titulo || c.descripcion || 'Sin descripción',
+      area: c.area_nombre || '—',
+      monto: c.monto_estimado,
+      fecha: c.creado_en,
+      estado: c.estado_nombre || 'Pendiente',
+    }))
+    .sort((a, b) => (fechaDe(a.fecha) || 0) - (fechaDe(b.fecha) || 0))
+)
+
+const pendientesFiltradas = computed(() => {
+  const t = busqueda.value.trim().toLowerCase()
+  if (!t) return pendientesAprobacion.value
+  return pendientesAprobacion.value.filter(p =>
+    [p.codigo, p.descripcion, p.area, p.estado].some(v => (v || '').toLowerCase().includes(t))
+  )
+})
+
+
+/* =========================================================
+   NOTIFICACIONES
+========================================================= */
+
+const notifAbierta = ref(false)
+
+
+/* =========================================================
+   ACCIONES RÁPIDAS
+========================================================= */
+
+const accionesRapidas = [
+  { icono: 'solicitudes', titulo: 'Nueva solicitud', desc: 'Registrar una nueva solicitud', ruta: '/admin/portal-solicitante', tono: 'azul' },
+  { icono: 'reloj', titulo: 'Verificar pendientes', desc: 'Revisar solicitudes en espera', ruta: { path: '/admin/mis-solicitudes', query: { vista: 'verificaciones' } }, tono: 'oro' },
+  { icono: 'compras', titulo: 'Autorizar compras', desc: 'Gestionar y aprobar solicitudes', ruta: '/admin/compras', tono: 'azul' },
+  { icono: 'reporte', titulo: 'Ver reportes', desc: 'Consultar estadísticas y reportes', ruta: '/admin/historial', tono: 'azul' },
+]
+
+
+/* =========================================================
    CERRAR SESIÓN
 ========================================================= */
 
@@ -1742,6 +2200,565 @@ function cerrarSesion() {
       1fr;
   }
 
+}
+
+
+/* =========================================================
+   REDISEÑO DIRECTOR — BARRA SUPERIOR
+========================================================= */
+
+.dash-strip {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.dash-search {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--sigta-borde);
+  border-radius: 10px;
+  background: var(--sigta-blanco);
+  color: var(--sigta-texto-suave);
+  box-shadow: 0 2px 8px rgba(11, 40, 79, .05);
+}
+
+.dash-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--sigta-texto);
+}
+
+.dash-strip-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dash-notif { position: relative; }
+
+.dash-bell {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--sigta-borde);
+  border-radius: 10px;
+  background: var(--sigta-blanco);
+  color: var(--sigta-azul);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(11, 40, 79, .05);
+}
+
+.dash-bell em {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--sigta-error);
+  color: #fff;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.dash-notif-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  z-index: 30;
+  background: var(--sigta-blanco);
+  border: 1px solid var(--sigta-borde);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(11, 40, 79, .2);
+  overflow: hidden;
+}
+
+.dash-notif-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--sigta-borde-suave);
+}
+
+.dash-notif-panel header strong { color: var(--sigta-azul); font-size: 14px; }
+.dash-notif-panel header button { border: 0; background: transparent; cursor: pointer; color: var(--sigta-texto-suave); font-size: 15px; }
+
+.dash-notif-vacio { margin: 0; padding: 22px 16px; text-align: center; color: var(--sigta-texto-suave); font-size: 13px; }
+
+.dash-notif-panel ul { list-style: none; margin: 0; padding: 6px; max-height: 320px; overflow-y: auto; }
+.dash-notif-panel li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 8px;
+  border-radius: 8px;
+}
+.dash-notif-panel li:hover { background: var(--sigta-azul-tenue); }
+.dash-notif-panel li > :deep(.icono-sigta) { color: var(--sigta-alerta); flex-shrink: 0; }
+.dash-notif-panel li div { flex: 1; min-width: 0; }
+.dash-notif-panel li strong { display: block; font-size: 12.5px; color: var(--sigta-azul); }
+.dash-notif-panel li span { display: block; font-size: 12px; color: var(--sigta-texto-suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dash-notif-panel li button {
+  flex-shrink: 0;
+  border: 1px solid var(--sigta-borde);
+  border-radius: 6px;
+  background: var(--sigta-blanco);
+  color: var(--sigta-azul);
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 5px 9px;
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   REDISEÑO DIRECTOR — ENCABEZADO
+========================================================= */
+
+.dash-head {
+  margin-bottom: 20px;
+}
+
+.dash-head h1 {
+  margin: 0;
+  color: var(--sigta-texto);
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.dash-head p {
+  margin: 6px 0 0;
+  color: var(--sigta-texto-suave);
+  font-size: 15.5px;
+  max-width: 620px;
+}
+
+
+/* =========================================================
+   REDISEÑO DIRECTOR — FILTROS
+========================================================= */
+
+.dash-filtros {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.dash-filtros label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sigta-texto-suave);
+}
+
+.dash-filtros label > :deep(.icono-sigta) {
+  color: var(--sigta-azul-medio);
+  flex-shrink: 0;
+}
+
+.dash-filtros select {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--sigta-borde);
+  border-radius: 9px;
+  background: var(--sigta-blanco);
+  color: var(--sigta-texto);
+  font-family: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.dash-rango { flex-wrap: wrap; }
+
+.dash-rango input[type="date"] {
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--sigta-borde);
+  border-radius: 9px;
+  background: var(--sigta-blanco);
+  color: var(--sigta-texto);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.dash-rango input[type="date"]:focus {
+  outline: none;
+  border-color: var(--sigta-azul-medio);
+  box-shadow: 0 0 0 3px rgba(29, 80, 144, .12);
+}
+
+.dash-rango b { color: var(--sigta-texto-tenue); font-weight: 700; }
+
+.grafico-rango {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border-radius: 7px;
+  background: var(--sigta-azul-tenue);
+  color: var(--sigta-azul);
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   REDISEÑO DIRECTOR — TARJETAS DE RESUMEN
+========================================================= */
+
+.stats-grid { grid-template-columns: repeat(5, 1fr); }
+
+.stat-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 16px 15px;
+  border: 1px solid var(--sigta-borde);
+  border-top: 3px solid var(--sigta-borde);
+  border-radius: 12px;
+  background: var(--sigta-blanco);
+  box-shadow: 0 3px 12px rgba(11, 40, 79, .05);
+  cursor: pointer;
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+.stat-card:hover { box-shadow: 0 10px 24px rgba(11, 40, 79, .1); transform: translateY(-2px); }
+
+.stat-card.t-azul { border-top-color: #2563C9; }
+.stat-card.t-oro { border-top-color: var(--sigta-mostaza); }
+.stat-card.t-verde { border-top-color: var(--sigta-exito); }
+.stat-card.t-rojo { border-top-color: var(--sigta-error); }
+
+.stat-ico {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+}
+.t-azul .stat-ico { background: #eaf1fc; color: #2563C9; }
+.t-oro .stat-ico { background: var(--sigta-mostaza-suave); color: var(--sigta-mostaza-oscuro); }
+.t-verde .stat-ico { background: var(--sigta-exito-fondo); color: var(--sigta-exito); }
+.t-rojo .stat-ico { background: var(--sigta-error-fondo); color: var(--sigta-error); }
+
+.stat-body { min-width: 0; }
+.stat-card .stat-body span {
+  display: block;
+  padding-right: 34px;
+  color: var(--sigta-texto-suave);
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .2px;
+  line-height: 1.25;
+}
+.stat-card .stat-body strong {
+  display: block;
+  margin: 3px 0 2px;
+  color: var(--sigta-texto);
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 1;
+}
+.stat-card .stat-body small {
+  display: block;
+  color: var(--sigta-texto-suave);
+  font-size: 11.5px;
+  line-height: 1.3;
+}
+
+.stat-delta {
+  position: absolute;
+  top: 13px;
+  right: 13px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.stat-delta.sube { color: var(--sigta-exito); }
+.stat-delta.baja { color: var(--sigta-error); }
+.stat-delta.neutro { color: var(--sigta-texto-tenue); }
+
+
+/* =========================================================
+   REDISEÑO DIRECTOR — FILA GRÁFICO / RECIENTES / ACCIONES
+========================================================= */
+
+.dash-fila {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+  margin: 22px 0;
+}
+
+.dash-card {
+  background: var(--sigta-blanco);
+  border: 1px solid var(--sigta-borde);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 3px 12px rgba(11, 40, 79, .05);
+}
+
+.dash-card > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.dash-card h2 { margin: 0; color: var(--sigta-azul); font-size: 17px; font-weight: 800; }
+.dash-card-kicker { display: block; color: var(--sigta-texto-suave); font-size: 10px; font-weight: 900; letter-spacing: 1px; margin-bottom: 3px; }
+.dash-card > header p { margin: 3px 0 0; color: var(--sigta-texto-suave); font-size: 12.5px; }
+
+.dash-card > header select {
+  height: 32px;
+  padding: 0 9px;
+  border: 1px solid var(--sigta-borde);
+  border-radius: 7px;
+  background: var(--sigta-blanco);
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--sigta-texto);
+  cursor: pointer;
+}
+
+.dash-ver {
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: var(--sigta-azul-medio);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.dash-ver:hover { text-decoration: underline; }
+
+.dash-vacio { margin: 0; padding: 26px 8px; text-align: center; color: var(--sigta-texto-suave); font-size: 13px; }
+
+
+/* ---------- GRÁFICO ---------- */
+.grafico-caja { position: relative; }
+
+.grafico-svg {
+  width: 100%;
+  height: 210px;
+  display: block;
+  overflow: visible;
+}
+
+.g-rejilla line { stroke: var(--sigta-borde-suave); stroke-width: 1; }
+.g-rejilla text { fill: var(--sigta-texto-tenue); font-size: 10px; }
+.g-eje-x { fill: var(--sigta-texto-suave); font-size: 10px; }
+
+.g-linea { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.g-linea.g-reg { stroke: #2563C9; }
+.g-linea.g-apr { stroke: #A87F00; }
+
+.g-punto { stroke: var(--sigta-blanco); stroke-width: 1.5; }
+.g-punto.g-reg { fill: #2563C9; }
+.g-punto.g-apr { fill: #A87F00; }
+.g-punto.activo { r: 5.5; }
+
+.g-cross { stroke: var(--sigta-texto-tenue); stroke-width: 1; stroke-dasharray: 3 3; }
+
+.grafico-tip {
+  position: absolute;
+  top: 6px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: var(--sigta-azul-oscuro);
+  color: #fff;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 11.5px;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .25);
+}
+.grafico-tip strong { display: block; margin-bottom: 3px; font-size: 12px; }
+.grafico-tip span { display: flex; align-items: center; gap: 6px; }
+
+.grafico-leyenda {
+  display: flex;
+  gap: 18px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--sigta-borde-suave);
+  font-size: 12.5px;
+  color: var(--sigta-texto-suave);
+}
+.grafico-leyenda span { display: flex; align-items: center; gap: 7px; }
+
+.pt { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.pt-reg { background: #2563C9; }
+.pt-apr { background: #A87F00; }
+
+
+/* ---------- ACTIVIDADES RECIENTES ---------- */
+.recientes-lista { list-style: none; margin: 0; padding: 0; }
+.recientes-lista li {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--sigta-borde-suave);
+}
+.recientes-lista li:last-child { border-bottom: 0; }
+.rec-ico {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.rec-ico.tono-ok { background: var(--sigta-exito-fondo); color: var(--sigta-exito); }
+.rec-ico.tono-mal { background: var(--sigta-error-fondo); color: var(--sigta-error); }
+.rec-ico.tono-espera { background: var(--sigta-mostaza-suave); color: var(--sigta-mostaza-oscuro); }
+.rec-ico.tono-info { background: #eaf1fc; color: #2563C9; }
+.recientes-lista li div { flex: 1; min-width: 0; }
+.recientes-lista li strong { display: block; font-size: 13px; color: var(--sigta-texto); }
+.recientes-lista li span { display: block; font-size: 12px; color: var(--sigta-texto-suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recientes-lista li small { flex-shrink: 0; font-size: 11.5px; color: var(--sigta-texto-tenue); }
+
+
+/* ---------- ACCIONES RÁPIDAS ---------- */
+.dash-acciones .accion {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px;
+  margin-bottom: 8px;
+  border: 1px solid var(--sigta-borde-suave);
+  border-radius: 10px;
+  background: var(--sigta-blanco);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease;
+}
+.dash-acciones .accion:last-child { margin-bottom: 0; }
+.dash-acciones .accion:hover { border-color: var(--sigta-azul-medio); background: var(--sigta-azul-tenue); }
+.dash-acciones .accion i {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+}
+.dash-acciones .a-azul i { background: #eaf1fc; color: #2563C9; }
+.dash-acciones .a-oro i { background: var(--sigta-mostaza-suave); color: var(--sigta-mostaza-oscuro); }
+.dash-acciones .accion div { flex: 1; min-width: 0; }
+.dash-acciones .accion strong { display: block; font-size: 13px; color: var(--sigta-texto); }
+.dash-acciones .accion span { display: block; font-size: 11.5px; color: var(--sigta-texto-suave); }
+.dash-acciones .accion b { flex-shrink: 0; color: var(--sigta-texto-tenue); font-size: 18px; }
+
+
+/* =========================================================
+   REDISEÑO DIRECTOR — TABLA DE PENDIENTES
+========================================================= */
+
+.dash-tabla { margin-bottom: 10px; }
+
+.tabla-scroll { overflow-x: auto; }
+
+.dash-tabla table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.dash-tabla th {
+  text-align: left;
+  padding: 10px 12px;
+  color: var(--sigta-texto-suave);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  border-bottom: 1px solid var(--sigta-borde);
+  white-space: nowrap;
+}
+.dash-tabla td {
+  padding: 12px;
+  color: var(--sigta-texto);
+  border-bottom: 1px solid var(--sigta-borde-suave);
+}
+.dash-tabla tbody tr:last-child td { border-bottom: 0; }
+.dash-tabla tbody tr:hover td { background: var(--sigta-azul-tenue); }
+.dash-tabla .cod { font-weight: 700; color: var(--sigta-azul); white-space: nowrap; }
+.dash-tabla .num { text-align: right; white-space: nowrap; }
+
+.pill-pend {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 20px;
+  background: var(--sigta-mostaza-suave);
+  color: var(--sigta-alerta);
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.btn-revisar {
+  border: 1px solid var(--sigta-borde);
+  border-radius: 7px;
+  background: var(--sigta-blanco);
+  color: var(--sigta-azul);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.btn-revisar:hover { background: var(--sigta-azul); color: #fff; border-color: var(--sigta-azul); }
+
+
+/* =========================================================
+   REDISEÑO DIRECTOR — RESPONSIVE
+========================================================= */
+
+@media (max-width: 1180px) {
+  .dash-fila { grid-template-columns: 1fr 1fr; }
+  .dash-grafico { grid-column: 1 / -1; }
+  .stats-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 820px) {
+  .dash-fila { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .dash-strip { flex-wrap: wrap; }
+  .dash-search { order: 3; flex-basis: 100%; }
 }
 
 </style>

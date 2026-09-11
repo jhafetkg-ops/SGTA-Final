@@ -38,6 +38,9 @@
 
       <section class="form-card">
 
+        <div class="form-columns">
+
+        <div class="col">
 
         <!-- =================================================
              PASO 1
@@ -114,6 +117,9 @@
 
         </div>
 
+        </div>
+
+        <div class="col">
 
         <!-- =================================================
              PASO 2
@@ -206,12 +212,16 @@
 
         </div>
 
+        </div>
+
+        </div>
+
 
         <!-- =================================================
-             PASO 4 - EVIDENCIA REAL
+             PASO 3 - EVIDENCIA (FILA COMPLETA)
         ================================================== -->
 
-        <div class="form-section">
+        <div class="form-section form-section--full">
 
           <div class="section-heading">
 
@@ -287,21 +297,17 @@
                 ↑
               </div>
 
+              <div class="upload-text">
 
-              <strong>
-                Cargar evidencia
-              </strong>
+                <strong>
+                  Cargar evidencia
+                </strong>
 
+                <small>
+                  JPG, JPEG, PNG o PDF · Máximo 5 MB
+                </small>
 
-              <span>
-                Haga clic para seleccionar una imagen
-                o documento
-              </span>
-
-
-              <small>
-                JPG, JPEG, PNG o PDF · Máximo 5 MB
-              </small>
+              </div>
 
             </label>
 
@@ -427,6 +433,12 @@
         />
 
 
+        <TarjetaGuardado
+          :visible="mostrarGuardadoOk"
+          :texto="textoGuardado"
+        />
+
+
         <!-- =================================================
              ACCIONES
         ================================================== -->
@@ -502,6 +514,16 @@ import {
 import SolicitanteMenu
   from '../components/SolicitanteMenu.vue'
 import SistemaNotificacion from './SistemaNotificacion.vue'
+import TarjetaGuardado from './TarjetaGuardado.vue'
+
+import { usarGuardado }
+  from '../utils/guardado.js'
+
+const {
+  mostrar: mostrarGuardadoOk,
+  texto: textoGuardado,
+  animar: animarGuardado,
+} = usarGuardado()
 
 const props = defineProps({
   tipoSolicitud: {
@@ -1222,31 +1244,23 @@ async function crearTicket() {
       ''
 
 
-    mostrarMensaje(
-
-      codigo
-
-        ? `Solicitud ${codigo} registrada correctamente.`
-
-        : 'Solicitud registrada correctamente.',
-
-      false
-    )
-
-
     window.dispatchEvent(new CustomEvent('sigta:solicitud-creada', {
       detail: { tipo: props.tipoSolicitud, id: datos.ticket?.id || datos.requerimiento?.id }
     }))
 
     limpiarFormulario(false)
 
-    window.setTimeout(() => {
-      const origen = typeof route.query.origen === 'string'
-        && (route.query.origen.startsWith('/usuario/') || (route.meta.portalDirector && ['/admin/dashboard','/admin/mis-solicitudes'].includes(route.query.origen)))
-        ? route.query.origen
-        : route.meta.portalDirector ? '/admin/mis-solicitudes' : '/usuario/dashboard'
-      router.push(origen)
-    }, 1200)
+    await animarGuardado(
+      codigo
+        ? `Solicitud ${codigo} registrada correctamente.`
+        : 'Solicitud registrada correctamente.'
+    )
+
+    const origen = typeof route.query.origen === 'string'
+      && (route.query.origen.startsWith('/usuario/') || (route.meta.portalDirector && ['/admin/dashboard','/admin/mis-solicitudes'].includes(route.query.origen)))
+      ? route.query.origen
+      : route.meta.portalDirector ? '/admin/mis-solicitudes' : '/usuario/dashboard'
+    router.push(origen)
 
 
   } catch (error) {
@@ -1424,9 +1438,9 @@ function cerrarSesion() {
   min-width: 0;
 
   padding:
-    25px
-    30px
-    50px;
+    16px
+    24px
+    20px;
 
   overflow-x: hidden;
 }
@@ -1438,12 +1452,12 @@ function cerrarSesion() {
 
 .topbar {
 
-  max-width: 1040px;
+  max-width: 1180px;
 
   margin:
     0
     auto
-    18px;
+    12px;
 }
 
 
@@ -1455,20 +1469,20 @@ function cerrarSesion() {
 
   color: var(--sigta-azul);
 
-  font-size: 31px;
+  font-size: 23px;
 }
 
 
 .topbar p {
 
   margin:
-    6px
+    3px
     0
     0;
 
   color: var(--sigta-texto-suave);
 
-  font-size: 17px;
+  font-size: 14px;
 }
 
 
@@ -1480,7 +1494,7 @@ function cerrarSesion() {
 
   width: 100%;
 
-  max-width: 1040px;
+  max-width: 1180px;
 
   margin: auto;
 
@@ -1501,13 +1515,49 @@ function cerrarSesion() {
 }
 
 
+.form-columns {
+
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  align-items: start;
+}
+
+
+.col {
+
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+.col:first-child {
+
+  border-right:
+    1px solid var(--sigta-borde);
+}
+
+
 .form-section {
 
   padding:
-    22px
-    26px;
+    14px
+    20px;
+}
+
+
+.col > .form-section:not(:last-child) {
 
   border-bottom:
+    1px solid var(--sigta-borde);
+}
+
+
+.form-section--full {
+
+  border-top:
     1px solid var(--sigta-borde);
 }
 
@@ -1522,17 +1572,17 @@ function cerrarSesion() {
 
   align-items: flex-start;
 
-  gap: 10px;
+  gap: 8px;
 
-  margin-bottom: 17px;
+  margin-bottom: 10px;
 }
 
 
 .number {
 
-  width: 30px;
+  width: 22px;
 
-  height: 30px;
+  height: 22px;
 
   flex-shrink: 0;
 
@@ -1548,7 +1598,7 @@ function cerrarSesion() {
 
   color: var(--sigta-blanco);
 
-  font-size: 15px;
+  font-size: 12px;
 
   font-weight: 800;
 }
@@ -1560,20 +1610,20 @@ function cerrarSesion() {
 
   color: var(--sigta-azul);
 
-  font-size: 20px;
+  font-size: 15.5px;
 }
 
 
 .section-heading p {
 
   margin:
-    4px
+    2px
     0
     0;
 
   color: var(--sigta-texto-suave);
 
-  font-size: 15px;
+  font-size: 12px;
 }
 
 
@@ -1589,7 +1639,7 @@ function cerrarSesion() {
     1fr
     1fr;
 
-  gap: 15px;
+  gap: 10px;
 }
 
 
@@ -1605,7 +1655,7 @@ function cerrarSesion() {
 
   flex-direction: column;
 
-  gap: 6px;
+  gap: 4px;
 }
 
 
@@ -1620,7 +1670,7 @@ function cerrarSesion() {
 
   color: var(--sigta-azul);
 
-  font-size: 16px;
+  font-size: 13px;
 
   font-weight: 700;
 }
@@ -1639,7 +1689,7 @@ function cerrarSesion() {
 
   color: var(--sigta-texto-suave);
 
-  font-size: 14px;
+  font-size: 11.5px;
 
   font-weight: 400;
 }
@@ -1652,13 +1702,13 @@ function cerrarSesion() {
   width: 100%;
 
   padding:
-    14px
-    15px;
+    9px
+    11px;
 
   border:
     1px solid var(--sigta-azul-texto-claro);
 
-  border-radius: 7px;
+  border-radius: 6px;
 
   background: var(--sigta-blanco);
 
@@ -1666,7 +1716,7 @@ function cerrarSesion() {
 
   font-family: inherit;
 
-  font-size: 17px;
+  font-size: 14px;
 
   outline: none;
 }
@@ -1674,7 +1724,7 @@ function cerrarSesion() {
 
 .field select {
 
-  min-height: 41px;
+  min-height: 36px;
 
   cursor: pointer;
 }
@@ -1682,17 +1732,17 @@ function cerrarSesion() {
 
 .field textarea {
 
-  min-height: 145px;
+  min-height: 88px;
 
   resize: vertical;
 
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 
 .field textarea.evidence-text {
 
-  min-height: 80px;
+  min-height: 40px;
 }
 
 
@@ -1715,7 +1765,7 @@ function cerrarSesion() {
 
   color: var(--sigta-texto-suave);
 
-  font-size: 14px;
+  font-size: 11px;
 }
 
 
@@ -1731,7 +1781,7 @@ function cerrarSesion() {
 
 .upload-container {
 
-  margin-top: 14px;
+  margin-top: 8px;
 }
 
 
@@ -1751,30 +1801,30 @@ function cerrarSesion() {
 
 .upload-box {
 
-  min-height: 145px;
+  min-height: 0;
 
   display: flex;
 
-  flex-direction: column;
+  flex-direction: row;
 
   align-items: center;
 
-  justify-content: center;
+  justify-content: flex-start;
 
-  gap: 6px;
+  gap: 10px;
 
-  padding: 20px;
+  padding: 10px 12px;
 
   border:
     2px dashed var(--sigta-azul-texto-claro);
 
-  border-radius: 9px;
+  border-radius: 8px;
 
   background: var(--sigta-azul-tenue);
 
   cursor: pointer;
 
-  text-align: center;
+  text-align: left;
 
   transition:
     border-color .2s,
@@ -1792,9 +1842,11 @@ function cerrarSesion() {
 
 .upload-icon {
 
-  width: 38px;
+  width: 28px;
 
-  height: 38px;
+  height: 28px;
+
+  flex-shrink: 0;
 
   display: flex;
 
@@ -1802,17 +1854,27 @@ function cerrarSesion() {
 
   justify-content: center;
 
-  margin-bottom: 4px;
-
   border-radius: 50%;
 
-  background: var(--sigta-azul-tenue);
+  background: var(--sigta-blanco);
 
   color: var(--sigta-azul);
 
-  font-size: 25px;
+  font-size: 16px;
 
   font-weight: 700;
+}
+
+
+.upload-text {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 1px;
+
+  min-width: 0;
 }
 
 
@@ -1820,15 +1882,7 @@ function cerrarSesion() {
 
   color: var(--sigta-azul);
 
-  font-size: 17px;
-}
-
-
-.upload-box span {
-
-  color: var(--sigta-texto-suave);
-
-  font-size: 15px;
+  font-size: 13.5px;
 }
 
 
@@ -1836,7 +1890,7 @@ function cerrarSesion() {
 
   color: var(--sigta-texto-suave);
 
-  font-size: 14px;
+  font-size: 11px;
 }
 
 
@@ -1850,14 +1904,14 @@ function cerrarSesion() {
 
   align-items: center;
 
-  gap: 13px;
+  gap: 10px;
 
-  padding: 13px;
+  padding: 8px 10px;
 
   border:
     1px solid var(--sigta-azul-texto-claro);
 
-  border-radius: 9px;
+  border-radius: 8px;
 
   background: var(--sigta-azul-tenue);
 }
@@ -1865,15 +1919,15 @@ function cerrarSesion() {
 
 .preview-wrapper {
 
-  width: 86px;
+  width: 40px;
 
-  height: 68px;
+  height: 40px;
 
   flex-shrink: 0;
 
   overflow: hidden;
 
-  border-radius: 7px;
+  border-radius: 6px;
 
   background: var(--sigta-azul-texto-claro);
 }
@@ -1891,9 +1945,9 @@ function cerrarSesion() {
 
 .pdf-preview {
 
-  width: 70px;
+  width: 40px;
 
-  height: 68px;
+  height: 40px;
 
   flex-shrink: 0;
 
@@ -1903,7 +1957,7 @@ function cerrarSesion() {
 
   justify-content: center;
 
-  border-radius: 7px;
+  border-radius: 6px;
 
   background: var(--sigta-error-fondo);
 }
@@ -1913,7 +1967,7 @@ function cerrarSesion() {
 
   color: var(--sigta-error);
 
-  font-size: 18px;
+  font-size: 12px;
 
   font-weight: 900;
 }
@@ -1930,13 +1984,7 @@ function cerrarSesion() {
 .file-information
 .file-label {
 
-  display: block;
-
-  margin-bottom: 3px;
-
-  color: var(--sigta-texto-suave);
-
-  font-size: 14px;
+  display: none;
 }
 
 
@@ -1948,7 +1996,7 @@ function cerrarSesion() {
 
   color: var(--sigta-azul);
 
-  font-size: 16px;
+  font-size: 13.5px;
 
   text-overflow: ellipsis;
 
@@ -1960,11 +2008,11 @@ function cerrarSesion() {
 
   display: block;
 
-  margin-top: 4px;
+  margin-top: 1px;
 
   color: var(--sigta-texto-suave);
 
-  font-size: 14px;
+  font-size: 11px;
 }
 
 
@@ -1973,8 +2021,8 @@ function cerrarSesion() {
   flex-shrink: 0;
 
   padding:
-    7px
-    10px;
+    5px
+    9px;
 
   border: none;
 
@@ -1984,7 +2032,7 @@ function cerrarSesion() {
 
   color: var(--sigta-error);
 
-  font-size: 14px;
+  font-size: 12px;
 
   font-weight: 700;
 
@@ -1999,20 +2047,22 @@ function cerrarSesion() {
 .priority-notice {
 
   margin:
+    12px
     20px
-    26px
     0;
 
   display: flex;
 
-  gap: 10px;
+  align-items: center;
 
-  padding: 13px;
+  gap: 9px;
+
+  padding: 8px 12px;
 
   border-left:
     4px solid var(--sigta-mostaza);
 
-  border-radius: 7px;
+  border-radius: 6px;
 
   background: var(--sigta-azul-tenue);
 }
@@ -2020,9 +2070,9 @@ function cerrarSesion() {
 
 .notice-icon {
 
-  width: 25px;
+  width: 19px;
 
-  height: 25px;
+  height: 19px;
 
   flex-shrink: 0;
 
@@ -2038,7 +2088,7 @@ function cerrarSesion() {
 
   color: white;
 
-  font-size: 16px;
+  font-size: 12px;
 
   font-weight: 700;
 }
@@ -2048,22 +2098,22 @@ function cerrarSesion() {
 
   color: var(--sigta-azul);
 
-  font-size: 16px;
+  font-size: 13px;
 }
 
 
 .priority-notice p {
 
   margin:
-    3px
+    1px
     0
     0;
 
   color: var(--sigta-texto-suave);
 
-  font-size: 15px;
+  font-size: 12px;
 
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
 
@@ -2112,13 +2162,13 @@ function cerrarSesion() {
 
   display: flex;
 
-  justify-content: flex-end;
+  justify-content: center;
 
   gap: 9px;
 
   padding:
-    19px
-    26px;
+    12px
+    20px;
 
   background: var(--sigta-azul-tenue);
 }
@@ -2126,15 +2176,15 @@ function cerrarSesion() {
 
 .actions button {
 
-  min-height: 48px;
+  min-height: 38px;
 
   padding:
     0
-    22px;
+    18px;
 
   border-radius: 7px;
 
-  font-size: 16px;
+  font-size: 14px;
 
   font-weight: 700;
 
@@ -2191,6 +2241,27 @@ function cerrarSesion() {
 /* =========================================================
    RESPONSIVE
 ========================================================= */
+
+@media (
+  max-width: 980px
+) {
+
+  .form-columns {
+
+    grid-template-columns: 1fr;
+  }
+
+
+  .col:first-child {
+
+    border-right: none;
+
+    border-bottom:
+      1px solid var(--sigta-borde);
+  }
+
+}
+
 
 @media (
   max-width: 760px

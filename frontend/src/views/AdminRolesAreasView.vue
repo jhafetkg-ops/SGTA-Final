@@ -62,70 +62,50 @@
       <section class="summary-grid">
 
         <article class="summary-card">
-
-          <span>
-            Roles
+          <span class="sc-icon" style="background:#e8f1fd;color:#2f6fd0" aria-hidden="true">
+            <IconoSigta nombre="usuarios" :tamano="22" />
           </span>
-
-          <strong>
-            {{ roles.length }}
-          </strong>
-
-          <small>
-            Registrados en SIGTA
-          </small>
-
+          <div class="sc-body">
+            <span>Roles</span>
+            <strong>{{ roles.length }}</strong>
+            <small>Registrados en SIGTA</small>
+          </div>
         </article>
 
 
         <article class="summary-card">
-
-          <span>
-            Permisos
+          <span class="sc-icon" style="background:#fdf2d4;color:#c79a1e" aria-hidden="true">
+            <IconoSigta nombre="llave" :tamano="22" />
           </span>
-
-          <strong>
-            {{ permisos.length }}
-          </strong>
-
-          <small>
-            Acciones controladas
-          </small>
-
+          <div class="sc-body">
+            <span>Permisos</span>
+            <strong>{{ permisos.length }}</strong>
+            <small>Acciones controladas</small>
+          </div>
         </article>
 
 
         <article class="summary-card">
-
-          <span>
-            Áreas
+          <span class="sc-icon" style="background:#e8f1fd;color:#2f6fd0" aria-hidden="true">
+            <IconoSigta nombre="edificio" :tamano="22" />
           </span>
-
-          <strong>
-            {{ areas.length }}
-          </strong>
-
-          <small>
-            Áreas institucionales
-          </small>
-
+          <div class="sc-body">
+            <span>Áreas</span>
+            <strong>{{ areas.length }}</strong>
+            <small>Áreas institucionales</small>
+          </div>
         </article>
 
 
         <article class="summary-card">
-
-          <span>
-            Roles activos
+          <span class="sc-icon" style="background:#fdf2d4;color:#c79a1e" aria-hidden="true">
+            <IconoSigta nombre="escudo" :tamano="22" />
           </span>
-
-          <strong>
-            {{ rolesActivos }}
-          </strong>
-
-          <small>
-            Disponibles para usuarios
-          </small>
-
+          <div class="sc-body">
+            <span>Roles activos</span>
+            <strong>{{ rolesActivos }}</strong>
+            <small>Disponibles para usuarios</small>
+          </div>
         </article>
 
       </section>
@@ -143,6 +123,7 @@
           }"
           @click="pestaña = 'roles'"
         >
+          <IconoSigta nombre="usuarios" :tamano="17" />
           Roles
         </button>
 
@@ -153,6 +134,7 @@
           }"
           @click="pestaña = 'permisos'"
         >
+          <IconoSigta nombre="llave" :tamano="17" />
           Permisos
         </button>
 
@@ -163,6 +145,7 @@
           }"
           @click="pestaña = 'areas'"
         >
+          <IconoSigta nombre="edificio" :tamano="17" />
           Áreas
         </button>
 
@@ -192,21 +175,29 @@
 
         <div class="panel-header">
 
-          <div>
+          <div class="ph-title">
 
-            <span class="section-label">
-              CONTROL DE ACCESO
+            <span class="ph-icon" aria-hidden="true">
+              <IconoSigta nombre="usuarios" :tamano="22" />
             </span>
 
-            <h2>
-              Roles del sistema
-            </h2>
+            <div>
 
-            <p>
-              Cada usuario recibe uno o más roles.
-              Los permisos se asignan al rol,
-              no directamente a cada usuario.
-            </p>
+              <span class="section-label">
+                CONTROL DE ACCESO
+              </span>
+
+              <h2>
+                Roles del sistema
+              </h2>
+
+              <p>
+                Cada usuario recibe uno o más roles.
+                Los permisos se asignan al rol,
+                no directamente a cada usuario.
+              </p>
+
+            </div>
 
           </div>
 
@@ -215,7 +206,8 @@
             class="yellow-button"
             @click="nuevoRol"
           >
-            + Nuevo rol
+            <IconoSigta nombre="mas" :tamano="16" />
+            Nuevo rol
           </button>
 
         </div>
@@ -231,7 +223,11 @@
 
             <div class="role-card-header">
 
-              <div>
+              <span class="role-icon" aria-hidden="true">
+                <IconoSigta :nombre="iconoRol(rol.codigo)" :tamano="20" />
+              </span>
+
+              <div class="role-card-title">
 
                 <span class="role-code">
                   {{ rol.codigo }}
@@ -273,38 +269,44 @@
 
             <div class="role-info">
 
-              <div>
+              <div class="ri-item">
 
-                <span>
-                  Tipo
+                <span class="ri-icon" aria-hidden="true">
+                  <IconoSigta nombre="globo" :tamano="16" />
                 </span>
 
-                <strong>
-                  {{
-                    rol.es_global
-                      ? 'Global'
-                      : 'Por área'
-                  }}
-                </strong>
+                <div>
+                  <span>Tipo</span>
+                  <strong>
+                    {{
+                      rol.es_global
+                        ? 'Global'
+                        : 'Por área'
+                    }}
+                  </strong>
+                </div>
 
               </div>
 
 
-              <div>
+              <div class="ri-item">
 
-                <span>
-                  Permisos
+                <span class="ri-icon" aria-hidden="true">
+                  <IconoSigta nombre="llave" :tamano="16" />
                 </span>
 
-                <strong>
-                  {{
-                    rol.cantidad_permisos
-                    ??
-                    cantidadPermisosRol(
-                      rol.id
-                    )
-                  }}
-                </strong>
+                <div>
+                  <span>Permisos</span>
+                  <strong>
+                    {{
+                      rol.cantidad_permisos
+                      ??
+                      cantidadPermisosRol(
+                        rol.id
+                      )
+                    }}
+                  </strong>
+                </div>
 
               </div>
 
@@ -317,6 +319,7 @@
                 class="secondary-button"
                 @click="editarRol(rol)"
               >
+                <IconoSigta nombre="editar" :tamano="15" />
                 Editar
               </button>
 
@@ -329,6 +332,7 @@
                   )
                 "
               >
+                <IconoSigta nombre="llave" :tamano="15" />
                 Administrar permisos
               </button>
 
@@ -360,20 +364,28 @@
 
         <div class="panel-header">
 
-          <div>
+          <div class="ph-title">
 
-            <span class="section-label">
-              MATRIZ DE PERMISOS
+            <span class="ph-icon" aria-hidden="true">
+              <IconoSigta nombre="llave" :tamano="22" />
             </span>
 
-            <h2>
-              Permisos de SIGTA
-            </h2>
+            <div>
 
-            <p>
-              Los nombres de las acciones están alineados
-              con las actividades de los procesos.
-            </p>
+              <span class="section-label">
+                MATRIZ DE PERMISOS
+              </span>
+
+              <h2>
+                Permisos de SIGTA
+              </h2>
+
+              <p>
+                Los nombres de las acciones están alineados
+                con las actividades de los procesos.
+              </p>
+
+            </div>
 
           </div>
 
@@ -384,10 +396,13 @@
 
         <div class="permission-filters">
 
-          <input
-            v-model="buscarPermiso"
-            placeholder="Buscar permiso por nombre o código..."
-          />
+          <div class="pf-search">
+            <IconoSigta nombre="buscar" :tamano="16" />
+            <input
+              v-model="buscarPermiso"
+              placeholder="Buscar permiso por nombre o código..."
+            />
+          </div>
 
 
           <select
@@ -533,20 +548,28 @@
 
         <div class="panel-header">
 
-          <div>
+          <div class="ph-title">
 
-            <span class="section-label">
-              ESTRUCTURA ORGANIZACIONAL
+            <span class="ph-icon" aria-hidden="true">
+              <IconoSigta nombre="edificio" :tamano="22" />
             </span>
 
-            <h2>
-              Áreas institucionales
-            </h2>
+            <div>
 
-            <p>
-              Las áreas permiten identificar la unidad
-              organizacional a la que pertenece cada usuario.
-            </p>
+              <span class="section-label">
+                ESTRUCTURA ORGANIZACIONAL
+              </span>
+
+              <h2>
+                Áreas institucionales
+              </h2>
+
+              <p>
+                Las áreas permiten identificar la unidad
+                organizacional a la que pertenece cada usuario.
+              </p>
+
+            </div>
 
           </div>
 
@@ -555,7 +578,8 @@
             class="yellow-button"
             @click="nuevaArea"
           >
-            + Nueva área
+            <IconoSigta nombre="mas" :tamano="16" />
+            Nueva área
           </button>
 
         </div>
@@ -817,13 +841,9 @@
             <button
               type="submit"
               class="primary-button"
-              :disabled="guardando"
+              :disabled="guardando || mostrarGuardadoOk"
             >
-              {{
-                guardando
-                  ? 'Guardando...'
-                  : 'Guardar rol'
-              }}
+              {{ guardando ? 'Guardando…' : 'Guardar rol' }}
             </button>
 
           </div>
@@ -964,13 +984,9 @@
             <button
               type="submit"
               class="primary-button"
-              :disabled="guardando"
+              :disabled="guardando || mostrarGuardadoOk"
             >
-              {{
-                guardando
-                  ? 'Guardando...'
-                  : 'Guardar área'
-              }}
+              {{ guardando ? 'Guardando…' : 'Guardar área' }}
             </button>
 
           </div>
@@ -1190,6 +1206,13 @@
 
     </div>
 
+
+    <!-- =====================================================
+         TARJETA DE GUARDADO (componente compartido)
+    ====================================================== -->
+
+    <TarjetaGuardado :visible="mostrarGuardadoOk" :texto="textoGuardado" />
+
   </div>
 
 </template>
@@ -1211,9 +1234,32 @@ import {
 import SuperuserMenu
   from '../components/SuperuserMenu.vue'
 
+import IconoSigta
+  from '../components/IconoSigta.vue'
+
+import TarjetaGuardado
+  from '../components/TarjetaGuardado.vue'
+
+import { usarGuardado }
+  from '../utils/guardado.js'
+
 
 const router =
   useRouter()
+
+
+/* Ícono representativo por tipo de rol */
+function iconoRol(codigo) {
+  const c = String(codigo || '').toUpperCase()
+  if (c.includes('SUPER')) return 'corona'
+  if (c.includes('DAF') || c.includes('TESORER') || c.includes('FINANC')) return 'reporte'
+  if (c.includes('ADMIN') || c.includes('DIRECTOR')) return 'perfil'
+  if (c.includes('UTIC') || c.includes('SOPORTE') || c.includes('AGENTE')) return 'soporte'
+  if (c.includes('MANTEN') || c.includes('SERVICIOS') || c.includes('AUXILIAR')) return 'mantenimiento'
+  if (c.includes('COMPRA') || c.includes('ALMACEN')) return 'compras'
+  if (c.includes('SOLICITANTE')) return 'solicitudes'
+  return 'roles'
+}
 
 
 /* =========================================================
@@ -1245,6 +1291,13 @@ const cargando =
 
 const guardando =
   ref(false)
+
+/* Tarjeta gelatinosa de "guardado" (componente + helper compartidos) */
+const {
+  mostrar: mostrarGuardadoOk,
+  texto: textoGuardado,
+  animar: animarGuardado,
+} = usarGuardado()
 
 const mensaje =
   ref('')
@@ -1920,6 +1973,15 @@ async function guardarRol() {
     }
 
 
+    guardando.value = false
+
+    await animarGuardado(
+      editando
+        ? 'Rol actualizado'
+        : 'Rol creado'
+    )
+
+
     modalRol.value =
       false
 
@@ -1949,6 +2011,7 @@ async function guardarRol() {
   } finally {
 
     guardando.value = false
+    mostrarGuardadoOk.value = false
   }
 }
 
@@ -2155,6 +2218,19 @@ async function persistirArea(accionEstadoConfirmada = '') {
     }
 
 
+    guardando.value = false
+
+    await animarGuardado(
+      accionEstadoConfirmada === 'inactivar'
+        ? 'Área inactivada'
+        : accionEstadoConfirmada === 'activar'
+          ? 'Área activada'
+          : editando
+            ? 'Área actualizada'
+            : 'Área creada'
+    )
+
+
     modalConfirmacionArea.value = false
 
     modalArea.value = false
@@ -2189,6 +2265,7 @@ async function persistirArea(accionEstadoConfirmada = '') {
   } finally {
 
     guardando.value = false
+    mostrarGuardadoOk.value = false
   }
 }
 
@@ -2739,6 +2816,12 @@ function cerrarSesion() {
 
   padding: 17px;
 
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
   background: white;
 
   border-top:
@@ -2751,6 +2834,30 @@ function cerrarSesion() {
     3px
     12px
     rgba(0,0,0,.04);
+}
+
+
+.summary-card .sc-icon {
+
+  flex-shrink: 0;
+
+  width: 46px;
+
+  height: 46px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 12px;
+}
+
+
+.summary-card .sc-body {
+
+  min-width: 0;
 }
 
 
@@ -2821,6 +2928,14 @@ function cerrarSesion() {
     0
     15px;
 
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 7px;
+
   border: none;
 
   border-radius: 7px;
@@ -2834,6 +2949,11 @@ function cerrarSesion() {
   font-weight: 700;
 
   cursor: pointer;
+}
+
+.tabs button .icono-sigta {
+
+  flex-shrink: 0;
 }
 
 
@@ -3045,6 +3165,124 @@ function cerrarSesion() {
 }
 
 
+.role-card-header .role-icon {
+
+  flex-shrink: 0;
+
+  width: 40px;
+
+  height: 40px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: var(--sigta-azul-tenue);
+
+  color: var(--sigta-azul);
+}
+
+
+.role-card-title {
+
+  flex: 1;
+
+  min-width: 0;
+}
+
+
+/* Iconos dentro de botones */
+.yellow-button,
+.blue-button,
+.secondary-button {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 6px;
+}
+
+.yellow-button .icono-sigta,
+.blue-button .icono-sigta,
+.secondary-button .icono-sigta {
+
+  flex-shrink: 0;
+}
+
+
+/* Encabezado de panel con icono */
+.ph-title {
+
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 12px;
+}
+
+
+.ph-title > .ph-icon {
+
+  flex-shrink: 0;
+
+  width: 44px;
+
+  height: 44px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: var(--sigta-azul-tenue);
+
+  color: var(--sigta-azul);
+}
+
+
+/* Fila de datos del rol con icono */
+.role-info .ri-item {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+}
+
+
+.role-info .ri-item > .ri-icon {
+
+  flex-shrink: 0;
+
+  width: 30px;
+
+  height: 30px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 8px;
+
+  background: var(--sigta-azul-tenue);
+
+  color: var(--sigta-azul);
+}
+
+
 .role-code {
 
   display: block;
@@ -3220,6 +3458,46 @@ function cerrarSesion() {
   font-size: 15px;
 
   outline: none;
+}
+
+
+.permission-filters .pf-search {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  height: 40px;
+
+  padding: 0 11px;
+
+  border: 1px solid var(--sigta-borde);
+
+  border-radius: 7px;
+
+  background: white;
+
+  color: var(--sigta-texto-suave);
+}
+
+
+.permission-filters .pf-search input {
+
+  height: auto;
+
+  flex: 1;
+
+  min-width: 0;
+
+  padding: 0;
+
+  border: 0;
+
+  border-radius: 0;
+
+  background: transparent;
 }
 
 

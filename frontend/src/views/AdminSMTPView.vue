@@ -71,10 +71,13 @@
 
       <section class="info-grid">
 
-        <article class="info-card">
+        <article class="info-card" style="border-top-color:#3E7BD6">
 
-          <span class="number">
-            01
+          <span class="ic-head" aria-hidden="true">
+            <span class="ic-num" style="background:#3E7BD6">01</span>
+            <span class="ic-icon" style="background:#3E7BD626;color:#3E7BD6">
+              <IconoSigta nombre="llave" :tamano="18" />
+            </span>
           </span>
 
           <div>
@@ -93,10 +96,13 @@
         </article>
 
 
-        <article class="info-card">
+        <article class="info-card" style="border-top-color:#7B6FD9">
 
-          <span class="number">
-            02
+          <span class="ic-head" aria-hidden="true">
+            <span class="ic-num" style="background:#7B6FD9">02</span>
+            <span class="ic-icon" style="background:#7B6FD926;color:#7B6FD9">
+              <IconoSigta nombre="notificaciones" :tamano="18" />
+            </span>
           </span>
 
           <div>
@@ -115,10 +121,13 @@
         </article>
 
 
-        <article class="info-card">
+        <article class="info-card" style="border-top-color:#1FA396">
 
-          <span class="number">
-            03
+          <span class="ic-head" aria-hidden="true">
+            <span class="ic-num" style="background:#1FA396">03</span>
+            <span class="ic-icon" style="background:#1FA39626;color:#1FA396">
+              <IconoSigta nombre="correo" :tamano="18" />
+            </span>
           </span>
 
           <div>
@@ -329,6 +338,8 @@
 
     </main>
 
+    <TarjetaGuardado :visible="mostrarGuardadoOk" :texto="textoGuardado" />
+
   </div>
 
 </template>
@@ -349,9 +360,24 @@ import {
 import SuperuserMenu
   from '../components/SuperuserMenu.vue'
 
+import IconoSigta
+  from '../components/IconoSigta.vue'
+
+import TarjetaGuardado
+  from '../components/TarjetaGuardado.vue'
+
+import { usarGuardado }
+  from '../utils/guardado.js'
+
 
 const router =
   useRouter()
+
+const {
+  mostrar: mostrarGuardadoOk,
+  texto: textoGuardado,
+  animar: animarGuardado,
+} = usarGuardado()
 
 
 // ==========================================================
@@ -600,19 +626,9 @@ async function guardar() {
     )
 
 
-    mensaje.value =
-      'Configuración SMTP actualizada correctamente.'
+    guardando.value = false
 
-
-    setTimeout(
-      () => {
-
-        mensaje.value =
-          ''
-
-      },
-      3500
-    )
+    await animarGuardado('Configuración SMTP guardada')
 
 
   } catch (err) {
@@ -630,6 +646,9 @@ async function guardar() {
   } finally {
 
     guardando.value =
+      false
+
+    mostrarGuardadoOk.value =
       false
   }
 }
@@ -787,27 +806,50 @@ function cerrarSesion() {
   min-height: 82px;
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: 13px;
+  padding: 14px 15px;
   border-top: 4px solid var(--sigta-mostaza);
-  border-radius: 9px;
+  border-radius: 11px;
   background: white;
   box-shadow: 0 3px 12px rgba(0,0,0,.04);
+  transition: box-shadow .2s ease, transform .2s ease;
 }
 
 
-.number {
-  width: 33px;
-  height: 33px;
+.info-card:hover {
+  box-shadow: 0 8px 22px rgba(0,0,0,.09);
+  transform: translateY(-1px);
+}
+
+
+.ic-head {
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  gap: 6px;
+}
+
+
+.ic-num {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  border-radius: 7px;
-  background: var(--sigta-azul-tenue);
-  color: var(--sigta-azul);
-  font-size: 15px;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
   font-weight: 900;
+}
+
+
+.ic-icon {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
 }
 
 

@@ -41,13 +41,14 @@
 
         <div class="security-box">
 
-          <span>
-            REGISTRO ACTIVO
+          <span class="sb-icon" aria-hidden="true">
+            <IconoSigta nombre="historial" :tamano="18" />
           </span>
 
-          <strong>
-            {{ registros.length }} eventos
-          </strong>
+          <div>
+            <span>REGISTRO ACTIVO</span>
+            <strong>{{ registros.length }} eventos</strong>
+          </div>
 
         </div>
 
@@ -61,70 +62,50 @@
       <section class="summary">
 
         <article>
-
-          <span>
-            Total de eventos
+          <span class="sc-icon" style="background:#e8f1fd;color:#2f6fd0" aria-hidden="true">
+            <IconoSigta nombre="auditoria" :tamano="22" />
           </span>
-
-          <strong>
-            {{ registros.length }}
-          </strong>
-
-          <small>
-            Registros almacenados
-          </small>
-
+          <div class="sc-body">
+            <span>Total de eventos</span>
+            <strong>{{ registros.length }}</strong>
+            <small>Registros almacenados</small>
+          </div>
         </article>
 
 
         <article>
-
-          <span>
-            Seguridad
+          <span class="sc-icon" style="background:#e3f5f2;color:#1f9c8f" aria-hidden="true">
+            <IconoSigta nombre="escudo" :tamano="22" />
           </span>
-
-          <strong>
-            {{ cantidad('SECURITY') }}
-          </strong>
-
-          <small>
-            Eventos de seguridad
-          </small>
-
+          <div class="sc-body">
+            <span>Seguridad</span>
+            <strong>{{ cantidad('SECURITY') }}</strong>
+            <small>Eventos de seguridad</small>
+          </div>
         </article>
 
 
         <article>
-
-          <span>
-            Advertencias
+          <span class="sc-icon" style="background:#fdf2d4;color:#c79a1e" aria-hidden="true">
+            <IconoSigta nombre="alerta" :tamano="22" />
           </span>
-
-          <strong>
-            {{ cantidad('WARNING') }}
-          </strong>
-
-          <small>
-            Eventos que requieren atención
-          </small>
-
+          <div class="sc-body">
+            <span>Advertencias</span>
+            <strong>{{ cantidad('WARNING') }}</strong>
+            <small>Eventos que requieren atención</small>
+          </div>
         </article>
 
 
         <article>
-
-          <span>
-            Errores
+          <span class="sc-icon" style="background:#fde7e7;color:#d92924" aria-hidden="true">
+            <IconoSigta nombre="error" :tamano="22" />
           </span>
-
-          <strong>
-            {{ cantidad('ERROR') }}
-          </strong>
-
-          <small>
-            Errores registrados
-          </small>
-
+          <div class="sc-body">
+            <span>Errores</span>
+            <strong>{{ cantidad('ERROR') }}</strong>
+            <small>Errores registrados</small>
+          </div>
         </article>
 
       </section>
@@ -477,6 +458,9 @@ import AdminMenu
 
 import SuperuserMenu
   from '../components/SuperuserMenu.vue'
+
+import IconoSigta
+  from '../components/IconoSigta.vue'
 
 
 const router =
@@ -876,9 +860,25 @@ function cerrarSesion() {
 .security-box {
   min-width: 145px;
   padding: 11px 15px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
   border-radius: 8px;
   background: white;
   box-shadow: 0 3px 12px rgba(0,0,0,.05);
+}
+
+
+.security-box .sb-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--sigta-exito-fondo, #e3f7ec);
+  color: var(--sigta-exito, #17a34a);
 }
 
 
@@ -918,10 +918,29 @@ function cerrarSesion() {
 .summary article {
   min-height: 105px;
   padding: 17px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
   border-top: 4px solid var(--sigta-mostaza);
   border-radius: 9px;
   background: white;
   box-shadow: 0 3px 12px rgba(0,0,0,.05);
+}
+
+
+.summary article .sc-icon {
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+
+.summary article .sc-body {
+  min-width: 0;
 }
 
 

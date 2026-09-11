@@ -245,51 +245,45 @@
           <div class="documento-seccion">
 
             <div class="documento-titulo-fila">
-              <IconoSigta class="documento-icono" nombre="almacen" :tamano="22" />
+              <IconoSigta class="documento-icono" nombre="almacen" :tamano="18" />
               <span class="documento-titulo">
                 Producto o servicio a comprar
               </span>
             </div>
 
-            <h4>{{ compraSeleccionada?.titulo || 'Sin título' }}</h4>
+            <p class="doc-descripcion">
+              {{ compraSeleccionada?.descripcion || 'Sin descripción registrada.' }}
+            </p>
 
-            <p>{{ compraSeleccionada?.descripcion || 'Sin descripción registrada.' }}</p>
+            <div class="doc-monto">
+              <b>Monto estimado</b>
+              <strong>
+                {{
+                  compraSeleccionada?.monto_estimado
+                    ? `Bs ${Number(compraSeleccionada.monto_estimado).toFixed(2)}`
+                    : 'No indicado'
+                }}
+              </strong>
+            </div>
 
-
-            <div class="documento-fila documento-fila-5">
-
-              <div>
+            <dl class="dl-grid">
+              <div class="dl">
                 <b>Tipo</b>
                 <span>{{ compraSeleccionada?.tipo_nombre || compraSeleccionada?.tipo || 'No indicado' }}</span>
               </div>
-
-              <div>
+              <div class="dl">
                 <b>Cantidad</b>
                 <span>{{ compraSeleccionada?.cantidad || 1 }}</span>
               </div>
-
-              <div>
-                <b>Monto estimado</b>
-                <span>
-                  {{
-                    compraSeleccionada?.monto_estimado
-                      ? `Bs ${Number(compraSeleccionada.monto_estimado).toFixed(2)}`
-                      : 'No indicado'
-                  }}
-                </span>
-              </div>
-
-              <div>
+              <div class="dl full">
                 <b>Especificaciones</b>
                 <span>{{ compraSeleccionada?.especificaciones || 'No registradas.' }}</span>
               </div>
-
-              <div>
+              <div class="dl full">
                 <b>Justificación</b>
                 <span>{{ compraSeleccionada?.justificacion || 'No registrada.' }}</span>
               </div>
-
-            </div>
+            </dl>
 
           </div>
 
@@ -297,15 +291,15 @@
           <div class="documento-seccion">
 
             <div class="documento-titulo-fila">
-              <IconoSigta class="documento-icono" nombre="solicitudes" :tamano="22" />
+              <IconoSigta class="documento-icono" nombre="solicitudes" :tamano="18" />
               <span class="documento-titulo">
                 Datos del expediente
               </span>
             </div>
 
-            <div class="documento-fila">
+            <dl class="dl-grid">
 
-              <div>
+              <div class="dl full">
                 <b>Solicitante</b>
                 <button
                   v-if="compraSeleccionada?.solicitante"
@@ -313,12 +307,7 @@
                   class="solicitante-link"
                   @click="abrirSolicitante(compraSeleccionada.solicitante)"
                 >
-                  <span>
-                    {{
-                      compraSeleccionada?.solicitante_nombre
-                      || 'Sin información'
-                    }}
-                  </span>
+                  <span>{{ compraSeleccionada?.solicitante_nombre || 'Sin información' }}</span>
                   <small v-if="compraSeleccionada?.solicitante_email">
                     {{ compraSeleccionada.solicitante_email }}
                   </small>
@@ -326,31 +315,27 @@
                 <span v-else>Sin información</span>
               </div>
 
-              <div>
+              <div class="dl">
                 <b>Área</b>
                 <span>{{ compraSeleccionada?.area_nombre || 'No indicada' }}</span>
               </div>
 
-              <div>
+              <div class="dl">
                 <b>Vía de adquisición</b>
                 <span>{{ compraSeleccionada?.via_nombre || 'No indicada' }}</span>
               </div>
 
-            </div>
-
-            <div class="documento-fila">
-
-              <div>
+              <div class="dl">
                 <b>Fecha de registro</b>
                 <span>{{ formatearFecha(compraSeleccionada?.creado_en) }}</span>
               </div>
 
-              <div v-if="compraSeleccionada?.monto_desembolsado">
+              <div class="dl" v-if="compraSeleccionada?.monto_desembolsado">
                 <b>Monto desembolsado</b>
                 <span>Bs {{ Number(compraSeleccionada.monto_desembolsado).toFixed(2) }}</span>
               </div>
 
-            </div>
+            </dl>
 
           </div>
 
@@ -358,7 +343,7 @@
           <div class="documento-seccion">
 
             <div class="documento-titulo-fila">
-              <IconoSigta class="documento-icono" nombre="auditoria" :tamano="22" />
+              <IconoSigta class="documento-icono" nombre="auditoria" :tamano="18" />
               <span class="documento-titulo">
                 Documentos del expediente
               </span>
@@ -1897,7 +1882,7 @@ function cerrarSesion() {
 ========================================================= */
 
 .documento-modal {
-  max-width: 700px;
+  max-width: 640px;
 }
 
 
@@ -1912,7 +1897,11 @@ function cerrarSesion() {
 
 
 .documento-body {
-  padding: 18px 22px 22px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--sigta-azul-tenue);
 }
 
 
@@ -1920,9 +1909,10 @@ function cerrarSesion() {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 18px;
+  margin-bottom: 0;
   padding: 14px 16px;
-  border-radius: 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, .05);
 }
 
 
@@ -1978,18 +1968,6 @@ function cerrarSesion() {
 }
 
 
-.documento-seccion {
-  padding: 16px 0;
-  border-top: 1px solid var(--sigta-azul-tenue);
-}
-
-
-.documento-seccion:first-of-type {
-  border-top: none;
-  padding-top: 0;
-}
-
-
 .documento-header-titulo {
   display: flex;
   align-items: center;
@@ -2010,11 +1988,23 @@ function cerrarSesion() {
 }
 
 
+/* Cada sección es una tarjeta blanca sobre el fondo azul tenue */
+.documento-seccion {
+  padding: 16px;
+  border: 1px solid var(--sigta-borde);
+  border-radius: 12px;
+  background: var(--sigta-blanco);
+  box-shadow: 0 2px 8px rgba(11, 40, 79, .04);
+}
+
+.documento-seccion:first-of-type { padding-top: 16px; }
+
+
 .documento-titulo-fila {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 9px;
+  margin-bottom: 12px;
 }
 
 
@@ -2023,74 +2013,98 @@ function cerrarSesion() {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
   background: var(--sigta-azul-tenue);
-  font-size: 13px;
+  color: var(--sigta-azul);
 }
 
 
 .documento-titulo {
   display: block;
-  margin-bottom: 8px;
   color: var(--sigta-texto-suave);
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: .6px;
-  text-transform: uppercase;
-}
-
-
-.documento-titulo-fila .documento-titulo {
-  margin-bottom: 0;
-}
-
-
-.documento-seccion h4 {
-  margin: 0 0 6px;
-  color: var(--sigta-texto);
-  font-size: 20px;
-}
-
-
-.documento-seccion > p {
-  margin: 0 0 10px;
-  color: var(--sigta-azul);
-  font-size: 16px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-}
-
-
-.documento-seccion b {
-  display: block;
-  margin-bottom: 4px;
-  color: var(--sigta-texto-suave);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: .5px;
   text-transform: uppercase;
 }
 
 
-.documento-fila {
-  display: grid;
-  grid-template-columns: repeat(3,1fr);
+/* Descripción del producto/servicio */
+.doc-descripcion {
+  margin: 0 0 14px;
+  color: var(--sigta-texto);
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+
+/* Monto destacado */
+.doc-monto {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--sigta-mostaza-suave);
+  border: 1px solid var(--sigta-mostaza-clara);
+}
+
+.doc-monto b {
+  color: var(--sigta-mostaza-oscuro);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.doc-monto strong {
+  color: var(--sigta-azul-oscuro);
+  font-size: 20px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 
-.documento-fila-5 {
-  grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+/* Rejilla de pares dato/valor */
+.dl-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  border: 1px solid var(--sigta-borde-suave);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--sigta-borde-suave);
 }
 
+.dl {
+  padding: 10px 12px;
+  background: var(--sigta-blanco);
+}
 
-.documento-fila > div span {
+.dl.full { grid-column: 1 / -1; }
+
+.dl b {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--sigta-texto-suave);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+
+.dl > span {
   display: block;
   color: var(--sigta-texto);
-  font-size: 16px;
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: pre-wrap;
 }
 
 
@@ -2154,17 +2168,22 @@ function cerrarSesion() {
   justify-content: space-between;
   gap: 10px;
   padding: 10px 12px;
-  border: none;
-  border-radius: 7px;
+  border: 1px solid transparent;
+  border-radius: 9px;
   font-family: inherit;
   text-align: left;
   text-decoration: none;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+a.documento-item.ok:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(11, 40, 79, .08);
 }
 
 
 .documento-item-icono {
   flex-shrink: 0;
-  font-size: 16px;
 }
 
 
@@ -2204,7 +2223,10 @@ function cerrarSesion() {
 
 .documento-item.ok {
   background: var(--sigta-exito-fondo);
+  border-color: #bfe6cf;
 }
+
+.documento-item.ok .documento-item-icono { color: var(--sigta-exito); }
 
 
 .documento-item.ok .documento-item-accion {
@@ -2215,7 +2237,10 @@ function cerrarSesion() {
 
 .documento-item.falta {
   background: var(--sigta-azul-tenue);
+  border-color: var(--sigta-borde-suave);
 }
+
+.documento-item.falta .documento-item-icono { color: var(--sigta-texto-tenue); }
 
 
 .documento-item.falta small {

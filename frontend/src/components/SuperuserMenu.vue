@@ -150,12 +150,19 @@
     <button
       class="logout"
       type="button"
-      @click="cerrarSesion"
+      @click="mostrarLogout = true"
     >
-      Cerrar sesión
+      <IconoSigta nombre="salir" :tamano="20" />
+      <span>Cerrar sesión</span>
     </button>
 
     </div>
+
+    <LogoutModal
+      :visible="mostrarLogout"
+      @cancelar="mostrarLogout = false"
+      @confirmar="confirmarCierreSesion"
+    />
 
   </aside>
 </template>
@@ -164,6 +171,7 @@
 <script setup>
 
 import IconoSigta from './IconoSigta.vue'
+import LogoutModal from './LogoutModal.vue'
 
 import {
   ref
@@ -190,6 +198,9 @@ const menuAbierto =
    CERRAR SESIÓN
 ========================================================= */
 
+const mostrarLogout =
+  ref(false)
+
 function cerrarSesion() {
 
   localStorage.removeItem(
@@ -203,6 +214,13 @@ function cerrarSesion() {
   router.push(
     '/login'
   )
+}
+
+/* El modal ya terminó su animación de despedida: recién ahora
+   ejecutamos el cierre de sesión real (la función existente). */
+function confirmarCierreSesion() {
+  mostrarLogout.value = false
+  cerrarSesion()
 }
 
 </script>
@@ -690,6 +708,219 @@ nav {
     margin-top: 20px;
   }
 
+}
+
+/* =========================================================
+   ACABADO SUPERUSUARIO
+========================================================= */
+
+.sidebar {
+  width: 286px !important;
+  min-width: 286px !important;
+  padding: 34px 18px 30px !important;
+  background:
+    linear-gradient(180deg, #063467 0%, #042855 52%, #02244f 100%) !important;
+  border-right: 0 !important;
+}
+
+.brand-row {
+  padding: 0 8px 30px;
+  border-bottom-color: rgba(255, 255, 255, .16);
+}
+
+.brand {
+  gap: 14px;
+}
+
+.logo {
+  width: 56px;
+  height: 56px;
+  border: 2px solid rgba(255, 255, 255, .68);
+  border-radius: 15px;
+  background: #fff;
+}
+
+.brand h2 {
+  color: #fff;
+  font-size: 29px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.brand span {
+  margin-top: 8px;
+  color: #c7d8ed;
+  font-size: 14px;
+}
+
+.section-title {
+  height: 22px;
+  margin: 22px 8px 10px;
+  overflow: hidden;
+  color: transparent;
+  user-select: none;
+}
+
+nav {
+  gap: 14px;
+}
+
+.menu-item {
+  min-height: 58px;
+  gap: 18px;
+  padding: 0 18px;
+  border-radius: 8px;
+  color: #ecf5ff;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.menu-item .icon {
+  width: 26px;
+  color: #d8e8fa;
+}
+
+.menu-item.router-link-active {
+  padding-left: 14px;
+  border-left: 5px solid var(--sigta-mostaza);
+  background: rgba(255, 255, 255, .12);
+  color: var(--sigta-mostaza);
+}
+
+.menu-item.router-link-active .icon {
+  color: var(--sigta-mostaza);
+}
+
+.sidebar-body {
+  min-height: 0;
+}
+
+.logout {
+  min-height: 52px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: auto;
+  border: 1px solid var(--sigta-mostaza) !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: #fff !important;
+  font-size: 15px;
+  box-shadow: inset 0 0 0 1px rgba(255, 199, 44, .35);
+  transform-origin: center;
+  transition:
+    transform .3s cubic-bezier(.34, 1.55, .5, 1),
+    background .2s ease,
+    color .2s ease,
+    box-shadow .2s ease !important;
+}
+
+.logout .icono-sigta {
+  color: var(--sigta-mostaza);
+  transition: color .2s ease;
+}
+
+.logout:hover {
+  background: #FFB300 !important;
+  color: var(--sigta-azul) !important;
+  transform: scale(1.09) !important;
+  box-shadow: 0 14px 32px rgba(255, 159, 0, .55) !important;
+}
+
+.logout:hover .icono-sigta {
+  color: var(--sigta-azul);
+}
+
+.sidebar .logo {
+  background: #fff !important;
+  color: #063467 !important;
+}
+
+.sidebar .brand span {
+  color: #c7d8ed !important;
+}
+
+.sidebar .menu-item.router-link-active {
+  border-left-color: var(--sigta-mostaza) !important;
+  background: rgba(255, 255, 255, .12) !important;
+  color: var(--sigta-mostaza) !important;
+}
+
+.sidebar .logout {
+  border: 1px solid var(--sigta-mostaza) !important;
+  background: transparent !important;
+  color: #fff !important;
+}
+
+.sidebar .logout:hover {
+  background: #FFB300 !important;
+  color: var(--sigta-azul) !important;
+  transform: scale(1.09) !important;
+  box-shadow: 0 14px 32px rgba(255, 159, 0, .55) !important;
+}
+
+.sidebar .logout:hover .icono-sigta {
+  color: var(--sigta-azul) !important;
+}
+
+@media (max-width: 760px) {
+
+  .sidebar {
+    width: 100% !important;
+    min-width: 100% !important;
+    padding: 18px !important;
+  }
+
+  .section-title {
+    height: auto;
+    color: #c7d8ed;
+  }
+
+  nav {
+    gap: 6px;
+  }
+}
+
+/* Tamaño final ajustado al viewport de escritorio. */
+.sidebar {
+  width: 260px !important;
+  min-width: 260px !important;
+  padding: 24px 16px 28px !important;
+}
+
+.brand-row {
+  padding-bottom: 24px;
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 13px;
+}
+
+.brand h2 {
+  font-size: 27px;
+}
+
+.brand span {
+  font-size: 13px;
+}
+
+nav {
+  gap: 10px;
+}
+
+.menu-item {
+  min-height: 50px;
+  gap: 14px;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+.logout {
+  min-height: 48px !important;
 }
 
 </style>

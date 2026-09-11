@@ -7,13 +7,19 @@
       </div>
       <div class="profile"><i>{{ iniciales }}</i><div><b>{{ nombre }}</b><small>Jefe de Mantenimiento</small></div></div>
       <p>GESTIÓN DE MANTENIMIENTO</p>
-      <button v-for="m in menu" :key="m.id" :class="{active:vista===m.id}" @click="irA(m.id)"><span>{{ m.icono }}</span>{{ m.nombre }}<em v-if="m.total!==undefined">{{ m.total }}</em></button>
-      <div class="bottom"><button @click="salir"><span>↪</span>Cerrar sesión</button></div>
+      <button v-for="m in menu" :key="m.id" :class="{active:vista===m.id}" @click="irA(m.id)"><span class="icon-badge" :style="{background:m.color+'26',color:m.color}"><IconoSigta :nombre="m.icono" :tamano="16" /></span>{{ m.nombre }}<em v-if="m.total!==undefined">{{ m.total }}</em></button>
+      <div class="sidebar-watermark" aria-hidden="true">
+        <img src="/img/marca-de-agua.png" alt="">
+        <div class="wm-text"><b>EMI</b><span>Escuela Militar de Ingeniería</span><small>"Mcal. Antonio José de Sucre"</small></div>
+      </div>
+      <div class="bottom"><button class="logout" @click="mostrarLogout = true"><IconoSigta nombre="salir" :tamano="17" />Cerrar sesión</button></div>
     </aside>
+
+    <LogoutModal :visible="mostrarLogout" @cancelar="mostrarLogout = false" @confirmar="confirmarSalida" />
 
     <main>
       <header>
-        <div><small>SIGTA / MANTENIMIENTO / {{ titulo }}</small><h1>{{ titulo }}</h1><p>{{ subtitulo }}</p></div>
+        <div><h1>{{ titulo }}</h1><p>{{ subtitulo }}</p></div>
         <button class="refresh" :disabled="cargando" @click="cargar">↻ Actualizar</button>
       </header>
 
@@ -26,18 +32,20 @@
           <span>MT</span>
         </div>
         <div class="stats">
-          <article @click="irA('gestion')"><i class="blue">GT</i><div><small>Gestión</small><b>{{ ticketsGestion.length }}</b><p>tickets pendientes</p></div></article>
-          <article @click="irA('compra')"><i class="navy">CO</i><div><small>Compras</small><b>{{ porEvaluarCompra.length }}</b><p>por evaluar</p></div></article>
-          <article @click="irA('informe')"><i class="green">VF</i><div><small>Por verificar</small><b>{{ porVerificar.length }}</b><p>funcionamiento</p></div></article>
-          <article @click="irA('informe')"><i class="gold">IF</i><div><small>Por informar</small><b>{{ porConformar.length + porInformar.length }}</b><p>conformidad</p></div></article>
+          <article @click="irA('gestion')"><i class="badge" style="background:#3E7BD626;color:#3E7BD6"><IconoSigta nombre="tickets" :tamano="20" /></i><div><small>Gestión</small><b>{{ ticketsGestion.length }}</b><p>tickets pendientes</p></div></article>
+          <article @click="irA('compra')"><i class="badge" style="background:#C79A1E26;color:#C79A1E"><IconoSigta nombre="compras" :tamano="20" /></i><div><small>Compras</small><b>{{ porEvaluarCompra.length }}</b><p>por evaluar</p></div></article>
+          <article @click="irA('informe')"><i class="badge" style="background:#2FA85C26;color:#2FA85C"><IconoSigta nombre="validar" :tamano="20" /></i><div><small>Por verificar</small><b>{{ porVerificar.length }}</b><p>funcionamiento</p></div></article>
+          <article @click="irA('informe')"><i class="badge" style="background:#7B6FD926;color:#7B6FD9"><IconoSigta nombre="conformidad" :tamano="20" /></i><div><small>Por informar</small><b>{{ porConformar.length + porInformar.length }}</b><p>conformidad</p></div></article>
         </div>
         <div class="panels">
           <section class="panel">
             <div class="panel-head"><div><h3>Proceso de mantenimiento</h3></div></div>
-            <button class="flow" @click="irA('gestion')"><i class="blue">1</i><div><b>Gestión integral de tickets</b><small>Validar, clasificar prioridad y designar técnico</small></div><strong>›</strong></button>
-            <button class="flow" @click="irA('compra')"><i class="gold">2</i><div><b>Recibir requerimiento y cotización</b><small>Evaluar la viabilidad de la compra</small></div><strong>›</strong></button>
-            <button class="flow" @click="irA('informe')"><i class="green">3</i><div><b>Verificar funcionamiento</b><small>Confirmar si el problema quedó resuelto</small></div><strong>›</strong></button>
-            <button class="flow" @click="irA('informe')"><i class="gold">4</i><div><b>Conformidad e informe final</b><small>Cerrar el caso y elevarlo a la Dirección</small></div><strong>›</strong></button>
+            <div class="process-grid">
+              <button class="process-card" style="border-top-color:#3E7BD6" @click="irA('gestion')"><span class="process-num" style="background:#3E7BD626;color:#3E7BD6">01</span><div><b>Gestión integral de tickets</b><small>Validar, clasificar prioridad y designar técnico</small></div></button>
+              <button class="process-card" style="border-top-color:#C79A1E" @click="irA('compra')"><span class="process-num" style="background:#C79A1E26;color:#C79A1E">02</span><div><b>Recibir requerimiento y cotización</b><small>Evaluar la viabilidad de la compra</small></div></button>
+              <button class="process-card" style="border-top-color:#2FA85C" @click="irA('informe')"><span class="process-num" style="background:#2FA85C26;color:#2FA85C">03</span><div><b>Verificar funcionamiento</b><small>Confirmar si el problema quedó resuelto</small></div></button>
+              <button class="process-card" style="border-top-color:#7B6FD9" @click="irA('informe')"><span class="process-num" style="background:#7B6FD926;color:#7B6FD9">04</span><div><b>Conformidad e informe final</b><small>Cerrar el caso y elevarlo a la Dirección</small></div></button>
+            </div>
           </section>
           <section class="panel">
             <div class="panel-head"><div><small>SEGUIMIENTO</small><h3>Reporte mensual</h3></div></div>
@@ -50,12 +58,25 @@
       <!-- ========================= GESTIÓN DE TICKETS ========================= -->
       <section v-else-if="vista==='gestion'" class="gestion-tickets-layout">
         <div class="gestion-left">
-          <div class="gestion-left-header">
-            <h3>Tickets Pendientes</h3>
-            <span class="badge">{{ ticketsGestion.length }} Requiere Acción</span>
+          <div class="gestion-stats">
+            <div class="g-stat"><i class="badge" style="background:#3E7BD626;color:#3E7BD6"><IconoSigta nombre="tickets" :tamano="16" /></i><div><small>Total</small><b>{{ ticketsGestion.length }}</b></div></div>
+            <div class="g-stat"><i class="badge" style="background:#DC262626;color:#DC2626"><IconoSigta nombre="tickets" :tamano="16" /></i><div><small>Por validar</small><b>{{ porValidar.length }}</b></div></div>
+            <div class="g-stat"><i class="badge" style="background:#C79A1E26;color:#C79A1E"><IconoSigta nombre="actividades" :tamano="16" /></i><div><small>Por priorizar</small><b>{{ porClasificar.length }}</b></div></div>
+            <div class="g-stat"><i class="badge" style="background:#3E7BD626;color:#3E7BD6"><IconoSigta nombre="usuarios" :tamano="16" /></i><div><small>Por designar</small><b>{{ porDesignar.length }}</b></div></div>
           </div>
+
+          <div class="gestion-filtros">
+            <div class="g-buscar"><IconoSigta nombre="solicitudes" :tamano="15" /><input v-model="busquedaTickets" type="text" placeholder="Buscar por código, título o solicitante..."></div>
+            <select v-model="filtroEstadoTickets">
+              <option value="TODOS">Todos los estados</option>
+              <option value="RECIBIDO">Por validar</option>
+              <option value="CLASIFICAR">Por priorizar</option>
+              <option value="DESIGNAR">Por designar</option>
+            </select>
+          </div>
+
           <div class="gestion-lista">
-            <article v-for="r in ticketsGestion" :key="r.id" :class="['ticket-item', itemActivo?.id === r.id ? 'activo' : '', r.estado_codigo === 'RECIBIDO' ? 't-validar' : (!r.prioridad_jefatura ? 't-clasificar' : 't-designar')]" @click="abrir(r)">
+            <article v-for="r in ticketsPaginados" :key="r.id" :class="['ticket-item', itemActivo?.id === r.id ? 'activo' : '', r.estado_codigo === 'RECIBIDO' ? 't-validar' : (!r.prioridad_jefatura ? 't-clasificar' : 't-designar')]" @click="abrir(r)">
               <div class="top">
                 <span>{{ r.codigo }}</span>
                 <em v-if="r.estado_codigo === 'RECIBIDO'" class="e-validar">Paso 1: Por Validar</em>
@@ -65,7 +86,13 @@
               <h4>{{ r.titulo }}</h4>
               <p>📍 {{ r.ubicacion || 's/d' }} • 🧑 {{ r.solicitante_nombre || 's/d' }}</p>
             </article>
-            <div v-if="!ticketsGestion.length" class="empty-list">Bandeja al día. No hay tickets pendientes.</div>
+            <div v-if="!ticketsFiltrados.length" class="empty-list">{{ ticketsGestion.length ? 'Ningún ticket coincide con la búsqueda.' : 'Bandeja al día. No hay tickets pendientes.' }}</div>
+          </div>
+
+          <div v-if="totalPaginasTickets > 1" class="gestion-paginacion">
+            <button type="button" :disabled="paginaTickets===1" @click="paginaTickets--">‹</button>
+            <span>Página {{ paginaTickets }} de {{ totalPaginasTickets }}</span>
+            <button type="button" :disabled="paginaTickets===totalPaginasTickets" @click="paginaTickets++">›</button>
           </div>
         </div>
 
@@ -440,8 +467,10 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import IconoSigta from '../components/IconoSigta.vue'
+import LogoutModal from '../components/LogoutModal.vue'
 
 const router = useRouter()
 const usuario = ref(JSON.parse(localStorage.getItem('sigta_usuario') || '{}'))
@@ -467,6 +496,37 @@ const porClasificar = computed(() => items.value.filter(r => r.estado_codigo ===
 const porDesignar = computed(() => items.value.filter(r => r.estado_codigo === 'VALIDADO' && !!r.prioridad_jefatura))
 const ticketsGestion = computed(() => [...porValidar.value, ...porClasificar.value, ...porDesignar.value])
 
+/* Búsqueda, filtro y paginación de la bandeja de "Gestión de tickets" */
+const busquedaTickets = ref('')
+const filtroEstadoTickets = ref('TODOS')
+const paginaTickets = ref(1)
+const TICKETS_POR_PAGINA = 10
+
+function etapaTicket(r) {
+  if (r.estado_codigo === 'RECIBIDO') return 'RECIBIDO'
+  if (!r.prioridad_jefatura) return 'CLASIFICAR'
+  return 'DESIGNAR'
+}
+
+const ticketsFiltrados = computed(() => {
+  const texto = busquedaTickets.value.trim().toLowerCase()
+  return ticketsGestion.value.filter(r => {
+    if (filtroEstadoTickets.value !== 'TODOS' && etapaTicket(r) !== filtroEstadoTickets.value) return false
+    if (!texto) return true
+    return [r.codigo, r.titulo, r.solicitante_nombre].some(v => (v || '').toLowerCase().includes(texto))
+  })
+})
+
+const totalPaginasTickets = computed(() => Math.max(1, Math.ceil(ticketsFiltrados.value.length / TICKETS_POR_PAGINA)))
+
+const ticketsPaginados = computed(() => {
+  const inicio = (paginaTickets.value - 1) * TICKETS_POR_PAGINA
+  return ticketsFiltrados.value.slice(inicio, inicio + TICKETS_POR_PAGINA)
+})
+
+watch([busquedaTickets, filtroEstadoTickets], () => { paginaTickets.value = 1 })
+watch(totalPaginasTickets, (total) => { if (paginaTickets.value > total) paginaTickets.value = total })
+
 const porEvaluarCompra = computed(() => items.value.filter(r => (r.estado_compra_componente === 'SOLICITADA' || r.compra_vinculada?.documentos_pendientes?.length)))
 const porVerificar = computed(() => items.value.filter(r => r.estado_codigo === 'INFORME_REGISTRADO' && !r.verificado_en))
 const porConformar = computed(() => items.value.filter(r => r.estado_codigo === 'INFORME_REGISTRADO' && !!r.verificado_en))
@@ -474,11 +534,11 @@ const porInformar = computed(() => items.value.filter(r => r.estado_codigo === '
 const pendientesInforme = computed(() => [...porVerificar.value, ...porConformar.value, ...porInformar.value])
 
 const menu = computed(() => [
-  { id: 'resumen', icono: '⌂', nombre: 'Dashboard' },
-  { id: 'gestion', icono: 'GT', nombre: 'Gestión de tickets', total: ticketsGestion.value.length },
-  { id: 'compra', icono: 'CO', nombre: 'Solicitar compra', total: porEvaluarCompra.value.length },
-  { id: 'informe', icono: 'IF', nombre: 'Informes de los técnicos', total: pendientesInforme.value.length },
-  { id: 'reporte', icono: 'RM', nombre: 'Reporte mensual' },
+  { id: 'resumen', icono: 'inicio', nombre: 'Dashboard', color: '#F2C400' },
+  { id: 'gestion', icono: 'tickets', nombre: 'Gestión de tickets', total: ticketsGestion.value.length, color: '#3E7BD6' },
+  { id: 'compra', icono: 'compras', nombre: 'Solicitar compra', total: porEvaluarCompra.value.length, color: '#C79A1E' },
+  { id: 'informe', icono: 'conformidad', nombre: 'Informes de los técnicos', total: pendientesInforme.value.length, color: '#7B6FD9' },
+  { id: 'reporte', icono: 'reporte', nombre: 'Reporte mensual', color: '#D9538A' },
 ])
 
 const titulo = computed(() => ({
@@ -592,10 +652,17 @@ function fecha(valor) {
   return valor ? new Date(valor).toLocaleDateString('es-BO', { day: '2-digit', month: 'short', year: 'numeric' }) : 's/d'
 }
 
+const mostrarLogout = ref(false)
+
 function salir() {
   localStorage.removeItem('sigta_token')
   localStorage.removeItem('sigta_usuario')
   router.push('/login')
+}
+
+function confirmarSalida() {
+  mostrarLogout.value = false
+  salir()
 }
 
 /* Acciones del flujo */
@@ -703,11 +770,37 @@ async function cargarReporte() {
   }
 }
 
-onMounted(cargar)
+let intervaloActualizacion = null
+
+onMounted(() => {
+  cargar()
+  intervaloActualizacion = setInterval(cargar, 30000)
+})
+
+onUnmounted(() => {
+  if (intervaloActualizacion) clearInterval(intervaloActualizacion)
+})
 </script>
 
 <style scoped>
-*{box-sizing:border-box}.layout{min-height:100vh;background:var(--sigta-fondo);color:var(--sigta-texto);font-family:var(--sigta-fuente)}aside{position:fixed;inset:0 auto 0 0;width:var(--sigta-sidebar);background:var(--sigta-azul);color:var(--sigta-blanco);padding:22px 16px;display:flex;flex-direction:column}.brand,.profile{display:flex;align-items:center;gap:12px}.brand{padding:0 10px 20px;border-bottom:1px solid rgba(255,255,255,.2)}.brand>b{background:var(--sigta-mostaza);color:var(--sigta-azul);padding:14px 10px;border-radius:9px}.brand strong,.brand small,.profile b,.profile small{display:block}.brand strong{font-size:23px}.brand small,.profile small{color:var(--sigta-azul-texto-claro);margin-top:3px}.profile{padding:22px 10px}.profile>i{width:42px;height:42px;border-radius:50%;background:var(--sigta-mostaza);color:var(--sigta-azul);display:grid;place-items:center;font-style:normal;font-weight:900}aside>p{font-size:10px;color:var(--sigta-azul-texto-claro);font-weight:800;letter-spacing:1.4px;margin:14px 10px 8px}aside button{border:0;background:transparent;color:var(--sigta-blanco);border-radius:8px;padding:12px;display:flex;gap:11px;align-items:center;text-align:left;cursor:pointer;margin:2px 0;width:100%}aside button>span{font-size:10px;font-weight:900;width:28px}aside button em{margin-left:auto;background:rgba(255,255,255,.16);padding:2px 8px;border-radius:10px;font-style:normal}aside button.active,aside button:hover{background:rgba(255,255,255,.13)}.bottom{margin-top:auto;border-top:1px solid rgba(255,255,255,.2);padding-top:10px}.bottom button{width:100%}main{margin-left:var(--sigta-sidebar);padding:30px 38px 55px;max-width:1650px}header{display:flex;justify-content:space-between;align-items:center;margin-bottom:27px}header small{color:var(--sigta-texto-suave)}h1{font-size:var(--sigta-titulo);margin:6px 0}header p{margin:0;color:var(--sigta-texto-suave)}.refresh{border:1px solid var(--sigta-borde);background:var(--sigta-blanco);color:var(--sigta-azul);padding:10px 14px;border-radius:8px;cursor:pointer}.hero{background:linear-gradient(120deg,var(--sigta-azul),var(--sigta-azul-medio));color:var(--sigta-blanco);border-radius:13px;padding:28px 30px;display:flex;justify-content:space-between;align-items:center}.hero small,.panel-head small{font-size:10px;font-weight:800;letter-spacing:1.4px;color:var(--sigta-mostaza-clara)}.hero h2{font-size:24px;margin:7px 0}.hero p{margin:0;color:var(--sigta-azul-texto-claro)}.hero>span{width:68px;height:68px;border:1px solid var(--sigta-mostaza);border-radius:50%;display:grid;place-items:center;font-weight:900}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:18px 0}.stats article{background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:10px;padding:19px;display:flex;gap:13px;cursor:pointer}.stats i,.flow i{font-style:normal;width:37px;height:37px;border-radius:8px;display:grid;place-items:center;color:var(--sigta-blanco);font-size:10px;font-weight:900}.blue{background:var(--sigta-azul)}.gold{background:var(--sigta-mostaza);color:var(--sigta-texto)!important}.green{background:var(--sigta-azul-medio)}.navy{background:var(--sigta-azul-medio)}.stats small,.stats b,.stats p{display:block}.stats b{font-size:25px;margin:3px 0}.stats p{font-size:11px;color:var(--sigta-texto-suave);margin:0}.panels{display:grid;grid-template-columns:2fr 1fr;gap:18px}.panel{background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:11px;padding:22px}.panel-head h3{margin:5px 0 14px}.flow{width:100%;border:0;border-top:1px solid var(--sigta-borde-suave);background:var(--sigta-blanco);padding:15px 2px;display:flex;gap:13px;align-items:center;text-align:left;cursor:pointer}.flow div{flex:1}.flow b,.flow small{display:block}.flow small{color:var(--sigta-texto-suave);margin-top:4px}.flow>strong{font-size:20px}.copy{color:var(--sigta-texto-suave);font-size:12px;line-height:1.7}.wide{width:100%;padding:10px;border-radius:7px;border:1px solid var(--sigta-borde);cursor:pointer}.primary{background:var(--sigta-azul)!important;color:var(--sigta-blanco)!important;border-color:var(--sigta-azul)!important}.instruction{background:var(--sigta-mostaza-suave);border-left:4px solid var(--sigta-mostaza);padding:14px 17px;margin-bottom:17px;border-radius:7px}.instruction b,.instruction span{display:block}.instruction span{font-size:12px;color:var(--sigta-alerta);margin-top:4px}.mini-alerta{background:var(--sigta-error-fondo);color:var(--sigta-error);font-size:11px;font-weight:700;padding:7px 9px;border-radius:6px;margin-bottom:10px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}.cards article{background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:10px;padding:19px}.cards article.retorno{border-color:var(--sigta-error);box-shadow:inset 3px 0 var(--sigta-error)}.top{display:flex;justify-content:space-between;gap:8px}.top span{font-size:12px;font-weight:800;color:var(--sigta-azul)}.top em{font-size:10px;background:var(--sigta-azul-tenue);padding:4px 8px;border-radius:10px;font-style:normal}.cards h3{font-size:17px;margin:15px 0 7px}.cards article>p{font-size:12px;color:var(--sigta-texto-suave);min-height:42px}.datos{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:4px}.datos li{display:flex;justify-content:space-between;gap:10px;font-size:11px;border-bottom:1px dashed var(--sigta-borde-suave);padding-bottom:3px}.datos b{color:var(--sigta-texto-suave)}.datos span{color:var(--sigta-texto-suave);text-align:right}.adjunto{display:inline-block;font-size:11px;color:var(--sigta-azul);margin-bottom:10px;text-decoration:none}.actions{display:flex;gap:7px;border-top:1px solid var(--sigta-borde-suave);padding-top:13px;margin-top:10px;align-items:flex-end}.actions button{flex:1;padding:9px 6px;border-radius:7px;border:1px solid var(--sigta-borde);background:var(--sigta-blanco);color:var(--sigta-texto);font-weight:700;cursor:pointer}.actions button:disabled{opacity:.55;cursor:not-allowed}.reject{color:var(--sigta-error)!important;border-color:var(--sigta-error)!important}.empty{text-align:center;background:var(--sigta-blanco);border:1px dashed var(--sigta-borde);padding:65px;border-radius:10px;color:var(--sigta-texto-suave)}.empty>span{font-size:31px;color:var(--sigta-exito)}.campo{display:block;margin:14px 0;font-size:12px;font-weight:700;color:var(--sigta-texto)}.campo input,.campo select,.campo textarea{display:block;width:100%;margin-top:6px;padding:9px 11px;border:1px solid var(--sigta-borde);border-radius:7px;font-family:inherit;font-size:13px;font-weight:400;color:var(--sigta-texto)}.reporte-item{padding:9px 0;border-top:1px solid var(--sigta-borde-suave);font-size:13px}.detalle-modal-backdrop{position:fixed;inset:0;background:rgba(18,58,107,.55);display:grid;place-items:center;padding:20px;z-index:20}.detalle-modal{background:var(--sigta-blanco);border-radius:14px;width:min(700px,100%);max-height:88vh;display:flex;flex-direction:column}.detalle-modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--sigta-borde-suave)}.detalle-modal-header h3{margin:0}.detalle-modal-header small{color:var(--sigta-texto-suave)}.detalle-modal-close{border:0;background:transparent;font-size:20px;cursor:pointer;color:var(--sigta-texto-suave)}.detalle-modal-body{padding:20px 24px;overflow-y:auto;display:grid;gap:14px}.detalle-fila{display:grid;grid-template-columns:1fr 1fr;gap:14px}.detalle-campo b{display:block;font-size:11px;color:var(--sigta-texto-suave);margin-bottom:4px}.detalle-campo span,.detalle-campo p{font-size:13px;color:var(--sigta-texto);margin:0}
+*{box-sizing:border-box}.layout{min-height:100vh;background:var(--sigta-fondo);color:var(--sigta-texto);font-family:var(--sigta-fuente)}aside{position:fixed;inset:0 auto 0 0;width:var(--sigta-sidebar);background:var(--sigta-azul);color:var(--sigta-blanco);padding:22px 16px;display:flex;flex-direction:column}.brand,.profile{display:flex;align-items:center;gap:12px}.brand{padding:0 10px 20px;border-bottom:1px solid rgba(255,255,255,.2)}.brand>b{background:var(--sigta-mostaza);color:var(--sigta-azul);padding:14px 10px;border-radius:9px}.brand strong,.brand small,.profile b,.profile small{display:block}.brand strong{font-size:23px}.brand small,.profile small{color:var(--sigta-azul-texto-claro);margin-top:3px}.profile{padding:22px 10px}.profile>i{width:42px;height:42px;border-radius:50%;background:var(--sigta-mostaza);color:var(--sigta-azul);display:grid;place-items:center;font-style:normal;font-weight:900}aside>p{font-size:10px;color:var(--sigta-azul-texto-claro);font-weight:800;letter-spacing:1.4px;margin:14px 10px 8px}aside button{border:0;background:transparent;color:var(--sigta-blanco);border-radius:8px;padding:12px;display:flex;gap:11px;align-items:center;text-align:left;cursor:pointer;margin:2px 0;width:100%}aside button .icon-badge{flex-shrink:0;width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center}aside button em{margin-left:auto;background:rgba(255,255,255,.16);padding:2px 8px;border-radius:10px;font-style:normal}aside button.active,aside button:hover{background:rgba(255,255,255,.13)}.bottom{margin-top:auto;border-top:1px solid rgba(255,255,255,.2);padding-top:10px}.bottom button{width:100%}.bottom .logout{gap:14px!important;border:1px solid var(--sigta-mostaza)!important;border-radius:8px!important;background:transparent!important;color:#fff!important;box-shadow:inset 0 0 0 1px rgba(255,199,44,.35)!important;transition:transform .3s cubic-bezier(.34,1.55,.5,1),background .2s ease,color .2s ease,box-shadow .2s ease!important}.bottom .logout .icono-sigta{color:var(--sigta-mostaza);transition:color .2s ease}.bottom .logout:hover{background:#FFB300!important;color:var(--sigta-azul)!important;transform:scale(1.09)!important;box-shadow:0 14px 32px rgba(255,159,0,.55)!important}.bottom .logout:hover .icono-sigta{color:var(--sigta-azul)}main{margin-left:var(--sigta-sidebar);padding:30px 38px 55px;max-width:1650px}header{display:flex;justify-content:space-between;align-items:center;margin-bottom:27px}header small{color:var(--sigta-texto-suave)}h1{font-size:var(--sigta-titulo);margin:6px 0}header p{margin:0;color:var(--sigta-texto-suave)}.refresh{border:1px solid var(--sigta-borde);background:var(--sigta-blanco);color:var(--sigta-azul);padding:10px 14px;border-radius:8px;cursor:pointer}.hero{background:linear-gradient(120deg,var(--sigta-azul),var(--sigta-azul-medio));color:var(--sigta-blanco);border-radius:13px;padding:28px 30px;display:flex;justify-content:space-between;align-items:center}.hero small,.panel-head small{font-size:10px;font-weight:800;letter-spacing:1.4px;color:var(--sigta-mostaza-clara)}.hero h2{font-size:24px;margin:7px 0}.hero p{margin:0;color:var(--sigta-azul-texto-claro)}.hero>span{width:68px;height:68px;border:1px solid var(--sigta-mostaza);border-radius:50%;display:grid;place-items:center;font-weight:900}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:18px 0}.stats article{background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:10px;padding:19px;display:flex;gap:13px;cursor:pointer}.stats i,.flow i{font-style:normal;width:37px;height:37px;border-radius:8px;display:grid;place-items:center;color:var(--sigta-blanco);font-size:10px;font-weight:900}.blue{background:var(--sigta-azul)}.gold{background:var(--sigta-mostaza);color:var(--sigta-texto)!important}.green{background:var(--sigta-azul-medio)}.navy{background:var(--sigta-azul-medio)}.stats small,.stats b,.stats p{display:block}.stats b{font-size:25px;margin:3px 0}.stats p{font-size:11px;color:var(--sigta-texto-suave);margin:0}.panels{display:grid;grid-template-columns:2fr 1fr;gap:18px}.panel{background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:11px;padding:22px}.panel-head h3{margin:5px 0 14px}.flow{width:100%;border:0;border-top:1px solid var(--sigta-borde-suave);background:var(--sigta-blanco);padding:15px 2px;display:flex;gap:13px;align-items:center;text-align:left;cursor:pointer}.flow div{flex:1}.flow b,.flow small{display:block}.flow small{color:var(--sigta-texto-suave);margin-top:4px}.flow>strong{font-size:20px}.copy{color:var(--sigta-texto-suave);font-size:12px;line-height:1.7}.wide{width:100%;padding:10px;border-radius:7px;border:1px solid var(--sigta-borde);cursor:pointer}.primary{background:var(--sigta-azul)!important;color:var(--sigta-blanco)!important;border-color:var(--sigta-azul)!important}.instruction{background:var(--sigta-mostaza-suave);border-left:4px solid var(--sigta-mostaza);padding:14px 17px;margin-bottom:17px;border-radius:7px}.instruction b,.instruction span{display:block}.instruction span{font-size:12px;color:var(--sigta-alerta);margin-top:4px}.mini-alerta{background:var(--sigta-error-fondo);color:var(--sigta-error);font-size:11px;font-weight:700;padding:7px 9px;border-radius:6px;margin-bottom:10px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}.cards article{background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:10px;padding:19px}.cards article.retorno{border-color:var(--sigta-error);box-shadow:inset 3px 0 var(--sigta-error)}.top{display:flex;justify-content:space-between;gap:8px}.top span{font-size:12px;font-weight:800;color:var(--sigta-azul)}.top em{font-size:10px;background:var(--sigta-azul-tenue);padding:4px 8px;border-radius:10px;font-style:normal}.cards h3{font-size:17px;margin:15px 0 7px}.cards article>p{font-size:12px;color:var(--sigta-texto-suave);min-height:42px}.datos{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:4px}.datos li{display:flex;justify-content:space-between;gap:10px;font-size:11px;border-bottom:1px dashed var(--sigta-borde-suave);padding-bottom:3px}.datos b{color:var(--sigta-texto-suave)}.datos span{color:var(--sigta-texto-suave);text-align:right}.adjunto{display:inline-block;font-size:11px;color:var(--sigta-azul);margin-bottom:10px;text-decoration:none}.actions{display:flex;gap:7px;border-top:1px solid var(--sigta-borde-suave);padding-top:13px;margin-top:10px;align-items:flex-end}.actions button{flex:1;padding:9px 6px;border-radius:7px;border:1px solid var(--sigta-borde);background:var(--sigta-blanco);color:var(--sigta-texto);font-weight:700;cursor:pointer}.actions button:disabled{opacity:.55;cursor:not-allowed}.reject{color:var(--sigta-error)!important;border-color:var(--sigta-error)!important}.empty{text-align:center;background:var(--sigta-blanco);border:1px dashed var(--sigta-borde);padding:65px;border-radius:10px;color:var(--sigta-texto-suave)}.empty>span{font-size:31px;color:var(--sigta-exito)}.campo{display:block;margin:14px 0;font-size:12px;font-weight:700;color:var(--sigta-texto)}.campo input,.campo select,.campo textarea{display:block;width:100%;margin-top:6px;padding:9px 11px;border:1px solid var(--sigta-borde);border-radius:7px;font-family:inherit;font-size:13px;font-weight:400;color:var(--sigta-texto)}.reporte-item{padding:9px 0;border-top:1px solid var(--sigta-borde-suave);font-size:13px}.detalle-modal-backdrop{position:fixed;inset:0;background:rgba(18,58,107,.55);display:grid;place-items:center;padding:20px;z-index:20}.detalle-modal{background:var(--sigta-blanco);border-radius:14px;width:min(700px,100%);max-height:88vh;display:flex;flex-direction:column}.detalle-modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--sigta-borde-suave)}.detalle-modal-header h3{margin:0}.detalle-modal-header small{color:var(--sigta-texto-suave)}.detalle-modal-close{border:0;background:transparent;font-size:20px;cursor:pointer;color:var(--sigta-texto-suave)}.detalle-modal-body{padding:20px 24px;overflow-y:auto;display:grid;gap:14px}.detalle-fila{display:grid;grid-template-columns:1fr 1fr;gap:14px}.detalle-campo b{display:block;font-size:11px;color:var(--sigta-texto-suave);margin-bottom:4px}.detalle-campo span,.detalle-campo p{font-size:13px;color:var(--sigta-texto);margin:0}
+
+/* ====== MARCA DE AGUA DEL SIDEBAR ====== */
+.sidebar-watermark { flex: 1; min-height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 8px; padding: 10px 0 4px; }
+.sidebar-watermark img { width: 65%; max-width: 130px; max-height: 110px; object-fit: contain; opacity: .15; }
+.wm-text { text-align: center; opacity: .55; }
+.wm-text b { display: block; font-size: 12px; letter-spacing: 1.4px; }
+.wm-text span { display: block; margin-top: 3px; color: var(--sigta-azul-texto-claro); font-size: 9.5px; line-height: 1.3; }
+.wm-text small { display: block; margin-top: 2px; color: var(--sigta-azul-texto-claro); font-size: 9px; font-style: italic; }
+
+/* ====== TARJETAS NUMERADAS DEL PROCESO ====== */
+.process-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 4px; }
+.process-card { display: flex; gap: 12px; align-items: flex-start; text-align: left; width: 100%; background: var(--sigta-blanco); border: 1px solid var(--sigta-borde); border-top: 4px solid var(--sigta-azul); border-radius: 10px; padding: 15px; cursor: pointer; transition: box-shadow .2s, transform .2s; }
+.process-card:hover { box-shadow: 0 6px 16px rgba(0,0,0,.08); transform: translateY(-1px); }
+.process-num { flex-shrink: 0; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 900; }
+.process-card div { flex: 1; }
+.process-card b { display: block; color: var(--sigta-texto); font-size: 13.5px; }
+.process-card small { display: block; color: var(--sigta-texto-suave); font-size: 11.5px; margin-top: 3px; line-height: 1.4; }
 
 /* ====== NUEVOS ESTILOS: GESTIÓN DE TICKETS ====== */
 .gestion-tickets-layout { display: flex; gap: 20px; height: calc(100vh - 160px); overflow: hidden; align-items: stretch; }
@@ -715,7 +808,19 @@ onMounted(cargar)
 .gestion-left-header { padding: 15px 20px; border-bottom: 1px solid var(--sigta-borde-suave); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
 .gestion-left-header h3 { margin: 0; font-size: 14px; color: var(--sigta-texto); }
 .badge { background: #e0e7ff; color: var(--sigta-azul); font-size: 11px; padding: 4px 8px; border-radius: 20px; font-weight: bold; }
+.gestion-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 14px 14px 0; }
+.g-stat { display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid var(--sigta-borde-suave); border-radius: 8px; padding: 8px 10px; }
+.g-stat i.badge { flex-shrink: 0; width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; padding: 0; }
+.g-stat small { display: block; font-size: 9.5px; color: var(--sigta-texto-suave); }
+.g-stat b { display: block; font-size: 16px; color: var(--sigta-texto); }
+.gestion-filtros { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--sigta-borde-suave); }
+.g-buscar { display: flex; align-items: center; gap: 8px; border: 1px solid var(--sigta-borde); border-radius: 8px; padding: 8px 10px; color: var(--sigta-texto-suave); }
+.g-buscar input { border: 0; outline: none; flex: 1; font-size: 12.5px; font-family: inherit; color: var(--sigta-texto); }
+.gestion-filtros select { border: 1px solid var(--sigta-borde); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; font-family: inherit; color: var(--sigta-texto); background: var(--sigta-blanco); }
 .gestion-lista { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.gestion-paginacion { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 10px; border-top: 1px solid var(--sigta-borde-suave); font-size: 12px; color: var(--sigta-texto-suave); }
+.gestion-paginacion button { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--sigta-borde); background: var(--sigta-blanco); cursor: pointer; font-size: 14px; }
+.gestion-paginacion button:disabled { opacity: .4; cursor: not-allowed; }
 .ticket-item { padding: 14px; border: 1px solid var(--sigta-borde-suave); border-radius: 8px; cursor: pointer; transition: all 0.2s; background: var(--sigta-blanco); }
 .ticket-item:hover { border-color: var(--sigta-borde); box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
 .ticket-item.activo { border-color: var(--sigta-azul); background: #f8fafc; }
@@ -782,5 +887,5 @@ textarea { width: 100%; border: 1px solid var(--sigta-borde); border-radius: 6px
 .step-btn { width: 100%; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; background: var(--sigta-azul); color: var(--sigta-blanco); font-size: 14px; text-align: center; }
 .load-error { margin: -10px 0 18px; padding: 12px 14px; border-left: 4px solid var(--sigta-error); border-radius: 7px; background: var(--sigta-error-fondo); color: var(--sigta-error); font-size: 13px; font-weight: 700; }
 
-@media(max-width:1050px){.stats{grid-template-columns:1fr 1fr}.panels{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}.gestion-tickets-layout{flex-direction:column;height:auto}.gestion-left{width:100%;height:300px}}@media(max-width:760px){aside{position:static;width:100%}main{margin:0;padding:20px}.stats,.cards{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column;gap:12px}.detalle-fila{grid-template-columns:1fr}.p-options{grid-template-columns:1fr 1fr}}
+@media(max-width:1050px){.stats{grid-template-columns:1fr 1fr}.panels{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}.gestion-tickets-layout{flex-direction:column;height:auto}.gestion-left{width:100%;height:300px}}@media(max-width:760px){aside{position:static;width:100%}main{margin:0;padding:20px}.stats,.cards,.process-grid{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column;gap:12px}.detalle-fila{grid-template-columns:1fr}.p-options{grid-template-columns:1fr 1fr}}
 </style>

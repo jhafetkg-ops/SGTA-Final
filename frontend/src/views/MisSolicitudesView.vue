@@ -420,6 +420,14 @@
                   Verificar funcionamiento
                 </button>
 
+                <button
+                  v-if="item.proceso === 'MANTENIMIENTO' && item.estado_codigo === 'INFORME_REGISTRADO'"
+                  class="edit"
+                  @click="abrirVerificacion(item)"
+                >
+                  ¿Se solucionó?
+                </button>
+
               </div>
 
             </div>
@@ -526,7 +534,8 @@
           <div>
 
             <label>
-              Proceso
+              <IconoSigta nombre="portal" :tamano="14" />
+              <span>Proceso</span>
             </label>
 
             <p>
@@ -539,7 +548,8 @@
           <div>
 
             <label>
-              Área
+              <IconoSigta nombre="edificio" :tamano="14" />
+              <span>Área</span>
             </label>
 
             <p>
@@ -559,7 +569,8 @@
           >
 
             <label>
-              Ubicación
+              <IconoSigta nombre="globo" :tamano="14" />
+              <span>Ubicación</span>
             </label>
 
             <p>
@@ -576,7 +587,8 @@
           >
 
             <label>
-              Tipo
+              <IconoSigta nombre="filtro" :tamano="14" />
+              <span>Tipo</span>
             </label>
 
             <p>
@@ -589,7 +601,8 @@
           <div class="full">
 
             <label>
-              Descripción
+              <IconoSigta nombre="reporte" :tamano="14" />
+              <span>Descripción</span>
             </label>
 
             <p>
@@ -614,7 +627,8 @@
             <div>
 
               <label>
-                Categoría
+                <IconoSigta nombre="etiqueta" :tamano="14" />
+                <span>Categoría</span>
               </label>
 
               <p>
@@ -630,7 +644,8 @@
             <div>
 
               <label>
-                Equipo afectado
+                <IconoSigta nombre="soporte" :tamano="14" />
+                <span>Equipo afectado</span>
               </label>
 
               <p>
@@ -646,7 +661,8 @@
             <div class="full">
 
               <label>
-                Evidencia
+                <IconoSigta nombre="auditoria" :tamano="14" />
+                <span>Evidencia</span>
               </label>
 
               <p>
@@ -671,7 +687,8 @@
             <div class="full">
 
               <label>
-                Revisión del equipo
+                <IconoSigta nombre="validar" :tamano="14" />
+                <span>Revisión del equipo</span>
               </label>
 
               <p>
@@ -687,7 +704,8 @@
             <div class="full">
 
               <label>
-                Reparación técnica
+                <IconoSigta nombre="mantenimiento" :tamano="14" />
+                <span>Reparación técnica</span>
               </label>
 
               <p>
@@ -714,7 +732,8 @@
             <div>
 
               <label>
-                Tipo de mantenimiento
+                <IconoSigta nombre="mantenimiento" :tamano="14" />
+                <span>Tipo de mantenimiento</span>
               </label>
 
               <p>
@@ -733,7 +752,8 @@
             <div>
 
               <label>
-                Auxiliar asignado
+                <IconoSigta nombre="usuario_check" :tamano="14" />
+                <span>Auxiliar asignado</span>
               </label>
 
               <p>
@@ -749,7 +769,8 @@
             <div class="full">
 
               <label>
-                Evidencia
+                <IconoSigta nombre="auditoria" :tamano="14" />
+                <span>Evidencia</span>
               </label>
 
               <p>
@@ -1053,12 +1074,16 @@
             <h3>Resultado del trabajo</h3>
             <div class="result-grid">
               <div v-if="solicitudSeleccionada.tecnico_nombre"><small>Técnico responsable</small><strong>{{ solicitudSeleccionada.tecnico_nombre }}</strong></div>
+              <div v-if="solicitudSeleccionada.auxiliar_asignado_nombre"><small>Técnico responsable</small><strong>{{ solicitudSeleccionada.auxiliar_asignado_nombre }}</strong></div>
               <div v-if="solicitudSeleccionada.diagnostico" class="wide-result"><small>Diagnóstico</small><p>{{ solicitudSeleccionada.diagnostico }}</p></div>
               <div v-if="solicitudSeleccionada.solucion" class="wide-result"><small>Trabajo realizado</small><p>{{ solicitudSeleccionada.solucion }}</p></div>
+              <div v-if="solicitudSeleccionada.trabajo_realizado" class="wide-result"><small>Trabajo realizado</small><p>{{ solicitudSeleccionada.trabajo_realizado }}</p></div>
               <div v-if="solicitudSeleccionada.resultado_pruebas" class="wide-result"><small>Resultado de pruebas</small><p>{{ solicitudSeleccionada.resultado_pruebas }}</p></div>
-              <div><small>Compra</small><strong>{{ solicitudSeleccionada.requiere_compra ? 'Sí' : 'No' }}</strong></div>
+              <div v-if="solicitudSeleccionada.proceso !== 'MANTENIMIENTO'"><small>Compra</small><strong>{{ solicitudSeleccionada.requiere_compra ? 'Sí' : 'No' }}</strong></div>
               <div v-if="solicitudSeleccionada.requiere_compra && solicitudSeleccionada.componente_requerido"><small>Componente</small><strong>{{ solicitudSeleccionada.componente_requerido }}</strong></div>
               <div v-if="solicitudSeleccionada.requiere_compra"><small>Cantidad</small><strong>{{ solicitudSeleccionada.cantidad_componente }}</strong></div>
+              <div v-if="solicitudSeleccionada.producto_requerido"><small>Componente requerido</small><strong>{{ solicitudSeleccionada.producto_requerido }}</strong></div>
+              <div v-if="solicitudSeleccionada.producto_requerido"><small>Cantidad</small><strong>{{ solicitudSeleccionada.cantidad_requerida }}</strong></div>
             </div>
             <div v-if="evidenciasTecnicas.length" class="technical-evidence-list">
               <strong>Evidencias técnicas</strong>
@@ -1172,6 +1197,9 @@ import {
 
 import SolicitanteMenu
   from '../components/SolicitanteMenu.vue'
+
+import IconoSigta
+  from '../components/IconoSigta.vue'
 
 
 const router =
@@ -2446,17 +2474,21 @@ async function confirmarConformidad() {
 
   try {
 
-    const respuesta = await fetch(
-      `/api/soporte/tickets/${pendiente.item.id}/informar-conformidad/`,
-      {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({
-          conformidad: pendiente.conforme,
-          observaciones,
-        }),
-      }
-    )
+    const esMantenimiento = pendiente.item.proceso === 'MANTENIMIENTO'
+
+    const url = esMantenimiento
+      ? `/api/mantenimiento/requerimientos/${pendiente.item.id}/verificar-funcionamiento/`
+      : `/api/soporte/tickets/${pendiente.item.id}/informar-conformidad/`
+
+    const cuerpo = esMantenimiento
+      ? { problema_resuelto: pendiente.conforme, observaciones }
+      : { conformidad: pendiente.conforme, observaciones }
+
+    const respuesta = await fetch(url, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify(cuerpo),
+    })
 
     let datos = {}
 
@@ -2467,7 +2499,7 @@ async function confirmarConformidad() {
     }
 
     if (!respuesta.ok) {
-      mensajeConformidad.value = datos.observaciones || datos.conformidad || datos.detalle || 'No fue posible registrar la conformidad.'
+      mensajeConformidad.value = datos.observaciones || datos.conformidad || datos.problema_resuelto || datos.detalle || 'No fue posible registrar la conformidad.'
       return
     }
 
@@ -2479,11 +2511,15 @@ async function confirmarConformidad() {
     mensajeResultado.value = conforme
       ? {
           titulo: 'Conformidad registrada',
-          texto: 'Gracias. El resultado fue confirmado correctamente. El Ticket continuará con su cierre administrativo.',
+          texto: esMantenimiento
+            ? 'Gracias. Quedó registrado que el problema fue resuelto. El Jefe de Mantenimiento confirmará el cierre.'
+            : 'Gracias. El resultado fue confirmado correctamente. El Ticket continuará con su cierre administrativo.',
         }
       : {
           titulo: 'Observación enviada',
-          texto: 'La orden volvió al técnico responsable para una nueva atención y conservó su historial.',
+          texto: esMantenimiento
+            ? 'El requerimiento volvió al técnico de mantenimiento para una nueva atención.'
+            : 'La orden volvió al técnico responsable para una nueva atención y conservó su historial.',
         }
 
     await cargarTodo()
@@ -3693,7 +3729,7 @@ function cerrarSesion() {
   .create-panel { grid-template-columns: 1fr; }
 }
 
-.timeline { display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:4px 0 22px; }
+.timeline { display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:4px 0 22px; }
 .timeline-step { position:relative;text-align:center;color:var(--sigta-texto-suave); }
 .timeline-step::before { content:'';position:absolute;top:14px;left:-50%;width:100%;height:3px;background:var(--sigta-borde); }
 .timeline-step:first-child::before { display:none; }
@@ -3712,9 +3748,17 @@ function cerrarSesion() {
 
 
 .detail-grid > div {
-  padding: 11px;
-  border-radius: 7px;
+  padding: 11px 13px;
+  border: 1px solid transparent;
+  border-radius: 9px;
   background: var(--sigta-azul-tenue);
+  transition: border-color .15s, background .15s;
+}
+
+
+.detail-grid > div:hover {
+  border-color: var(--sigta-azul-texto-claro);
+  background: white;
 }
 
 
@@ -3724,10 +3768,19 @@ function cerrarSesion() {
 
 
 .detail-grid label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   color: var(--sigta-texto-suave);
   font-size: 13px;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+
+.detail-grid label :deep(.icono-sigta) {
+  flex-shrink: 0;
+  color: var(--sigta-azul-medio);
 }
 
 

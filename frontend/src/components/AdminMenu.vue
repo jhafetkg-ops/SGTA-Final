@@ -19,6 +19,7 @@
           <span>
             Sistema Integral de Gestión
           </span>
+          <small class="brand-lema">Disciplina · Ciencia · Desarrollo</small>
         </div>
 
       </div>
@@ -149,12 +150,19 @@
     <button
       class="logout"
       type="button"
-      @click="cerrarSesion"
+      @click="mostrarLogout = true"
     >
-      Cerrar sesión
+      <IconoSigta nombre="salir" :tamano="18" />
+      <span>Cerrar sesión</span>
     </button>
 
     </div>
+
+    <LogoutModal
+      :visible="mostrarLogout"
+      @cancelar="mostrarLogout = false"
+      @confirmar="confirmarCierreSesion"
+    />
 
   </aside>
 </template>
@@ -163,6 +171,7 @@
 <script setup>
 
 import IconoSigta from './IconoSigta.vue'
+import LogoutModal from './LogoutModal.vue'
 
 import {
   computed,
@@ -373,6 +382,9 @@ function puede(
    CERRAR SESIÓN
 ========================================================= */
 
+const mostrarLogout =
+  ref(false)
+
 function cerrarSesion() {
 
   localStorage.removeItem(
@@ -386,6 +398,13 @@ function cerrarSesion() {
   router.push(
     '/login'
   )
+}
+
+/* La animación de despedida ya terminó: recién ahora se ejecuta
+   el cierre de sesión real (la misma función de siempre). */
+function confirmarCierreSesion() {
+  mostrarLogout.value = false
+  cerrarSesion()
 }
 
 </script>
@@ -537,6 +556,17 @@ function cerrarSesion() {
   font-size: 11px;
 
   line-height: 1.3;
+}
+
+
+.brand-lema {
+  display: block;
+  margin-top: 4px;
+  color: var(--sigta-mostaza-clara);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
 }
 
 
@@ -717,6 +747,14 @@ nav {
 
   margin-top: auto;
 
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 10px;
+
   border: none;
 
   border-radius: 7px;
@@ -746,6 +784,43 @@ nav {
     4px
     12px
     rgba(0,0,0,.18);
+}
+
+
+/* Estilo unificado del botón "Cerrar sesión" en todos los
+   perfiles (idéntico al de Superuser): fondo transparente con
+   borde mostaza, se torna amarillo intenso y crece al pasar
+   el cursor. Se repite en cada sidebar con esta misma
+   especificidad para vencer la regla global que lo forzaba
+   a mostaza sólido. */
+.sidebar .logout {
+  gap: 14px !important;
+  border: 1px solid var(--sigta-mostaza) !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: #fff !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 199, 44, .35) !important;
+  transition:
+    transform .3s cubic-bezier(.34, 1.55, .5, 1),
+    background .2s ease,
+    color .2s ease,
+    box-shadow .2s ease !important;
+}
+
+.sidebar .logout .icono-sigta {
+  color: var(--sigta-mostaza);
+  transition: color .2s ease;
+}
+
+.sidebar .logout:hover {
+  background: #FFB300 !important;
+  color: var(--sigta-azul) !important;
+  transform: scale(1.09) !important;
+  box-shadow: 0 14px 32px rgba(255, 159, 0, .55) !important;
+}
+
+.sidebar .logout:hover .icono-sigta {
+  color: var(--sigta-azul);
 }
 
 
