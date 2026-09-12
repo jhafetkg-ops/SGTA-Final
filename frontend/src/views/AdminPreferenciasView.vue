@@ -372,7 +372,7 @@
 
     </main>
 
-    <TarjetaGuardado :visible="mostrarGuardadoOk" :texto="textoGuardado" />
+    <TarjetaGuardado :visible="mostrarGuardadoOk" :texto="textoGuardado" @cerrar="ocultarGuardado" />
 
   </div>
 
@@ -412,6 +412,7 @@ const {
   mostrar: mostrarGuardadoOk,
   texto: textoGuardado,
   animar: animarGuardado,
+  ocultar: ocultarGuardado,
 } = usarGuardado()
 
 

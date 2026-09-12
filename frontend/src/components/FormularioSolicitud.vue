@@ -438,6 +438,7 @@
         <TarjetaGuardado
           :visible="mostrarGuardadoOk"
           :texto="textoGuardado"
+          @cerrar="ocultarGuardado"
         />
 
 
@@ -526,6 +527,7 @@ const {
   mostrar: mostrarGuardadoOk,
   texto: textoGuardado,
   animar: animarGuardado,
+  ocultar: ocultarGuardado,
 } = usarGuardado()
 
 const props = defineProps({

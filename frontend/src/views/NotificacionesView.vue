@@ -2,35 +2,36 @@
   <div class="notification-layout">
     <SolicitanteMenu v-if="!esTecnico" />
     <aside v-else class="technician-nav">
-      <div class="tech-brand"><img src="/img/emi.jpg" alt="EMI"><div><b>SIGTA</b><small>Soporte Técnico</small></div></div>
-      <div class="tech-profile"><i>{{iniciales}}</i><div><b>{{nombre}}</b><small>Especialista</small></div></div>
+      <div class="brand-row">
+        <div class="brand"><b><img src="/img/emi.jpg" alt="EMI"></b><div><strong>SIGTA</strong><small>Soporte Técnico</small></div></div>
+      </div>
       <p>MI TRABAJO</p>
-      <button @click="irSeccion('resumen')"><span>⌂</span>Dashboard</button>
-      <button @click="irSeccion('misordenes')"><span>OT</span>Mis órdenes</button>
-      <button @click="irSeccion('curso')"><span>TC</span>Trabajos en curso</button>
-      <button @click="irSeccion('cotizaciones')"><span>CO</span>Cotizaciones y requerimientos</button>
-      <button @click="irSeccion('trabajo')"><span>RP</span>Trabajos y anotaciones</button>
-      <button @click="irSeccion('informes')"><span>IF</span>Pruebas e informes</button>
-      <button @click="irSeccion('compras')"><span>CP</span>Seguimiento de compras</button>
-      <button class="active"><span>●</span>Notificaciones <em v-if="pendientes">{{pendientes}}</em></button>
-      <button @click="irSeccion('historial')"><span>HI</span>Historial</button>
-      <button class="tech-logout" @click="mostrarLogout=true"><IconoSigta nombre="salir" :tamano="17" />Cerrar sesión</button>
+      <button @click="irSeccion('resumen')"><IconoSigta class="nav-icon" nombre="panel" :tamano="17" />Dashboard</button>
+      <button @click="irSeccion('misordenes')"><IconoSigta class="nav-icon" nombre="tickets" :tamano="17" />Mis órdenes<em>{{porRecibir.length}}</em></button>
+      <button @click="irSeccion('curso')"><IconoSigta class="nav-icon" nombre="mantenimiento" :tamano="17" />Trabajos en curso<em>{{trabajosCurso.length}}</em></button>
+      <button @click="irSeccion('cotizaciones')"><IconoSigta class="nav-icon" nombre="compras" :tamano="17" />Cotizaciones y requerimientos<em>{{porCotizar.length}}</em></button>
+      <button @click="irSeccion('trabajo')"><IconoSigta class="nav-icon" nombre="editar" :tamano="17" />Trabajos y anotaciones<em>{{porIntervenir.length}}</em></button>
+      <button @click="irSeccion('informes')"><IconoSigta class="nav-icon" nombre="reporte" :tamano="17" />Pruebas e informes<em>{{porProbar.length}}</em></button>
+      <button @click="irSeccion('compras')"><IconoSigta class="nav-icon" nombre="reloj" :tamano="17" />Seguimiento de compras<em>{{esperandoCompra.length}}</em></button>
+      <button class="active"><IconoSigta class="nav-icon" nombre="notificaciones" :tamano="17" />Notificaciones<em>{{pendientes}}</em></button>
+      <button @click="irSeccion('historial')"><IconoSigta class="nav-icon" nombre="historial" :tamano="17" />Historial</button>
+      <div class="bottom"><button class="logout" @click="mostrarLogout=true"><IconoSigta nombre="salir" :tamano="17" />Cerrar sesión</button></div>
     </aside>
 
     <LogoutModal :visible="mostrarLogout" @cancelar="mostrarLogout=false" @confirmar="confirmarSalida" />
     <main class="page">
     <header>
-      <button class="back" @click="router.push(rutaVolver)" aria-label="Volver al panel"><span>←</span> Volver al panel</button>
-      <div><small>CENTRO DE AVISOS</small><h1>Notificaciones</h1><p>Decisiones y novedades relacionadas con sus tickets.</p></div>
-      <button v-if="pendientes" class="read-all" @click="marcarTodas">Marcar todas como leídas</button>
-    
+      <div><h1>Notificaciones</h1><p>Decisiones y novedades relacionadas con sus tickets.</p></div>
+      <div class="header-actions">
+        <button v-if="pendientes" class="read-all" @click="marcarTodas">Marcar todas como leídas</button>
+      </div>
         <UsuarioHeader @actualizar="cargar" />
       </header>
-    <section class="summary">
-      <div><b>{{pendientes}}</b><span>Sin leer</span></div>
-      <div class="summary-approved"><b>{{aprobadas}}</b><span>Aprobadas</span></div>
-      <div class="summary-rejected"><b>{{rechazadas}}</b><span>Rechazadas</span></div>
-      <div class="summary-total"><b>{{notificaciones.length}}</b><span>Total</span></div>
+    <section class="stats">
+      <article><i class="blue"><IconoSigta nombre="notificaciones" :tamano="19" /></i><div><small>Sin leer</small><b>{{pendientes}}</b></div></article>
+      <article><i class="green"><IconoSigta nombre="validar" :tamano="19" /></i><div><small>Aprobadas</small><b>{{aprobadas}}</b></div></article>
+      <article><i class="red"><IconoSigta nombre="error" :tamano="19" /></i><div><small>Rechazadas</small><b>{{rechazadas}}</b></div></article>
+      <article><i class="gold"><IconoSigta nombre="reporte" :tamano="19" /></i><div><small>Total</small><b>{{notificaciones.length}}</b></div></article>
     </section>
     <section class="list">
       <article v-for="n in notificaciones" :key="n.id" :class="[n.tipo.toLowerCase(),{unread:!n.leida}]">
@@ -54,13 +55,39 @@ import IconoSigta from '../components/IconoSigta.vue'
 import SolicitanteMenu from '../components/SolicitanteMenu.vue'
 const router=useRouter(),route=useRoute(),notificaciones=ref([]),cargando=ref(true)
 const usuario=JSON.parse(localStorage.getItem('sigta_usuario')||'{}'),roles=(usuario.roles||[]).map(r=>String(r?.codigo||r).toUpperCase())
-const esTecnico=route.path.startsWith('/especialista/')||roles.includes('ESPECIALISTA')||roles.includes('AGENTE'),rutaVolver=esTecnico?'/especialista/dashboard':'/usuario/dashboard'
-const nombre=usuario.nombre||usuario.nombre_completo||'Técnico',iniciales=nombre.split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase()
+const esTecnico=route.path.startsWith('/especialista/')||roles.includes('ESPECIALISTA')||roles.includes('AGENTE')
 const pendientes=computed(()=>notificaciones.value.filter(n=>!n.leida).length)
 const aprobadas=computed(()=>notificaciones.value.filter(n=>n.tipo==='EXITO').length)
 const rechazadas=computed(()=>notificaciones.value.filter(n=>n.tipo==='RECHAZO').length)
 const headers=()=>({Authorization:`Token ${localStorage.getItem('sigta_token')}`,Accept:'application/json'})
-async function cargar(){cargando.value=true;try{const r=await fetch('/api/soporte/notificaciones/',{headers:headers()}),d=await r.json();notificaciones.value=Array.isArray(d)?d:d.results||[]}finally{cargando.value=false}}
+
+/* ==========================================================
+   CONTADORES DEL SIDEBAR TÉCNICO
+
+   Réplica de los mismos filtros de EspecialistaDashboardView
+   para que el menú muestre las mismas cifras en ambas vistas.
+========================================================== */
+const tickets=ref([])
+const misTickets=computed(()=>tickets.value.filter(t=>Number(t.tecnico_asignado)===Number(usuario.id)))
+const enEsperaDeCompra=t=>['SOLICITADA','VIABLE'].includes(t.estado_compra_componente)
+const porRecibir=computed(()=>misTickets.value.filter(t=>t.estado_codigo==='ASIGNADO'))
+const trabajosCurso=computed(()=>misTickets.value.filter(t=>['EN_DIAGNOSTICO','EN_EJECUCION'].includes(t.estado_codigo)))
+const esperandoCompra=computed(()=>misTickets.value.filter(t=>t.estado_codigo==='EN_EJECUCION'&&enEsperaDeCompra(t)))
+const porIntervenir=computed(()=>misTickets.value.filter(t=>t.estado_codigo==='EN_EJECUCION'&&!t.solucion&&!enEsperaDeCompra(t)))
+const porProbar=computed(()=>misTickets.value.filter(t=>t.estado_codigo==='EN_EJECUCION'&&!!t.solucion))
+const porCotizar=computed(()=>trabajosCurso.value.filter(t=>t.estado_codigo==='EN_EJECUCION'&&(t.requiere_compra||t.estado_compra_componente==='BORRADOR')&&!enEsperaDeCompra(t)&&t.estado_compra_componente!=='ENTREGADA'))
+
+async function cargar(){
+  cargando.value=true
+  try{
+    const peticiones=[fetch('/api/soporte/notificaciones/',{headers:headers()})]
+    if(esTecnico)peticiones.push(fetch('/api/soporte/tickets/',{headers:headers()}))
+    const [r,rt]=await Promise.all(peticiones)
+    const d=await r.json()
+    notificaciones.value=Array.isArray(d)?d:d.results||[]
+    if(rt){const dt=await rt.json();tickets.value=Array.isArray(dt)?dt:dt.results||[]}
+  }finally{cargando.value=false}
+}
 async function marcarLeida(n){await fetch(`/api/soporte/notificaciones/${n.id}/marcar-leida/`,{method:'POST',headers:headers()});n.leida=true}
 async function marcarTodas(){await fetch('/api/soporte/notificaciones/marcar-todas-leidas/',{method:'POST',headers:headers()});notificaciones.value.forEach(n=>n.leida=true)}
 async function verDetalle(n){if(!n.leida)await marcarLeida(n);router.push(esTecnico?{path:'/especialista/dashboard',query:{ticket:n.ticket}}:{path:'/usuario/mis-solicitudes',query:{proceso:'SOPORTE',id:n.ticket,origen:'notificaciones'}})}
@@ -73,32 +100,51 @@ onMounted(cargar)
 </script>
 
 <style scoped>
-*{box-sizing:border-box}.page{min-height:100vh;padding:30px;background:var(--sigta-azul-tenue);color:var(--sigta-texto);font-family:var(--sigta-fuente)}header{max-width:1050px;margin:auto auto 18px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:20px;background:linear-gradient(120deg,var(--sigta-azul),#315f8b);color:#fff;border-radius:15px;padding:22px 25px}header small{color:var(--sigta-mostaza-clara);font-weight:900;letter-spacing:1px}h1{margin:3px 0;font-size:26px}header p{margin:0;color:#d2e1ef}.back,.read-all{border:1px solid #ffffff55;background:#ffffff12;color:#fff;border-radius:8px;padding:10px 13px;font-weight:800;cursor:pointer}.read-all{background:var(--sigta-mostaza);border-color:var(--sigta-mostaza);color:var(--sigta-azul)}.summary{max-width:1050px;margin:auto auto 14px;display:flex;gap:10px}.summary div{background:#fff;border:1px solid var(--sigta-borde);border-radius:9px;padding:10px 18px}.summary b,.summary span{display:block}.summary b{font-size:20px;color:var(--sigta-azul)}.summary span{font-size:10px;color:var(--sigta-texto-suave)}.list{max-width:1050px;margin:auto;display:grid;gap:10px}.list article{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:14px;background:#fff;border:1px solid var(--sigta-borde);border-radius:11px;padding:16px}.list article.unread{box-shadow:inset 4px 0 var(--sigta-mostaza)}.list article.rechazo{border-color:#efc7c7}.list article>i{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--sigta-azul-tenue);color:var(--sigta-azul);font-style:normal;font-weight:900}.list article.rechazo>i{background:var(--sigta-error-fondo);color:var(--sigta-error)}.title{display:flex;gap:9px;align-items:center}.title em{font-size:9px;font-style:normal;background:var(--sigta-mostaza-suave);color:var(--sigta-mostaza-oscuro);border-radius:9px;padding:3px 7px}.list p{margin:5px 0;color:var(--sigta-texto-suave)}.list small{color:var(--sigta-texto-suave)}.actions{display:flex;gap:7px;flex-direction:column}.actions button{border:0;background:var(--sigta-azul);color:#fff;border-radius:7px;padding:8px 11px;font-weight:800;cursor:pointer}.actions .secondary{background:#fff;color:var(--sigta-azul);border:1px solid var(--sigta-borde)}.empty{text-align:center;background:#fff;border:1px dashed var(--sigta-borde);border-radius:11px;padding:50px;color:var(--sigta-texto-suave)}.empty span{font-size:28px;color:var(--sigta-exito)}@media(max-width:700px){.page{padding:12px}header{grid-template-columns:1fr}.read-all,.back{width:100%}.list article{grid-template-columns:38px 1fr}.actions{grid-column:1/-1;flex-direction:row}.actions button{flex:1}}
+*{box-sizing:border-box}
+.notification-layout{display:flex;min-height:100vh;background:var(--sigta-azul-tenue)}
+.notification-layout>.page{flex:1;min-width:0}
+.page{padding:28px;max-width:1650px;color:var(--sigta-texto);font-family:var(--sigta-fuente)}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px}
+h1{font-size:29px;margin:0!important}
+header p{margin:0;font-size:12px;color:var(--sigta-texto-suave)}
+.header-actions{display:flex;gap:9px}
+.read-all{border:1px solid var(--sigta-borde);background:var(--sigta-blanco);color:var(--sigta-azul);border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}
+.read-all:hover{background:var(--sigta-mostaza);border-color:var(--sigta-mostaza)}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:0 0 18px}
+.stats article{background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-top:4px solid var(--sigta-mostaza);border-radius:10px;min-height:120px;padding:18px;display:flex;gap:13px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.05)}
+.stats i{font-style:normal;width:37px;height:37px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--sigta-blanco);flex-shrink:0}
+.stats i.blue{background:var(--sigta-azul)}
+.stats i.green{background:var(--sigta-azul-medio)}
+.stats i.red{background:var(--sigta-error)}
+.stats i.gold{background:var(--sigta-mostaza);color:var(--sigta-texto)}
+.stats small,.stats b{display:block}
+.stats small{font-size:9px;color:var(--sigta-texto-suave)}
+.stats b{font-size:28px;margin-top:3px;color:var(--sigta-azul)}
+
+.list{display:grid;gap:10px}
+.list article{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:14px;background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:11px;padding:16px}
+.list article.unread{box-shadow:inset 4px 0 var(--sigta-mostaza)}
+.list article.rechazo{border-color:#efc7c7}
+.list article>i{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--sigta-azul-tenue);color:var(--sigta-azul);font-style:normal;font-weight:900}
+.list article.rechazo>i{background:var(--sigta-error-fondo);color:var(--sigta-error)}
+.title{display:flex;gap:9px;align-items:center}
+.title em{font-size:9px;font-style:normal;background:var(--sigta-mostaza-suave);color:var(--sigta-mostaza-oscuro);border-radius:9px;padding:3px 7px}
+.list p{margin:5px 0;color:var(--sigta-texto-suave)}
+.list small{color:var(--sigta-texto-suave)}
+.actions{display:flex;gap:7px;flex-direction:column}
+.actions button{border:0;background:var(--sigta-azul);color:var(--sigta-blanco);border-radius:7px;padding:8px 11px;font-weight:800;cursor:pointer}
+.actions .secondary{background:var(--sigta-blanco);color:var(--sigta-azul);border:1px solid var(--sigta-borde)}
+
+.empty{text-align:center;background:var(--sigta-blanco);border:1px dashed var(--sigta-borde);padding:65px;border-radius:10px;color:var(--sigta-texto-suave)}
+.empty>span{font-size:31px;color:var(--sigta-exito)}
+
+@media(max-width:1050px){.stats{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.page{padding:20px}header{align-items:flex-start;flex-direction:column;gap:12px}.stats{grid-template-columns:1fr}.list article{grid-template-columns:38px 1fr}.actions{grid-column:1/-1;flex-direction:row}.actions button{flex:1}}
 </style>
 <style scoped>
-.notification-layout .technician-nav > button{gap:11px;padding:10px 12px;line-height:1.2}
-.technician-nav > button span{flex:0 0 28px;width:28px;text-align:center;font-size:11px;font-weight:900}
-.notification-layout .page > header{display:flex;min-height:124px;padding:24px 28px;background:var(--sigta-azul);box-shadow:0 8px 22px #0c2a4f14}
-.notification-layout .page > header > div{order:2;flex:1}
-.notification-layout .page > header .back{order:1;align-self:center;display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;background:#fff;color:var(--sigta-azul);border-color:#fff;padding:10px 14px;box-shadow:0 3px 10px #001b3728}
-.page > header .back span{font-size:18px}
-.page > header .back:hover{background:var(--sigta-mostaza);border-color:var(--sigta-mostaza)}
-.notification-layout .page > header .read-all{order:3;flex:0 0 auto}
-@media(max-width:900px){.page > header{display:flex;flex-wrap:wrap}.page > header > div{order:1;flex-basis:100%}.page > header .back{order:2}.page > header .read-all{order:3;margin-left:auto}}
-@media(max-width:700px){.page > header{display:grid}.page > header > div{order:1}.page > header .back{order:2;width:auto;justify-self:start}.page > header .read-all{order:3;width:100%;margin:0}}
+.technician-nav > button :deep(.icono-sigta){flex-shrink:0}
 </style>
 <style scoped>
-.page > .summary{grid-template-columns:repeat(4,minmax(130px,1fr))}
-.page > .summary::after{display:none;content:none}
-.summary div{border-top:3px solid var(--sigta-azul)}
-.summary .summary-approved{border-top-color:var(--sigta-exito)}
-.summary .summary-rejected{border-top-color:var(--sigta-error)}
-.summary .summary-total{border-top-color:var(--sigta-mostaza)}
-@media(max-width:900px){.page > .summary{grid-template-columns:repeat(2,1fr)}}
-</style>
-<style scoped>
-.notification-layout{display:flex;min-height:100vh;background:var(--sigta-azul-tenue)}.notification-layout>.page{flex:1;min-width:0}.technician-nav{position:sticky;top:0;width:var(--sigta-sidebar);min-width:var(--sigta-sidebar);height:100vh;padding:22px 14px;background:var(--sigta-azul);color:#fff;display:flex;flex-direction:column}.tech-brand,.tech-profile{display:flex;align-items:center;gap:11px}.tech-brand{padding:0 8px 18px;border-bottom:1px solid #ffffff22}.tech-brand img{width:48px;height:48px;border-radius:10px}.tech-brand b,.tech-brand small,.tech-profile b,.tech-profile small{display:block}.tech-brand b{font-size:22px}.tech-brand small,.tech-profile small{color:#c7d8ea;font-size:11px}.tech-profile{padding:22px 8px}.tech-profile i{width:42px;height:42px;border-radius:50%;background:var(--sigta-mostaza);color:var(--sigta-azul);display:grid;place-items:center;font-style:normal;font-weight:900}.technician-nav>p{font-size:10px;color:#9db3cc;font-weight:900;letter-spacing:1px;margin:8px}.technician-nav>button{display:flex;align-items:center;width:100%;border:0;background:transparent;color:#d7e4f2;border-radius:8px;padding:12px;cursor:pointer;text-align:left;font-weight:700}.technician-nav>button em{margin-left:auto;background:#ffffff20;border-radius:12px;padding:2px 7px;font-style:normal}.technician-nav>button.active{background:#ffffff16;box-shadow:inset 3px 0 var(--sigta-mostaza);color:var(--sigta-mostaza)}.technician-nav>.tech-logout{margin-top:auto;justify-content:center;gap:14px;border:1px solid var(--sigta-mostaza);background:transparent;color:#fff;box-shadow:inset 0 0 0 1px rgba(255,199,44,.35);transition:transform .3s cubic-bezier(.34,1.55,.5,1),background .2s ease,color .2s ease,box-shadow .2s ease}.technician-nav>.tech-logout .icono-sigta{color:var(--sigta-mostaza);transition:color .2s ease}.technician-nav>.tech-logout:hover{background:#FFB300;color:var(--sigta-azul);transform:scale(1.09);box-shadow:0 14px 32px rgba(255,159,0,.55)}.technician-nav>.tech-logout:hover .icono-sigta{color:var(--sigta-azul)}@media(max-width:700px){.notification-layout{display:block}.technician-nav{position:static;width:100%;min-width:0;height:auto}.technician-nav .tech-profile,.technician-nav>p,.technician-nav>button:not(.active){display:none}.technician-nav>button.active{margin-top:10px}}
-</style>
-<style scoped>
-.notification-layout>.page{padding:32px 38px}.page>header,.page>.summary,.page>.list{max-width:none;width:100%}.page>header{min-height:138px;padding:25px 30px;background:linear-gradient(120deg,var(--sigta-azul) 0%,#285786 72%,#356895 100%);box-shadow:0 12px 28px #0c2a4f18}.page>header h1{font-size:30px}.page>header .back{order:2;align-self:start;background:#ffffff12}.page>header>div{order:1}.page>header .read-all{order:3}.summary{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:12px;margin:0 0 18px}.summary:after{display:none;content:none}.summary div{padding:14px 18px;border-radius:11px;box-shadow:0 5px 15px #17324a0a}.list article{min-height:116px;padding:18px 20px;border-color:#d6e1ed;box-shadow:0 5px 16px #17324a0a;transition:transform .18s,box-shadow .18s}.list article:hover{transform:translateY(-2px);box-shadow:0 10px 24px #17324a14}.list article.unread{border-left:5px solid var(--sigta-mostaza);box-shadow:0 8px 22px #17324a12}.list article.rechazo{background:linear-gradient(90deg,#fff9f9,#fff 28%)}.list article.exito{background:linear-gradient(90deg,#f5fcf8,#fff 28%);border-color:#bfe3d0}.list article.exito>i{background:var(--sigta-exito-fondo);color:var(--sigta-exito)}.title strong{font-size:15px}.list p{font-size:13px;line-height:1.5}.actions button{min-width:128px;padding:10px 14px}.actions .secondary{font-size:11px}@media(max-width:900px){.notification-layout>.page{padding:20px}.page>header{grid-template-columns:1fr auto}.page>header>div{grid-column:1/-1}.page>header .back{order:initial}.summary{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){.notification-layout>.page{padding:12px}.page>header{grid-template-columns:1fr;padding:20px}.page>header .read-all,.page>header .back{order:initial}.summary{grid-template-columns:1fr 1fr}.list article{min-height:0}}
+.technician-nav{position:sticky;top:0;width:var(--sigta-sidebar);min-width:var(--sigta-sidebar);height:100vh;padding:20px 14px;background:var(--sigta-azul);color:#fff;display:flex;flex-direction:column}.technician-nav .brand-row{display:flex;align-items:center}.technician-nav .brand{display:flex;align-items:center;gap:11px;padding:0 10px 20px;border-bottom:1px solid #ffffff20;width:100%}.technician-nav .brand>b{display:block;flex-shrink:0}.technician-nav .brand img{width:48px;height:48px;border-radius:10px;display:block}.technician-nav .brand strong,.technician-nav .brand small{display:block}.technician-nav .brand strong{font-size:22px}.technician-nav .brand small{color:var(--sigta-azul-texto-claro);font-size:11px;margin-top:3px}.technician-nav>p{font-size:10px;color:var(--sigta-texto-suave);font-weight:800;letter-spacing:1.4px;margin:14px 10px 8px}.technician-nav button{display:flex;align-items:center;gap:11px;width:100%;border:0;border-left:3px solid transparent;background:transparent;color:#fff!important;font-size:13px!important;font-weight:600!important;border-radius:8px;padding:0 12px;min-height:42px;cursor:pointer;text-align:left;margin:2px 0}.technician-nav>button :deep(.icono-sigta){flex-shrink:0}.technician-nav>button em{margin-left:auto;background:#ffffff1c;border-radius:10px;padding:2px 8px;font-style:normal}.technician-nav>button.active,.technician-nav>button:hover{background:#ffffff14;box-shadow:inset 3px 0 var(--sigta-mostaza-clara)}.technician-nav>button.active{color:var(--sigta-mostaza)!important}.technician-nav>.bottom{margin-top:auto;border-top:1px solid #ffffff20;padding-top:10px}.technician-nav>.bottom button{width:100%}.technician-nav>.bottom .logout{gap:14px;border:1px solid var(--sigta-mostaza);background:transparent;color:#fff!important;font-size:13px!important;box-shadow:inset 0 0 0 1px rgba(255,199,44,.35);transition:transform .3s cubic-bezier(.34,1.55,.5,1),background .2s ease,color .2s ease,box-shadow .2s ease}.technician-nav>.bottom .logout .icono-sigta{color:var(--sigta-mostaza);transition:color .2s ease}.technician-nav>.bottom .logout:hover{background:#FFB300;color:var(--sigta-azul)!important;transform:scale(1.09);box-shadow:0 14px 32px rgba(255,159,0,.55)}.technician-nav>.bottom .logout:hover .icono-sigta{color:var(--sigta-azul)}@media(max-width:700px){.notification-layout{display:block}.technician-nav{position:static;width:100%;min-width:0;height:auto}.technician-nav>p,.technician-nav>button:not(.active){display:none}.technician-nav>button.active{margin-top:10px}}
 </style>

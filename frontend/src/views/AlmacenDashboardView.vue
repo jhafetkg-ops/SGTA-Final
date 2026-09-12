@@ -6,15 +6,16 @@
         <button type="button" class="menu-toggle" :aria-expanded="menuAbierto" aria-label="Mostrar opciones del menú" @click="menuAbierto = !menuAbierto"><span></span><span></span><span></span></button>
       </div>
       <p>CAJA CHICA</p>
-      <button v-for="m in menu" :key="m.id" :class="{active:vista===m.id}" @click="irA(m.id)"><span>{{ m.icono }}</span>{{ m.nombre }}<em v-if="m.total!==undefined">{{ m.total }}</em></button>
+      <button v-for="m in menu" :key="m.id" :class="{active:vista===m.id}" @click="irA(m.id)"><IconoSigta class="nav-icon" :nombre="m.icono" :tamano="17" />{{ m.nombre }}<em v-if="m.total!==undefined">{{ m.total }}</em></button>
       <div class="bottom"><button class="logout" @click="mostrarLogout = true"><IconoSigta nombre="salir" :tamano="17" />Cerrar sesión</button></div>
     </aside>
 
     <LogoutModal :visible="mostrarLogout" @cancelar="mostrarLogout = false" @confirmar="confirmarSalida" />
+    <TarjetaGuardado :visible="mostrarGuardado" :texto="textoGuardado" :tipo="tipoGuardado" @cerrar="ocultarGuardado" />
 
     <main>
       <header>
-        <div><small>SIGTA / COMPRAS / {{ titulo }}</small><h1>{{ titulo }}</h1><p>{{ subtitulo }}</p></div>
+        <div><h1>{{ titulo }}</h1><p>{{ subtitulo }}</p></div>
 
       
         <UsuarioHeader @actualizar="cargar" />
@@ -28,10 +29,10 @@
         </div>
 
         <div class="stats">
-          <article @click="irA('comprar')"><i class="gold">CO</i><div><small>Por comprar</small><b>{{ porComprar.length }}</b><p>fondos desembolsados</p></div></article>
-          <article @click="irA('entrada')"><i class="blue">EN</i><div><small>Por registrar entrada</small><b>{{ porIngresar.length }}</b><p>producto adquirido</p></div></article>
-          <article @click="irA('salida')"><i class="blue">SA</i><div><small>Por registrar salida</small><b>{{ porDespachar.length }}</b><p>en almacén</p></div></article>
-          <article @click="irA('entrega')"><i class="green">EG</i><div><small>Por entregar</small><b>{{ porEntregar.length }}</b><p>con acta de conformidad</p></div></article>
+          <article @click="irA('comprar')"><i class="gold"><IconoSigta nombre="compras" :tamano="19" /></i><div><small>Por comprar</small><b>{{ porComprar.length }}</b><p>fondos desembolsados</p></div></article>
+          <article @click="irA('entrada')"><i class="blue"><IconoSigta nombre="almacen" :tamano="19" /></i><div><small>Por registrar entrada</small><b>{{ porIngresar.length }}</b><p>producto adquirido</p></div></article>
+          <article @click="irA('salida')"><i class="blue"><IconoSigta nombre="salir" :tamano="19" /></i><div><small>Por registrar salida</small><b>{{ porDespachar.length }}</b><p>en almacén</p></div></article>
+          <article @click="irA('entrega')"><i class="green"><IconoSigta nombre="conformidad" :tamano="19" /></i><div><small>Por entregar</small><b>{{ porEntregar.length }}</b><p>con acta de conformidad</p></div></article>
         </div>
 
         <div class="panels">
@@ -75,7 +76,7 @@
                 <template v-else><label class="campo">Acta de conformidad<input type="file" accept="application/pdf,image/*" @change="onActa"></label></template>
                 <div class="step-actions"><button class="reject" @click="pasoActual=1">Retroceder</button><button class="flex-btn primary" :disabled="!pasoDosValido" @click="pasoActual=3">Continuar</button></div>
               </div></div></div>
-              <div class="wf-step" :class="{ active: pasoActual===3, locked: pasoActual<3 }"><div class="step-num">3</div><div class="step-content"><h4>Confirmar registro</h4><p>Revise la información. Al confirmar, el expediente avanzará al siguiente proceso.</p><div v-if="pasoActual===3" class="step-form"><p v-if="error" class="error-linea">{{ error }}</p><div class="step-actions"><button class="reject" @click="pasoActual=2">Retroceder</button><button class="flex-btn primary" :disabled="procesando" @click="registrarGestion">{{ configuracionGestion.accion }}</button></div></div></div></div>
+              <div class="wf-step" :class="{ active: pasoActual===3, locked: pasoActual<3 }"><div class="step-num">3</div><div class="step-content"><h4>Confirmar registro</h4><p>Revise la información. Al confirmar, el expediente avanzará al siguiente proceso.</p><div v-if="pasoActual===3" class="step-form"><div class="step-actions"><button class="reject" @click="pasoActual=2">Retroceder</button><button class="flex-btn primary" :disabled="procesando" @click="registrarGestion">{{ configuracionGestion.accion }}</button></div></div></div></div>
             </div></div>
           </div>
         </section>
@@ -140,8 +141,6 @@
             <input v-model="formGestion.gestion_nota" type="text" placeholder="Ej.: cotizando en tres proveedores">
           </label>
 
-          <p v-if="error" class="error-linea">{{ error }}</p>
-
           <div class="actions">
             <button @click="cerrar">Cancelar</button>
             <button class="primary" :disabled="procesando" @click="informarAvance">Guardar avance</button>
@@ -167,8 +166,6 @@
           <label class="campo">Verificación del producto
             <input v-model="formCompra.observacion_verificacion" type="text" placeholder="El producto corresponde a lo solicitado...">
           </label>
-
-          <p v-if="error" class="error-linea">{{ error }}</p>
 
           <div class="actions">
             <button @click="cerrar">Cancelar</button>
@@ -215,8 +212,6 @@
             <input v-model="formIngreso.observacion_ingreso" type="text" placeholder="Estado del producto, embalaje...">
           </label>
 
-          <p v-if="error" class="error-linea">{{ error }}</p>
-
           <div class="actions">
             <button @click="cerrar">Cancelar</button>
             <button class="primary" :disabled="procesando||!formIngreso.cantidad_recibida||!formIngreso.responsable_recepcion.trim()" @click="registrarEntrada">Registrar entrada</button>
@@ -262,8 +257,6 @@
             <input v-model="formSalida.observacion_salida" type="text" placeholder="Detalle adicional...">
           </label>
 
-          <p v-if="error" class="error-linea">{{ error }}</p>
-
           <div class="actions">
             <button @click="cerrar">Cancelar</button>
             <button class="primary" :disabled="procesando||!formSalida.cantidad_entregada||!formSalida.entregado_a.trim()" @click="registrarSalida">Registrar salida</button>
@@ -302,8 +295,6 @@
           <label class="campo">Acta de conformidad
             <input type="file" accept="application/pdf,image/*" @change="onActa">
           </label>
-
-          <p v-if="error" class="error-linea">{{ error }}</p>
 
           <div class="actions">
             <button @click="cerrar">Cancelar</button>
@@ -375,8 +366,11 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import LogoutModal from '../components/LogoutModal.vue'
 import IconoSigta from '../components/IconoSigta.vue'
+import TarjetaGuardado from '../components/TarjetaGuardado.vue'
+import { usarGuardado } from '../utils/guardado.js'
 
 const router = useRouter()
+const { mostrar: mostrarGuardado, texto: textoGuardado, tipo: tipoGuardado, animar: animarGuardado, animarError, ocultar: ocultarGuardado } = usarGuardado()
 const usuario = ref(JSON.parse(localStorage.getItem('sigta_usuario') || '{}'))
 const vista = ref('resumen')
 const menuAbierto = ref(false)
@@ -385,7 +379,6 @@ const cargando = ref(false)
 const procesando = ref(false)
 const activo = ref(null)
 const detalle = ref(null)
-const error = ref('')
 const comprobante = ref(null)
 const acta = ref(null)
 const pasoActual = ref(1)
@@ -424,12 +417,12 @@ const pasoDosValido = computed(() => {
 })
 
 const menu = computed(() => [
-  { id: 'resumen', icono: '⌂', nombre: 'Dashboard' },
-  { id: 'comprar', icono: 'CO', nombre: 'Realizar compra', total: porComprar.value.length },
-  { id: 'entrada', icono: 'EN', nombre: 'Entrada de almacén', total: porIngresar.value.length },
-  { id: 'salida', icono: 'SA', nombre: 'Salida de almacén', total: porDespachar.value.length },
-  { id: 'entrega', icono: 'EG', nombre: 'Entregar con acta', total: porEntregar.value.length },
-  { id: 'historial', icono: 'HI', nombre: 'Historial' },
+  { id: 'resumen', icono: 'panel', nombre: 'Dashboard' },
+  { id: 'comprar', icono: 'compras', nombre: 'Realizar compra', total: porComprar.value.length },
+  { id: 'entrada', icono: 'almacen', nombre: 'Entrada de almacén', total: porIngresar.value.length },
+  { id: 'salida', icono: 'salir', nombre: 'Salida de almacén', total: porDespachar.value.length },
+  { id: 'entrega', icono: 'conformidad', nombre: 'Entregar con acta', total: porEntregar.value.length },
+  { id: 'historial', icono: 'historial', nombre: 'Historial' },
 ])
 
 const titulo = computed(() => ({
@@ -494,7 +487,6 @@ function abrir(e) {
   activo.value = e
   pasoActual.value = 1
   modoGestion.value = false
-  error.value = ''
   comprobante.value = null
   acta.value = null
   formCompra.monto_real = e.monto_desembolsado || ''
@@ -512,7 +504,6 @@ function cerrar() {
   activo.value = null
   pasoActual.value = 1
   modoGestion.value = false
-  error.value = ''
 }
 
 function verDetalle(e) { detalle.value = e }
@@ -530,8 +521,7 @@ function confirmarSalida() {
   salir()
 }
 
-async function accion(endpoint, cuerpo, esFormData = false) {
-  error.value = ''
+async function accion(endpoint, cuerpo, esFormData = false, mensajeExito = 'Registro guardado correctamente.') {
   procesando.value = true
   try {
     const headers = { Authorization: `Token ${token()}` }
@@ -545,9 +535,10 @@ async function accion(endpoint, cuerpo, esFormData = false) {
     if (!r.ok) throw new Error(d.detalle || Object.values(d)[0] || 'No fue posible completar la acción.')
     await cargar()
     cerrar()
+    await animarGuardado(mensajeExito)
     return d
   } catch (e) {
-    error.value = e.message
+    await animarError(e.message)
   } finally {
     procesando.value = false
   }
@@ -559,12 +550,12 @@ const formGestion = reactive({ gestion_estado: 'BUSCANDO', gestion_nota: '' })
 
 async function confirmarFondos(e) {
   activo.value = e
-  await accion('confirmar-recepcion-fondos', {})
+  await accion('confirmar-recepcion-fondos', {}, false, 'Recepción de efectivo confirmada.')
 }
 
 async function completarPasoUno() {
   if (vista.value === 'comprar' && !activo.value.fondos_recibidos_en) {
-    await accion('confirmar-recepcion-fondos', {})
+    await accion('confirmar-recepcion-fondos', {}, false, 'Recepción de efectivo confirmada.')
     return
   }
   pasoActual.value = 2
@@ -580,7 +571,6 @@ function resumenExpediente(e) {
 function abrirGestion(e) {
   activo.value = e
   modoGestion.value = true
-  error.value = ''
   formGestion.gestion_estado = e.gestion_estado || 'BUSCANDO'
   formGestion.gestion_nota = e.gestion_nota || ''
 }
@@ -589,7 +579,7 @@ async function informarAvance() {
   await accion('actualizar-gestion', {
     gestion_estado: formGestion.gestion_estado,
     gestion_nota: formGestion.gestion_nota.trim(),
-  })
+  }, false, 'Avance registrado correctamente.')
 }
 
 
@@ -605,7 +595,7 @@ async function registrarCompra() {
   datos.append('componente_verificado', 'true')
   datos.append('observacion_verificacion', formCompra.observacion_verificacion.trim())
   datos.append('comprobante_compra', comprobante.value)
-  await accion('registrar-compra', datos, true)
+  await accion('registrar-compra', datos, true, 'Compra registrada correctamente.')
 }
 
 /* --------- 2. Entrada de almacén --------- */
@@ -616,7 +606,7 @@ async function registrarEntrada() {
     cantidad_recibida: Number(formIngreso.cantidad_recibida),
     responsable_recepcion: formIngreso.responsable_recepcion.trim(),
     observacion_ingreso: formIngreso.observacion_ingreso.trim(),
-  })
+  }, false, 'Entrada de almacén registrada correctamente.')
 }
 
 /* --------- 3. Salida de almacén --------- */
@@ -627,7 +617,7 @@ async function registrarSalida() {
     cantidad_entregada: Number(formSalida.cantidad_entregada),
     entregado_a: formSalida.entregado_a.trim(),
     observacion_salida: formSalida.observacion_salida.trim(),
-  })
+  }, false, 'Salida de almacén registrada correctamente.')
 }
 
 /* --------- 4. Entrega con acta --------- */
@@ -636,7 +626,7 @@ function onActa(evento) { acta.value = evento.target.files?.[0] || null }
 async function entregarConActa() {
   const datos = new FormData()
   datos.append('acta_conformidad', acta.value)
-  await accion('entregar-con-acta', datos, true)
+  await accion('entregar-con-acta', datos, true, 'Entrega registrada correctamente.')
 }
 
 async function registrarGestion() {
@@ -650,7 +640,12 @@ onMounted(cargar)
 </script>
 
 <style scoped>
-*{box-sizing:border-box}.layout{min-height:100vh;background:var(--sigta-fondo);color:var(--sigta-texto);font-family:var(--sigta-fuente)}aside{position:fixed;inset:0 auto 0 0;width:var(--sigta-sidebar);background:var(--sigta-azul);color:var(--sigta-blanco);padding:22px 16px;display:flex;flex-direction:column}.brand,.profile{display:flex;align-items:center;gap:12px}.brand{padding:0 10px 20px;border-bottom:1px solid rgba(255,255,255,.2)}.brand>b{background:var(--sigta-mostaza);color:var(--sigta-azul);padding:14px 10px;border-radius:9px}.brand strong,.brand small,.profile b,.profile small{display:block}.brand strong{font-size:23px}.brand small,.profile small{color:var(--sigta-azul-texto-claro);margin-top:3px}.profile{padding:22px 10px}.profile>i{width:42px;height:42px;border-radius:50%;background:var(--sigta-mostaza);color:var(--sigta-azul);display:grid;place-items:center;font-style:normal;font-weight:900}aside>p{font-size:10px;color:var(--sigta-azul-texto-claro);font-weight:800;letter-spacing:1.4px;margin:14px 10px 8px}aside button{border:0;background:transparent;color:var(--sigta-blanco);border-radius:8px;padding:12px;display:flex;gap:11px;align-items:center;text-align:left;cursor:pointer;margin:2px 0;width:100%}aside button>span{font-size:10px;font-weight:900;width:28px}aside button em{margin-left:auto;background:rgba(255,255,255,.16);padding:2px 8px;border-radius:10px;font-style:normal}aside button.active,aside button:hover{background:rgba(255,255,255,.13)}.bottom{margin-top:auto;border-top:1px solid rgba(255,255,255,.2);padding-top:10px}.bottom button{width:100%}.bottom .logout{gap:14px!important;border:1px solid var(--sigta-mostaza)!important;border-radius:8px!important;background:transparent!important;color:#fff!important;box-shadow:inset 0 0 0 1px rgba(255,199,44,.35)!important;transition:transform .3s cubic-bezier(.34,1.55,.5,1),background .2s ease,color .2s ease,box-shadow .2s ease!important}.bottom .logout .icono-sigta{color:var(--sigta-mostaza);transition:color .2s ease}.bottom .logout:hover{background:#FFB300!important;color:var(--sigta-azul)!important;transform:scale(1.09)!important;box-shadow:0 14px 32px rgba(255,159,0,.55)!important}.bottom .logout:hover .icono-sigta{color:var(--sigta-azul)}main{margin-left:var(--sigta-sidebar);padding:30px 38px 55px;max-width:1650px}header{display:flex;justify-content:space-between;align-items:center;margin-bottom:27px}header small{color:var(--sigta-texto-suave)}h1{font-size:var(--sigta-titulo);margin:6px 0}header p{margin:0;color:var(--sigta-texto-suave)}.refresh{border:1px solid var(--sigta-borde);background:var(--sigta-blanco);color:var(--sigta-azul);padding:10px 14px;border-radius:8px;cursor:pointer}.hero{background:linear-gradient(120deg,var(--sigta-azul),var(--sigta-azul-medio));color:var(--sigta-blanco);border-radius:13px;padding:28px 30px;display:flex;justify-content:space-between;align-items:center}.hero small,.panel-head small,.hoja-head small{font-size:10px;font-weight:800;letter-spacing:1.4px;color:var(--sigta-mostaza-clara)}.hero h2{font-size:24px;margin:7px 0}.hero p{margin:0;color:var(--sigta-azul-texto-claro)}.hero>span{width:68px;height:68px;border:1px solid var(--sigta-mostaza);border-radius:50%;display:grid;place-items:center;font-weight:900}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:18px 0}.stats article{background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:10px;padding:19px;display:flex;gap:13px;cursor:pointer}.stats i,.flow i{font-style:normal;width:37px;height:37px;border-radius:8px;display:grid;place-items:center;color:var(--sigta-blanco);font-size:10px;font-weight:900;flex-shrink:0}.blue{background:var(--sigta-azul)}.gold{background:var(--sigta-mostaza);color:var(--sigta-texto)!important}.green{background:var(--sigta-azul-medio)}.stats small,.stats b,.stats p{display:block}.stats b{font-size:25px;margin:3px 0}.stats p{font-size:11px;color:var(--sigta-texto-suave);margin:0}.panels{display:grid;grid-template-columns:2fr 1fr;gap:18px}.panel{background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:11px;padding:22px}.panel-head h3{margin:5px 0 14px}.flow{width:100%;border:0;border-top:1px solid var(--sigta-borde-suave);background:var(--sigta-blanco);padding:15px 2px;display:flex;gap:13px;align-items:center;text-align:left;cursor:pointer}.flow div{flex:1}.flow b,.flow small{display:block}.flow small{color:var(--sigta-texto-suave);margin-top:4px}.flow>strong{font-size:20px}.copy{color:var(--sigta-texto-suave);font-size:12px;line-height:1.8}.copy a{color:var(--sigta-azul)}.wide{width:100%;padding:10px;border-radius:7px;border:1px solid var(--sigta-borde);cursor:pointer}.primary{background:var(--sigta-azul)!important;color:var(--sigta-blanco)!important;border-color:var(--sigta-azul)!important}.instruction{background:var(--sigta-mostaza-suave);border-left:4px solid var(--sigta-mostaza);padding:14px 17px;margin-bottom:17px;border-radius:7px}.instruction b,.instruction span{display:block}.instruction span{font-size:12px;color:var(--sigta-alerta);margin-top:4px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.cards article{background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:10px;padding:19px}.top{display:flex;justify-content:space-between;gap:8px}.top span{font-size:12px;font-weight:800;color:var(--sigta-azul)}.top em{font-size:10px;background:var(--sigta-azul-tenue);padding:4px 8px;border-radius:10px;font-style:normal;white-space:nowrap}.cards h3{font-size:17px;margin:15px 0 7px}.datos{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:4px}.datos li{display:flex;justify-content:space-between;gap:10px;font-size:11px;border-bottom:1px dashed var(--sigta-borde-suave);padding-bottom:3px}.datos b{color:var(--sigta-texto-suave)}.datos span{color:var(--sigta-texto-suave);text-align:right}.actions{display:flex;gap:7px;border-top:1px solid var(--sigta-borde-suave);padding-top:13px;margin-top:10px}.actions button{flex:1;padding:9px 6px;border-radius:7px;border:1px solid var(--sigta-borde);background:var(--sigta-blanco);color:var(--sigta-texto);font-weight:700;cursor:pointer}.actions button:disabled{opacity:.55;cursor:not-allowed}.empty{text-align:center;background:var(--sigta-blanco);border:1px dashed var(--sigta-borde);padding:65px;border-radius:10px;color:var(--sigta-texto-suave)}.empty>span{font-size:31px;color:var(--sigta-exito)}.empty h3{margin:10px 0 6px}.campo{display:block;margin:14px 0;font-size:12px;font-weight:700;color:var(--sigta-texto)}.campo input{display:block;width:100%;margin-top:6px;padding:9px 11px;border:1px solid var(--sigta-borde);border-radius:7px;font-family:inherit;font-size:13px;font-weight:400;color:var(--sigta-texto)}.situacion{font-size:11px;color:var(--sigta-texto-suave);background:var(--sigta-azul-tenue);border-radius:6px;padding:8px 10px;margin:0 0 10px}.situacion.aviso{background:var(--sigta-mostaza-suave);color:var(--sigta-alerta);font-weight:700}.error-linea{background:var(--sigta-error-fondo);color:var(--sigta-error);padding:10px 13px;border-radius:7px;font-size:12px;font-weight:700}.hoja{max-width:760px}.hoja-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}.hoja-head h3{margin:5px 0 0}.documentos{display:flex;gap:12px;flex-wrap:wrap}.documentos a{color:var(--sigta-azul);font-size:12px}.detalle-modal-backdrop{position:fixed;inset:0;background:rgba(18,58,107,.55);display:grid;place-items:center;padding:20px;z-index:20}.detalle-modal{background:var(--sigta-blanco);border-radius:14px;width:min(700px,100%);max-height:88vh;display:flex;flex-direction:column}.detalle-modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--sigta-borde-suave)}.detalle-modal-header h3{margin:0}.detalle-modal-header small{color:var(--sigta-texto-suave)}.detalle-modal-close{border:0;background:transparent;font-size:20px;cursor:pointer;color:var(--sigta-texto-suave)}.detalle-modal-body{padding:20px 24px;overflow-y:auto;display:grid;gap:14px}.detalle-fila{display:grid;grid-template-columns:1fr 1fr;gap:14px}.detalle-campo b{display:block;font-size:11px;color:var(--sigta-texto-suave);margin-bottom:4px}.detalle-campo span,.detalle-campo p{font-size:13px;color:var(--sigta-texto);margin:0}@media(max-width:1050px){.stats{grid-template-columns:1fr 1fr}.panels{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}}@media(max-width:760px){aside{position:static;width:100%}main{margin:0;padding:20px}.stats,.cards{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column;gap:12px}.detalle-fila{grid-template-columns:1fr}}
+*{box-sizing:border-box}.layout{min-height:100vh;background:var(--sigta-fondo);color:var(--sigta-texto);font-family:var(--sigta-fuente)}aside{position:fixed;inset:0 auto 0 0;width:var(--sigta-sidebar);background:var(--sigta-azul);color:var(--sigta-blanco);padding:22px 16px;display:flex;flex-direction:column}.brand,.profile{display:flex;align-items:center;gap:12px}.brand{padding:0 10px 20px;border-bottom:1px solid rgba(255,255,255,.2)}.brand>b{background:var(--sigta-mostaza);color:var(--sigta-azul);padding:14px 10px;border-radius:9px}.brand strong,.brand small,.profile b,.profile small{display:block}.brand strong{font-size:23px}.brand small,.profile small{color:var(--sigta-azul-texto-claro);margin-top:3px}.profile{padding:22px 10px}.profile>i{width:42px;height:42px;border-radius:50%;background:var(--sigta-mostaza);color:var(--sigta-azul);display:grid;place-items:center;font-style:normal;font-weight:900}aside>p{font-size:10px;color:var(--sigta-azul-texto-claro);font-weight:800;letter-spacing:1.4px;margin:14px 10px 8px}aside button{border:0;background:transparent;color:var(--sigta-blanco);border-radius:8px;padding:12px;display:flex;gap:11px;align-items:center;text-align:left;cursor:pointer;margin:2px 0;width:100%}aside button :deep(.icono-sigta){flex-shrink:0}aside button em{margin-left:auto;background:rgba(255,255,255,.16);padding:2px 8px;border-radius:10px;font-style:normal}aside button.active,aside button:hover{background:rgba(255,255,255,.13)}.bottom{margin-top:auto;border-top:1px solid rgba(255,255,255,.2);padding-top:10px}.bottom button{width:100%}.bottom .logout{gap:14px!important;border:1px solid var(--sigta-mostaza)!important;border-radius:8px!important;background:transparent!important;color:#fff!important;box-shadow:inset 0 0 0 1px rgba(255,199,44,.35)!important;transition:transform .3s cubic-bezier(.34,1.55,.5,1),background .2s ease,color .2s ease,box-shadow .2s ease!important}.bottom .logout .icono-sigta{color:var(--sigta-mostaza);transition:color .2s ease}.bottom .logout:hover{background:#FFB300!important;color:var(--sigta-azul)!important;transform:scale(1.09)!important;box-shadow:0 14px 32px rgba(255,159,0,.55)!important}.bottom .logout:hover .icono-sigta{color:var(--sigta-azul)}main{margin-left:var(--sigta-sidebar);padding:30px 38px 55px;max-width:1650px}header{display:flex;justify-content:space-between;align-items:center;margin-bottom:27px}header small{color:var(--sigta-texto-suave)}h1{font-size:var(--sigta-titulo);margin:6px 0}header p{margin:0;color:var(--sigta-texto-suave)}.refresh{border:1px solid var(--sigta-borde);background:var(--sigta-blanco);color:var(--sigta-azul);padding:10px 14px;border-radius:8px;cursor:pointer}.hero{background:linear-gradient(120deg,var(--sigta-azul),var(--sigta-azul-medio));color:var(--sigta-blanco);border-radius:13px;padding:28px 30px;display:flex;justify-content:space-between;align-items:center}.hero small,.panel-head small,.hoja-head small{font-size:10px;font-weight:800;letter-spacing:1.4px;color:var(--sigta-mostaza-clara)}.hero h2{font-size:24px;margin:7px 0}.hero p{margin:0;color:var(--sigta-azul-texto-claro)}.hero>span{width:68px;height:68px;border:1px solid var(--sigta-mostaza);border-radius:50%;display:grid;place-items:center;font-weight:900}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:18px 0}.stats article{background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:10px;padding:19px;display:flex;gap:13px;cursor:pointer}.stats i,.flow i{font-style:normal;width:37px;height:37px;border-radius:8px;display:grid;place-items:center;color:var(--sigta-blanco);font-size:10px;font-weight:900;flex-shrink:0}.blue{background:var(--sigta-azul)}.gold{background:var(--sigta-mostaza);color:var(--sigta-texto)!important}.green{background:var(--sigta-azul-medio)}.stats small,.stats b,.stats p{display:block}.stats b{font-size:25px;margin:3px 0}.stats p{font-size:11px;color:var(--sigta-texto-suave);margin:0}.panels{display:grid;grid-template-columns:2fr 1fr;gap:18px}.panel{background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:11px;padding:22px}.panel-head h3{margin:5px 0 14px}.flow{width:100%;border:0;border-top:1px solid var(--sigta-borde-suave);background:var(--sigta-blanco);padding:15px 2px;display:flex;gap:13px;align-items:center;text-align:left;cursor:pointer}.flow div{flex:1}.flow b,.flow small{display:block}.flow small{color:var(--sigta-texto-suave);margin-top:4px}.flow>strong{font-size:20px}.copy{color:var(--sigta-texto-suave);font-size:12px;line-height:1.8}.copy a{color:var(--sigta-azul)}.wide{width:100%;padding:10px;border-radius:7px;border:1px solid var(--sigta-borde);cursor:pointer}.primary{background:var(--sigta-azul)!important;color:var(--sigta-blanco)!important;border-color:var(--sigta-azul)!important}.instruction{background:var(--sigta-mostaza-suave);border-left:4px solid var(--sigta-mostaza);padding:14px 17px;margin-bottom:17px;border-radius:7px}.instruction b,.instruction span{display:block}.instruction span{font-size:12px;color:var(--sigta-alerta);margin-top:4px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.cards article{background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:10px;padding:19px}.top{display:flex;justify-content:space-between;gap:8px}.top span{font-size:12px;font-weight:800;color:var(--sigta-azul)}.top em{font-size:10px;background:var(--sigta-azul-tenue);padding:4px 8px;border-radius:10px;font-style:normal;white-space:nowrap}.cards h3{font-size:17px;margin:15px 0 7px}.datos{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:4px}.datos li{display:flex;justify-content:space-between;gap:10px;font-size:11px;border-bottom:1px dashed var(--sigta-borde-suave);padding-bottom:3px}.datos b{color:var(--sigta-texto-suave)}.datos span{color:var(--sigta-texto-suave);text-align:right}.actions{display:flex;gap:7px;border-top:1px solid var(--sigta-borde-suave);padding-top:13px;margin-top:10px}.actions button{flex:1;padding:9px 6px;border-radius:7px;border:1px solid var(--sigta-borde);background:var(--sigta-blanco);color:var(--sigta-texto);font-weight:700;cursor:pointer}.actions button:disabled{opacity:.55;cursor:not-allowed}.empty{text-align:center;background:var(--sigta-blanco);border:1px dashed var(--sigta-borde);padding:65px;border-radius:10px;color:var(--sigta-texto-suave)}.empty>span{font-size:31px;color:var(--sigta-exito)}.empty h3{margin:10px 0 6px}.campo{display:block;margin:14px 0;font-size:12px;font-weight:700;color:var(--sigta-texto)}.campo input{display:block;width:100%;margin-top:6px;padding:9px 11px;border:1px solid var(--sigta-borde);border-radius:7px;font-family:inherit;font-size:13px;font-weight:400;color:var(--sigta-texto)}.situacion{font-size:11px;color:var(--sigta-texto-suave);background:var(--sigta-azul-tenue);border-radius:6px;padding:8px 10px;margin:0 0 10px}.situacion.aviso{background:var(--sigta-mostaza-suave);color:var(--sigta-alerta);font-weight:700}.error-linea{background:var(--sigta-error-fondo);color:var(--sigta-error);padding:10px 13px;border-radius:7px;font-size:12px;font-weight:700}.hoja{max-width:760px}.hoja-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}.hoja-head h3{margin:5px 0 0}.documentos{display:flex;gap:12px;flex-wrap:wrap}.documentos a{color:var(--sigta-azul);font-size:12px}.detalle-modal-backdrop{position:fixed;inset:0;background:rgba(18,58,107,.55);display:grid;place-items:center;padding:20px;z-index:20}.detalle-modal{background:var(--sigta-blanco);border-radius:14px;width:min(700px,100%);max-height:88vh;display:flex;flex-direction:column}.detalle-modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--sigta-borde-suave)}.detalle-modal-header h3{margin:0}.detalle-modal-header small{color:var(--sigta-texto-suave)}.detalle-modal-close{border:0;background:transparent;font-size:20px;cursor:pointer;color:var(--sigta-texto-suave)}.detalle-modal-body{padding:20px 24px;overflow-y:auto;display:grid;gap:14px}.detalle-fila{display:grid;grid-template-columns:1fr 1fr;gap:14px}.detalle-campo b{display:block;font-size:11px;color:var(--sigta-texto-suave);margin-bottom:4px}.detalle-campo span,.detalle-campo p{font-size:13px;color:var(--sigta-texto);margin:0}@media(max-width:1050px){.stats{grid-template-columns:1fr 1fr}.panels{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}}@media(max-width:760px){aside{position:static;width:100%}main{margin:0;padding:20px}.stats,.cards{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column;gap:12px}.detalle-fila{grid-template-columns:1fr}}
+/* El tema global de rol oculta el icono de .stats y apila la tarjeta en
+   bloque (pensado para Admin); aquí se restaura el icono junto al texto. */
+main .stats article{display:flex!important;align-items:center!important}
+main .stats article>i.gold,main .stats article>i.blue,main .stats article>i.green{display:flex!important;align-items:center;justify-content:center}
+
 /* Patrón maestro–detalle compartido con la vista de Tesorería. */
 .gestion-tickets-layout{display:flex;gap:20px;height:calc(100vh - 160px);overflow:hidden;align-items:stretch;margin-top:15px}.gestion-left{width:35%;display:flex;flex-direction:column;background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:12px;overflow:hidden}.gestion-left-header{padding:15px 20px;border-bottom:1px solid var(--sigta-borde-suave);display:flex;justify-content:space-between;align-items:center;background:#f8fafc}.gestion-left-header h3{margin:0;font-size:14px}.badge{background:#fef9c3;color:#854d0e;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:700}.gestion-lista{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}.empty-list{padding:20px;text-align:center;color:var(--sigta-texto-suave);font-size:13px}.ticket-item{background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:8px;padding:12px;cursor:pointer;transition:.2s}.ticket-item:hover{border-color:var(--sigta-azul);background:#f8fafc}.ticket-item.activo{border-color:var(--sigta-azul);background:#f0f4f8;border-left:4px solid var(--sigta-azul)}.t-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}.ticket-item h4{margin:0;font-size:14px;color:var(--sigta-azul)}.ticket-item p{margin:0;font-size:12px;color:var(--sigta-texto-suave);line-height:1.45}.item-meta{margin-top:6px!important;color:var(--sigta-mostaza-oscuro)!important;font-weight:700}.step-badge{font-size:10px;padding:3px 7px;border-radius:10px;text-transform:uppercase;font-weight:700;background:#dbeafe;color:#1e40af}.gestion-right{flex:1;display:flex;flex-direction:column;overflow:hidden}.ticket-header-card{background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:12px;padding:20px;margin-bottom:15px}.ticket-header-card h2,.ticket-header-card h3{margin:0}.ticket-header-card>p{margin:8px 0;font-size:14px}.selector-vacio{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--sigta-texto-suave)}.selector-vacio>span{font-size:30px;color:var(--sigta-exito)}.gestion-detalle-wrapper{flex:1;overflow-y:auto;padding-right:10px;display:flex;flex-direction:column}.codigo-badge{background:var(--sigta-azul);color:var(--sigta-blanco);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}.t-meta{margin:0;font-size:12px;color:var(--sigta-texto-suave);display:flex;gap:15px}.workflow-card{flex:1;background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;margin-bottom:20px}.wf-header{padding:15px 20px;border-bottom:1px solid var(--sigta-borde-suave);font-weight:700;background:#f8fafc}.wf-body{flex:1;overflow-y:auto;padding:25px;display:flex;flex-direction:column;position:relative}.wf-body:before{content:'';position:absolute;left:45px;top:35px;bottom:35px;width:2px;background:var(--sigta-borde-suave);z-index:1}.wf-step{display:flex;margin-bottom:30px;position:relative;z-index:2}.wf-step:last-child{margin-bottom:0}.step-num{width:42px;height:42px;border-radius:50%;background:var(--sigta-borde);color:var(--sigta-texto-suave);display:grid;place-items:center;font-weight:700;flex-shrink:0;border:4px solid var(--sigta-blanco)}.step-content{margin-left:20px;flex:1;background:var(--sigta-blanco);border:1px solid var(--sigta-borde);border-radius:10px;padding:15px 20px}.step-content h4{margin:0 0 5px;font-size:15px}.step-content>p{margin:0 0 15px;font-size:12px;color:var(--sigta-texto-suave)}.wf-step.active .step-num{background:var(--sigta-azul);color:var(--sigta-blanco);box-shadow:0 0 0 4px rgba(0,42,92,.1)}.wf-step.active .step-content{border-color:var(--sigta-azul);box-shadow:0 4px 12px rgba(0,0,0,.05)}.wf-step.completed .step-num{background:var(--sigta-azul-medio);color:var(--sigta-blanco)}.wf-step.completed .step-content,.wf-step.locked .step-content{background:#f8fafc}.wf-step.locked{opacity:.5;pointer-events:none}.step-form{margin-top:15px}.step-actions{display:flex;gap:10px}.reject{background:var(--sigta-blanco);border:1px solid var(--sigta-error);color:var(--sigta-error);padding:10px 20px;border-radius:6px;font-weight:700;cursor:pointer}.flex-btn{flex:1;text-align:center;justify-content:center;padding:10px;border-radius:6px;font-weight:700;cursor:pointer;border:none}.campo input{background:var(--sigta-blanco)}
 @media(max-width:1050px){.gestion-tickets-layout{flex-direction:column;height:auto}.gestion-left{width:100%;height:300px}.gestion-right{min-height:650px}}@media(max-width:760px){.gestion-right{min-height:620px}.wf-body{padding:16px}.step-content{margin-left:10px;padding:14px}.t-meta{flex-direction:column;gap:4px}}

@@ -74,10 +74,10 @@
                   <strong>Documentos adjuntos</strong>
                 </div>
                 <div class="doc-links">
-                  <a v-if="itemActivo.informe" :href="itemActivo.informe" target="_blank" class="evidence-btn">Informe &#x2197;</a>
-                  <a v-if="itemActivo.poa" :href="itemActivo.poa" target="_blank" class="evidence-btn">POA &#x2197;</a>
-                  <a v-if="itemActivo.pedido" :href="itemActivo.pedido" target="_blank" class="evidence-btn">Proveído &#x2197;</a>
-                  <a v-if="itemActivo.proforma" :href="itemActivo.proforma" target="_blank" class="evidence-btn">Proforma &#x2197;</a>
+                  <a v-if="itemActivo.informe" :href="itemActivo.informe" target="_blank" class="evidence-btn">Informe 👁</a>
+                  <a v-if="itemActivo.poa" :href="itemActivo.poa" target="_blank" class="evidence-btn">POA 👁</a>
+                  <a v-if="itemActivo.pedido" :href="itemActivo.pedido" target="_blank" class="evidence-btn">Proveído 👁</a>
+                  <a v-if="itemActivo.proforma" :href="itemActivo.proforma" target="_blank" class="evidence-btn">Proforma 👁</a>
                 </div>
               </div>
             </div>

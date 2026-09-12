@@ -15,6 +15,7 @@
     </aside>
 
     <LogoutModal :visible="mostrarLogout" @cancelar="mostrarLogout = false" @confirmar="confirmarSalida" />
+    <TarjetaGuardado :visible="mostrarGuardadoOk" :texto="textoGuardado" :tipo="tipoGuardado" @cerrar="ocultarGuardado" />
 
     <main>
       <header>
@@ -534,6 +535,8 @@ import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import IconoSigta from '../components/IconoSigta.vue'
 import LogoutModal from '../components/LogoutModal.vue'
+import TarjetaGuardado from '../components/TarjetaGuardado.vue'
+import { usarGuardado } from '../utils/guardado.js'
 
 const router = useRouter()
 const usuario = ref(JSON.parse(localStorage.getItem('sigta_usuario') || '{}'))
@@ -742,6 +745,7 @@ function fecha(valor) {
 }
 
 const mostrarLogout = ref(false)
+const { mostrar: mostrarGuardadoOk, texto: textoGuardado, tipo: tipoGuardado, animar: animarGuardado, animarError, ocultar: ocultarGuardado } = usarGuardado()
 
 function salir() {
   localStorage.removeItem('sigta_token')
@@ -756,14 +760,19 @@ function confirmarSalida() {
 
 /* Acciones del flujo */
 async function validar(item) {
-  try { await postAccion(item, 'validar-ticket', { es_valido: true }) } catch (e) { alert(e.message) }
+  try {
+    await postAccion(item, 'validar-ticket', { es_valido: true })
+    await animarGuardado('Ticket validado correctamente.')
+  } catch (e) { await animarError(e.message) }
 }
 
 async function rechazar(item) {
   const motivo = await window.sigtaPrompt('Indique el motivo del rechazo:')
   if (!motivo?.trim()) return
-  try { await postAccion(item, 'validar-ticket', { es_valido: false, motivo_rechazo: motivo.trim() }) }
-  catch (e) { alert(e.message) }
+  try {
+    await postAccion(item, 'validar-ticket', { es_valido: false, motivo_rechazo: motivo.trim() })
+    await animarGuardado('Ticket rechazado.')
+  } catch (e) { await animarError(e.message) }
 }
 
 const formClasificar = reactive({ prioridad: '', criterio_prioridad: '' })
@@ -773,13 +782,16 @@ async function clasificar() {
       prioridad: formClasificar.prioridad,
       criterio_prioridad: formClasificar.criterio_prioridad.trim(),
     })
-  } catch (e) { alert(e.message) }
+    await animarGuardado('Prioridad clasificada correctamente.')
+  } catch (e) { await animarError(e.message) }
 }
 
 const formDesignar = reactive({ tecnico_id: '' })
 async function designar() {
-  try { await postAccion(itemActivo.value, 'designar-revision', { tecnico_id: Number(formDesignar.tecnico_id) }) }
-  catch (e) { alert(e.message) }
+  try {
+    await postAccion(itemActivo.value, 'designar-revision', { tecnico_id: Number(formDesignar.tecnico_id) })
+    await animarGuardado('Técnico asignado correctamente.')
+  } catch (e) { await animarError(e.message) }
 }
 
 const formCompra = reactive({ viable: true, motivo_no_viable: '', informe: null, proforma: null, poa: null, pedido: null })
@@ -809,11 +821,11 @@ async function evaluarCompraUpload() {
     })
     const d = await r.json().catch(() => ({}))
     if (!r.ok) throw new Error(d.detalle || Object.values(d)[0] || 'No fue posible completar la acción.')
-    alert(d?.mensaje || 'Evaluación de compra registrada.')
-    
+
     await cargar()
+    await animarGuardado(d?.mensaje || 'Evaluación de compra registrada.')
     itemActivo.value = null
-  } catch (e) { alert(e.message) }
+  } catch (e) { await animarError(e.message) }
   finally { procesando.value = false }
 }
 
@@ -830,20 +842,20 @@ async function evaluarCompra() {
 async function verificar(item, resuelto) {
   try {
     const d = await postAccion(item, 'verificar-funcionamiento', { problema_resuelto: resuelto })
-    alert(d?.mensaje || 'Verificación registrada.')
-  } catch (e) { alert(e.message) }
+    await animarGuardado(d?.mensaje || 'Verificación registrada.')
+  } catch (e) { await animarError(e.message) }
 }
 
 async function conformar(item) {
-  try { await postAccion(item, 'informar-conformidad', {}) } catch (e) { alert(e.message) }
+  try { await postAccion(item, 'informar-conformidad', {}) } catch (e) { await animarError(e.message) }
 }
 
 const formInforme = reactive({ informe_final: '' })
 async function elaborarInforme() {
   try {
     await postAccion(itemActivo.value, 'elaborar-informe-final', { informe_final: formInforme.informe_final.trim() })
-    alert('Informe final validado y elevado a la Dirección.')
-  } catch (e) { alert(e.message) }
+    await animarGuardado('Informe final validado y elevado a la Dirección.')
+  } catch (e) { await animarError(e.message) }
 }
 
 const periodo = reactive({ anio: new Date().getFullYear(), mes: new Date().getMonth() + 1 })

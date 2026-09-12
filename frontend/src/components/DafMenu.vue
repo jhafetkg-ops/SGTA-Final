@@ -555,6 +555,11 @@ nav {
   transition: color .2s ease;
 }
 
+.sidebar .logout span {
+  width: auto !important;
+  white-space: nowrap !important;
+}
+
 .sidebar .logout:hover {
   background: #FFB300 !important;
   color: var(--sigta-azul) !important;

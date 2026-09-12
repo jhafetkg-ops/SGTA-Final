@@ -3,6 +3,13 @@
 
     <DafMenu />
 
+    <TarjetaGuardado
+      :visible="mostrarGuardadoOk"
+      :texto="textoGuardado"
+      :tipo="tipoGuardado"
+      @cerrar="ocultarGuardado"
+    />
+
     <main class="main">
 
       <!-- =================================================
@@ -249,6 +256,10 @@
           </div>
 
 
+          <div class="documento-columnas">
+
+          <div class="documento-col">
+
           <div class="documento-seccion">
 
             <div class="documento-titulo-fila">
@@ -263,7 +274,7 @@
             <p>{{ compraSeleccionada?.descripcion || 'Sin descripción registrada.' }}</p>
 
 
-            <div class="documento-fila documento-fila-5">
+            <div class="documento-fila documento-fila-3">
 
               <div>
                 <b>Tipo</b>
@@ -286,6 +297,10 @@
                 </span>
               </div>
 
+            </div>
+
+            <div class="documento-fila documento-fila-1">
+
               <div>
                 <b>Especificaciones</b>
                 <span>{{ compraSeleccionada?.especificaciones || 'No registradas.' }}</span>
@@ -300,6 +315,10 @@
 
           </div>
 
+          </div>
+
+
+          <div class="documento-col">
 
           <div class="documento-seccion">
 
@@ -310,7 +329,7 @@
               </span>
             </div>
 
-            <div class="documento-fila">
+            <div class="documento-fila documento-fila-2">
 
               <div>
                 <b>Solicitante</b>
@@ -342,10 +361,6 @@
                 <b>Vía de adquisición</b>
                 <span>{{ compraSeleccionada?.via_nombre || 'No indicada' }}</span>
               </div>
-
-            </div>
-
-            <div class="documento-fila">
 
               <div>
                 <b>Fecha de registro</b>
@@ -399,6 +414,10 @@
               </template>
 
             </div>
+
+          </div>
+
+          </div>
 
           </div>
 
@@ -656,9 +675,24 @@ import {
 import DafMenu
   from '../components/DafMenu.vue'
 
+import TarjetaGuardado
+  from '../components/TarjetaGuardado.vue'
+
+import { usarGuardado }
+  from '../utils/guardado.js'
+
 
 const router =
   useRouter()
+
+const {
+  mostrar: mostrarGuardadoOk,
+  texto: textoGuardado,
+  tipo: tipoGuardado,
+  animar: animarGuardado,
+  animarError,
+  ocultar: ocultarGuardado,
+} = usarGuardado()
 
 
 // ==========================================================
@@ -1155,7 +1189,8 @@ async function confirmarCertificacion() {
     'certificar-daf',
     datosFormulario,
     'aprobar',
-    true
+    true,
+    'Certificación presupuestaria registrada y derivada a Tesorería.'
   )
 }
 
@@ -1187,7 +1222,9 @@ async function aprobarCompra() {
   await ejecutarAccion(
     'evaluar-daf',
     { califica: true },
-    'aprobar'
+    'aprobar',
+    false,
+    'Solicitud calificada como viable presupuestariamente.'
   )
 }
 
@@ -1219,7 +1256,9 @@ async function confirmarRechazo() {
   await ejecutarAccion(
     'evaluar-daf',
     { califica: false, motivo },
-    'rechazar'
+    'rechazar',
+    false,
+    'Solicitud rechazada.'
   )
 }
 
@@ -1228,7 +1267,8 @@ async function ejecutarAccion(
   endpoint,
   body,
   tipo,
-  esArchivo = false
+  esArchivo = false,
+  mensajeExito = ''
 ) {
 
   procesando.value =
@@ -1289,6 +1329,11 @@ async function ejecutarAccion(
     cerrarDetalle()
 
     await cargarCompras()
+
+    await animarGuardado(
+      mensajeExito
+      || (tipo === 'aprobar' ? 'Acción registrada correctamente.' : 'Solicitud rechazada.')
+    )
 
   } catch (error) {
 
@@ -1992,7 +2037,13 @@ function cerrarSesion() {
 ========================================================= */
 
 .documento-modal {
-  max-width: 700px;
+  max-width: 1060px;
+  max-height: 94vh;
+}
+
+
+.documento-modal .detalle-modal-header {
+  padding: 14px 22px 10px;
 }
 
 
@@ -2007,16 +2058,16 @@ function cerrarSesion() {
 
 
 .documento-body {
-  padding: 18px 22px 22px;
+  padding: 12px 26px 16px;
 }
 
 
 .estado-banner {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 18px;
-  padding: 14px 16px;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 10px 14px;
   border-radius: 8px;
 }
 
@@ -2069,7 +2120,7 @@ function cerrarSesion() {
 
 
 .documento-seccion {
-  padding: 16px 0;
+  padding: 12px 0;
   border-top: 1px solid var(--sigta-azul-tenue);
 }
 
@@ -2104,7 +2155,9 @@ function cerrarSesion() {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--sigta-azul-tenue);
 }
 
 
@@ -2113,10 +2166,11 @@ function cerrarSesion() {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
-  background: var(--sigta-azul-tenue);
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: var(--sigta-mostaza-suave);
+  color: var(--sigta-mostaza-oscuro);
   font-size: 13px;
 }
 
@@ -2124,8 +2178,8 @@ function cerrarSesion() {
 .documento-titulo {
   display: block;
   margin-bottom: 8px;
-  color: var(--sigta-texto-suave);
-  font-size: 13px;
+  color: var(--sigta-azul);
+  font-size: 14px;
   font-weight: 800;
   letter-spacing: .6px;
   text-transform: uppercase;
@@ -2140,14 +2194,14 @@ function cerrarSesion() {
 .documento-seccion h4 {
   margin: 0 0 6px;
   color: var(--sigta-texto);
-  font-size: 20px;
+  font-size: 21px;
 }
 
 
 .documento-seccion > p {
   margin: 0 0 10px;
   color: var(--sigta-azul);
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.5;
   white-space: pre-wrap;
 }
@@ -2156,31 +2210,54 @@ function cerrarSesion() {
 .documento-seccion b {
   display: block;
   margin-bottom: 4px;
-  color: var(--sigta-texto-suave);
-  font-size: 13px;
+  color: var(--sigta-azul-medio);
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: .5px;
+  letter-spacing: .6px;
   text-transform: uppercase;
+}
+
+
+.documento-columnas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 30px;
+}
+
+
+.documento-col {
+  min-width: 0;
 }
 
 
 .documento-fila {
   display: grid;
   grid-template-columns: repeat(3,1fr);
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
 
-.documento-fila-5 {
-  grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+.documento-fila-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+
+.documento-fila-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+
+.documento-fila-1 {
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
 
 
 .documento-fila > div span {
   display: block;
   color: var(--sigta-texto);
-  font-size: 16px;
+  font-size: 17px;
 }
 
 
@@ -2233,7 +2310,7 @@ function cerrarSesion() {
 .documento-lista {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 
@@ -2243,7 +2320,7 @@ function cerrarSesion() {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 7px 12px;
   border: none;
   border-radius: 7px;
   font-family: inherit;
@@ -2339,8 +2416,8 @@ function cerrarSesion() {
 ========================================================= */
 
 .documento-acciones {
-  margin-top: 16px;
-  padding-top: 16px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px solid var(--sigta-azul-tenue);
 }
 
@@ -2375,8 +2452,8 @@ function cerrarSesion() {
 .eval-mode {
   flex-direction: column;
   align-items: center;
-  margin-top: 15px;
-  gap: 12px;
+  margin-top: 10px;
+  gap: 8px;
 }
 
 .scroll-lock-msg {
@@ -2412,8 +2489,8 @@ function cerrarSesion() {
 
 .btn-eval-main {
   width: 100%;
-  min-height: 50px;
-  font-size: 16px;
+  min-height: 42px;
+  font-size: 15px;
   letter-spacing: 0.5px;
   transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -2561,6 +2638,11 @@ function cerrarSesion() {
 
 
   .documento-fila {
+    grid-template-columns: 1fr;
+  }
+
+
+  .documento-columnas {
     grid-template-columns: 1fr;
   }
 

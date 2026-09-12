@@ -1,11 +1,12 @@
 <template>
   <transition name="tg-fade">
-    <div v-if="visible" class="tg-overlay">
+    <div v-if="visible" class="tg-overlay" @click.self="$emit('cerrar')">
       <div class="tg-card">
-        <div class="tg-check" aria-hidden="true">
-          <IconoSigta nombre="validar" :tamano="42" />
+        <div :class="['tg-check', { 'tg-check--error': tipo === 'error' }]" aria-hidden="true">
+          <IconoSigta :nombre="tipo === 'error' ? 'error' : 'validar'" :tamano="42" />
         </div>
         <p>{{ texto }}</p>
+        <button type="button" class="tg-aceptar" @click="$emit('cerrar')">Aceptar</button>
       </div>
     </div>
   </transition>
@@ -17,7 +18,10 @@ import IconoSigta from './IconoSigta.vue'
 defineProps({
   visible: { type: Boolean, default: false },
   texto: { type: String, default: 'Cambios guardados' },
+  tipo: { type: String, default: 'exito' },
 })
+
+defineEmits(['cerrar'])
 </script>
 
 <style scoped>
@@ -33,8 +37,10 @@ defineProps({
 }
 
 .tg-card {
+  position: relative;
   width: 300px;
-  height: 210px;
+  min-height: 210px;
+  padding: 30px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -60,6 +66,7 @@ defineProps({
 .tg-check {
   width: 74px;
   height: 74px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -67,6 +74,11 @@ defineProps({
   background: #e3f7ec;
   color: #17a34a;
   animation: tg-check .55s cubic-bezier(.2, 1.7, .35, 1) .2s both;
+}
+
+.tg-check--error {
+  background: #fde3e3;
+  color: #dc2626;
 }
 
 @keyframes tg-check {
@@ -83,6 +95,23 @@ defineProps({
   font-weight: 700;
   letter-spacing: .3px;
   text-align: center;
+}
+
+.tg-aceptar {
+  padding: 10px 34px;
+  border: none;
+  border-radius: 999px;
+  background: #fff;
+  color: #7a1ba8;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+
+.tg-aceptar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .2);
 }
 
 .tg-fade-enter-active { transition: opacity .2s ease; }
