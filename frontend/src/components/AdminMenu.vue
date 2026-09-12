@@ -65,7 +65,7 @@
         to="/admin/dashboard"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="panel" />
+        <span class="icon-badge" style="background:#F2C40026;color:#F2C400"><IconoSigta nombre="panel" :tamano="16" /></span>
 
         <span>
           Panel
@@ -76,12 +76,12 @@
       <router-link to="/admin/mis-solicitudes" class="menu-item"
         active-class="" exact-active-class=""
         :class="{ 'router-link-active': opcionSolicitudesActiva(route) }">
-        <IconoSigta class="icon" nombre="solicitudes" /><span>Mis solicitudes</span>
+        <span class="icon-badge" style="background:#3E7BD626;color:#3E7BD6"><IconoSigta nombre="solicitudes" :tamano="16" /></span><span>Mis solicitudes</span>
       </router-link>
       <router-link :to="{ path: '/admin/mis-solicitudes', query: { vista: 'verificaciones' } }"
         class="menu-item" active-class="" exact-active-class=""
         :class="{ 'router-link-active': opcionSolicitudesActiva(route, true) }">
-        <IconoSigta class="icon" nombre="verificacion" /><span>Verificaciones pendientes</span>
+        <span class="icon-badge" style="background:#C79A1E26;color:#C79A1E"><IconoSigta nombre="verificacion" :tamano="16" /></span><span>Verificaciones pendientes</span>
       </router-link>
 
       <!--
@@ -96,7 +96,7 @@
         to="/admin/compras"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="compras" />
+        <span class="icon-badge" style="background:#7B6FD926;color:#7B6FD9"><IconoSigta nombre="compras" :tamano="16" /></span>
 
         <span>
           Autorizar compras
@@ -115,7 +115,7 @@
         to="/admin/historial"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="historial" />
+        <span class="icon-badge" style="background:#6B7C9326;color:#6B7C93"><IconoSigta nombre="historial" :tamano="16" /></span>
 
         <span>
           Historial
@@ -133,7 +133,7 @@
         to="/admin/actividades"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="actividades" />
+        <span class="icon-badge" style="background:#D9538A26;color:#D9538A"><IconoSigta nombre="actividades" :tamano="16" /></span>
 
         <span>
           Actividades
@@ -411,6 +411,10 @@ function confirmarCierreSesion() {
 
 
 <style scoped>
+/* Distintivo del icono: mismo formato y tamano que el panel de
+   Mantenimiento (30x30, radio 8, fondo del color al 15%). */
+.icon-badge { flex-shrink: 0; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+
 
 * {
   box-sizing: border-box;

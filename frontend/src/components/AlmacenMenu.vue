@@ -61,7 +61,7 @@
         to="/almacen/dashboard"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="compras" />
+        <span class="icon-badge" style="background:#C79A1E26;color:#C79A1E"><IconoSigta nombre="compras" :tamano="16" /></span>
 
         <span>
           Compras
@@ -72,7 +72,7 @@
         to="/almacen/requerimientos"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="almacen" />
+        <span class="icon-badge" style="background:#3E7BD626;color:#3E7BD6"><IconoSigta nombre="almacen" :tamano="16" /></span>
 
         <span>
           Requerimientos
@@ -163,6 +163,10 @@ function confirmarCierreSesion() {
 
 
 <style scoped>
+/* Distintivo del icono: mismo formato y tamano que el panel de
+   Mantenimiento (30x30, radio 8, fondo del color al 15%). */
+.icon-badge { flex-shrink: 0; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+
 
 * {
   box-sizing: border-box;

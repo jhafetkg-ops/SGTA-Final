@@ -63,7 +63,7 @@
         to="/superuser/dashboard"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="panel" />
+        <span class="icon-badge" style="background:#F2C40026;color:#F2C400"><IconoSigta nombre="panel" :tamano="16" /></span>
 
         <span>
           Panel
@@ -77,7 +77,7 @@
         to="/superuser/usuarios"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="usuarios" />
+        <span class="icon-badge" style="background:#3E7BD626;color:#3E7BD6"><IconoSigta nombre="usuarios" :tamano="16" /></span>
 
         <span>
           Usuarios
@@ -91,7 +91,7 @@
         to="/superuser/roles-permisos"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="roles" />
+        <span class="icon-badge" style="background:#7B6FD926;color:#7B6FD9"><IconoSigta nombre="roles" :tamano="16" /></span>
 
         <span>
           Roles y permisos
@@ -105,7 +105,7 @@
         to="/superuser/auditoria"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="auditoria" />
+        <span class="icon-badge" style="background:#C79A1E26;color:#C79A1E"><IconoSigta nombre="auditoria" :tamano="16" /></span>
 
         <span>
           Auditoría
@@ -119,7 +119,7 @@
         to="/superuser/smtp"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="correo" />
+        <span class="icon-badge" style="background:#2E9E6B26;color:#2E9E6B"><IconoSigta nombre="correo" :tamano="16" /></span>
 
         <span>
           Correo SMTP
@@ -133,7 +133,7 @@
         to="/superuser/preferencias"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="configuracion" />
+        <span class="icon-badge" style="background:#6B7C9326;color:#6B7C93"><IconoSigta nombre="configuracion" :tamano="16" /></span>
 
         <span>
           Preferencias
@@ -227,6 +227,10 @@ function confirmarCierreSesion() {
 
 
 <style scoped>
+/* Distintivo del icono: mismo formato y tamano que el panel de
+   Mantenimiento (30x30, radio 8, fondo del color al 15%). */
+.icon-badge { flex-shrink: 0; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+
 
 * {
   box-sizing: border-box;

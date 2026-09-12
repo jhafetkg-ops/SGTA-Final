@@ -61,7 +61,7 @@
         to="/tesoreria/dashboard"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="compras" />
+        <span class="icon-badge" style="background:#2E9E6B26;color:#2E9E6B"><IconoSigta nombre="compras" :tamano="16" /></span>
 
         <span>
           Solicitudes
@@ -152,6 +152,10 @@ function confirmarCierreSesion() {
 
 
 <style scoped>
+/* Distintivo del icono: mismo formato y tamano que el panel de
+   Mantenimiento (30x30, radio 8, fondo del color al 15%). */
+.icon-badge { flex-shrink: 0; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+
 
 * {
   box-sizing: border-box;

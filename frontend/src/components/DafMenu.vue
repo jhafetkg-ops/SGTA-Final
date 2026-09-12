@@ -63,7 +63,7 @@
         exact-active-class=""
         :class="['menu-item', enResumen ? 'router-link-active' : '']"
       >
-        <IconoSigta class="icon" nombre="reporte" />
+        <span class="icon-badge" style="background:#F2C40026;color:#F2C400"><IconoSigta nombre="reporte" :tamano="16" /></span>
 
         <span>
           Dashboard
@@ -76,7 +76,7 @@
         exact-active-class=""
         :class="['menu-item', enDaf && !enHistorial && !enResumen ? 'router-link-active' : '']"
       >
-        <IconoSigta class="icon" nombre="compras" />
+        <span class="icon-badge" style="background:#C79A1E26;color:#C79A1E"><IconoSigta nombre="compras" :tamano="16" /></span>
 
         <span>
           Solicitudes
@@ -89,7 +89,7 @@
         exact-active-class=""
         :class="['menu-item', enHistorial ? 'router-link-active' : '']"
       >
-        <IconoSigta class="icon" nombre="reloj" />
+        <span class="icon-badge" style="background:#6B7C9326;color:#6B7C93"><IconoSigta nombre="reloj" :tamano="16" /></span>
 
         <span>
           Historial
@@ -100,7 +100,7 @@
         to="/daf/emitir"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="editar" />
+        <span class="icon-badge" style="background:#3E7BD626;color:#3E7BD6"><IconoSigta nombre="editar" :tamano="16" /></span>
 
         <span>
           Emitir Certificación
@@ -205,6 +205,10 @@ function confirmarCierreSesion() {
 
 
 <style scoped>
+/* Distintivo del icono: mismo formato y tamano que el panel de
+   Mantenimiento (30x30, radio 8, fondo del color al 15%). */
+.icon-badge { flex-shrink: 0; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+
 
 * {
   box-sizing: border-box;
