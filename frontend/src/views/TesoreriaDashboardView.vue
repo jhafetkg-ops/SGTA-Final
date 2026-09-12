@@ -57,47 +57,52 @@
       <section v-else-if="vista==='desembolso'">
         <div v-if="cargando" class="empty">Consultando expedientes…</div>
         
-        <div v-else class="gestion-tickets-layout">
-          <!-- PANEL IZQUIERDO -->
-          <div class="gestion-left">
-            <div class="gestion-left-header">
-              <h3>Desembolsos Pendientes</h3>
-              <span class="badge">{{ porDesembolsar.length }} Requiere Acción</span>
-            </div>
-            
-            <div class="gestion-lista">
-              <div v-if="porDesembolsar.length === 0" class="empty-list">
-                Bandeja al día. No hay desembolsos pendientes.
-              </div>
-              <div
-                v-else
-                v-for="e in porDesembolsar"
-                :key="e.id"
-                :class="['ticket-item', 't-designar', { activo: expedienteActivo?.id === e.id }]"
-                @click="abrir(e)"
-              >
-                <div class="t-head" style="margin-bottom: 5px;">
-                  <h4 style="margin: 0; color: var(--sigta-azul);">{{ e.codigo }}</h4>
-                  <span class="step-badge e-designar">autorizado</span>
-                </div>
-                <p><strong>{{ e.solicitante_nombre || 's/d' }}</strong></p>
-                <p>{{ e.titulo }}</p>
-                <p style="margin-top: 5px; color: var(--sigta-mostaza-oscuro); font-weight: bold;">Bs {{ e.monto_estimado || '0.00' }}</p>
-              </div>
-            </div>
-          </div>
+        <div v-else class="gestion-tickets-layout vista-desem">
 
-          <!-- PANEL DERECHO -->
-          <section class="gestion-right">
-            <div v-if="!expedienteActivo" class="ticket-header-card" style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--sigta-texto-suave);">
-              <span style="font-size: 30px; margin-bottom: 15px; color: var(--sigta-exito);">←</span>
-              <h3>Seleccione un expediente</h3>
-              <p>Seleccione un expediente de la lista para gestionar su desembolso.</p>
+          <!-- ---------- COLUMNA IZQUIERDA: selector + expediente ---------- -->
+          <div class="desem-col-izq">
+
+            <div class="selector-informe selector-desem">
+              <div class="selector-encabezado">
+                <span class="selector-label">Desembolsos Pendientes</span>
+                <span class="badge">{{ porDesembolsar.length }} Requiere Acción</span>
+              </div>
+
+              <button
+                type="button"
+                :class="['selector-trigger', selectorDesemAbierto ? 'abierto' : '']"
+                @click="selectorDesemAbierto = !selectorDesemAbierto"
+              >
+                <span v-if="expedienteActivo" class="selector-valor"><b>{{ expedienteActivo.codigo }}</b> — {{ expedienteActivo.titulo }}</span>
+                <span v-else class="selector-valor vacio">Seleccione un expediente</span>
+                <i :class="['selector-flecha', selectorDesemAbierto ? 'abierta' : '']">▾</i>
+              </button>
+
+              <div v-if="selectorDesemAbierto" class="selector-panel">
+                <div class="g-buscar">
+                  <input v-model="busquedaDesem" type="text" placeholder="🔍 Buscar por código, título o solicitante...">
+                </div>
+                <div class="selector-cabecera"><span>Código</span><span>Título</span><span>Estado</span></div>
+                <div class="selector-lista">
+                  <button
+                    v-for="e in desemFiltradas"
+                    :key="e.id"
+                    type="button"
+                    :class="['selector-fila', expedienteActivo?.id === e.id ? 'activo' : '']"
+                    @click="abrir(e); selectorDesemAbierto = false"
+                  >
+                    <span class="c-codigo">{{ e.codigo }}</span>
+                    <span class="c-titulo"><b>{{ e.titulo }}</b><small>{{ e.solicitante_nombre || 's/d' }} · Bs {{ e.monto_estimado || '0.00' }}</small></span>
+                    <em class="e-designar">autorizado</em>
+                  </button>
+                  <div v-if="!desemFiltradas.length" class="empty-list">
+                    Bandeja al día. No hay desembolsos pendientes.
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <div v-else class="gestion-detalle-wrapper">
-              
-              <div class="ticket-header-card" style="padding: 20px;">
+
+            <div v-if="expedienteActivo" class="ticket-header-card" style="padding: 20px;">
                 <div class="t-head">
                   <h2 style="font-size: 18px;">{{ expedienteActivo.codigo }}</h2>
                   <span class="codigo-badge">Desembolso</span>
@@ -108,8 +113,16 @@
                   <span><b>Monto estimado:</b> Bs {{ expedienteActivo.monto_estimado || 's/d' }}</span>
                 </div>
               </div>
+          </div>
 
-              <div class="workflow-card">
+          <!-- ---------- COLUMNA DERECHA: flujo de desembolso ---------- -->
+          <section class="desem-col-der">
+            <div v-if="!expedienteActivo" class="ticket-header-card" style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--sigta-texto-suave);">
+              <span style="font-size: 30px; margin-bottom: 15px; color: var(--sigta-exito);">←</span>
+              <h3>Seleccione un expediente</h3>
+              <p>Seleccione un expediente de la lista para gestionar su desembolso.</p>
+            </div>
+            <div v-else class="workflow-card">
                 <div class="wf-header">Flujo de Desembolso</div>
                 <div class="wf-body">
                   
@@ -211,16 +224,35 @@
 
                 </div>
               </div>
-
-            </div>
           </section>
         </div>
       </section>
 <!-- =========================== HISTORIAL =========================== -->
       <section v-else-if="vista==='historial'">
         <div class="instruction"><b>Historial</b><span>Expedientes en los que Tesorería ya entregó los fondos.</span></div>
-        <div v-if="desembolsados.length" class="cards">
-          <article v-for="e in desembolsados" :key="e.id">
+
+        <!-- Filtros: solo acotan en pantalla los registros ya cargados -->
+        <div v-if="desembolsados.length" class="hist-filtros">
+          <div class="hf-buscar">
+            <input v-model="busquedaHist" type="text" placeholder="🔍 Buscar por código, título o responsable...">
+          </div>
+          <label class="hf-fecha">Desde<input v-model="desdeHist" type="date"></label>
+          <label class="hf-fecha">Hasta<input v-model="hastaHist" type="date"></label>
+          <button
+            v-if="busquedaHist || desdeHist || hastaHist"
+            type="button"
+            class="hf-limpiar"
+            @click="busquedaHist = ''; desdeHist = ''; hastaHist = ''"
+          >Limpiar</button>
+          <span class="hf-conteo">{{ historialFiltrado.length }} de {{ desembolsados.length }}</span>
+        </div>
+
+        <div v-if="desembolsados.length && !historialFiltrado.length" class="empty">
+          <span>🔍</span><h3>Sin coincidencias</h3><p>Ningún desembolso coincide con los filtros aplicados.</p>
+        </div>
+
+        <div v-if="historialFiltrado.length" class="cards">
+          <article v-for="e in historialFiltrado" :key="e.id">
             <div class="top"><span>{{ e.codigo }}</span><em>{{ etiquetaEstado(e.estado) }}</em></div>
             <h3>{{ e.titulo }}</h3>
             <ul class="datos">
@@ -303,7 +335,48 @@ const saludo = computed(() => new Date().getHours() < 12 ? 'Buenos días' : new 
 
 /* Su única tarea del BPMN: desembolsar tras la autorización del Director. */
 const porDesembolsar = computed(() => expedientes.value.filter(e => e.estado === 'APROBADO_PARA_DESEMBOLSO'))
+
+/* Selector compacto: solo presentacion. Filtra en memoria la MISMA
+   lista porDesembolsar; la seleccion sigue llamando a abrir(). */
+const selectorDesemAbierto = ref(false)
+const busquedaDesem = ref('')
+
+const desemFiltradas = computed(() => {
+  const texto = busquedaDesem.value.trim().toLowerCase()
+  if (!texto) return porDesembolsar.value
+  return porDesembolsar.value.filter(e =>
+    [e.codigo, e.titulo, e.solicitante_nombre].some(v => (v || '').toLowerCase().includes(texto))
+  )
+})
 const desembolsados = computed(() => expedientes.value.filter(e => !!e.monto_desembolsado))
+
+/* Filtros del historial: solo presentacion. Acotan en pantalla la misma
+   lista `desembolsados`; no consultan nada ni tocan el flujo. La fecha
+   usada es `fondos_recibidos_en`, la unica que estos registros tienen
+   (es la que ya se muestra como "Retirado el ..."). */
+const busquedaHist = ref('')
+const desdeHist = ref('')
+const hastaHist = ref('')
+
+const historialFiltrado = computed(() => {
+  const texto = busquedaHist.value.trim().toLowerCase()
+  const desde = desdeHist.value ? new Date(`${desdeHist.value}T00:00:00`) : null
+  const hasta = hastaHist.value ? new Date(`${hastaHist.value}T23:59:59`) : null
+
+  return desembolsados.value.filter(e => {
+    if (texto && ![e.codigo, e.titulo, e.responsable_adquisicion]
+      .some(v => (v || '').toLowerCase().includes(texto))) return false
+
+    if (desde || hasta) {
+      if (!e.fondos_recibidos_en) return false
+      const f = new Date(e.fondos_recibidos_en)
+      if (isNaN(f.getTime())) return false
+      if (desde && f < desde) return false
+      if (hasta && f > hasta) return false
+    }
+    return true
+  })
+})
 const montoTotal = computed(() =>
   desembolsados.value
     .reduce((total, e) => total + Number(e.monto_desembolsado || 0), 0)
@@ -453,6 +526,59 @@ onMounted(cargar)
 </script>
 
 <style scoped>
+/* ---------- Filtros del historial ---------- */
+.hist-filtros { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding: 14px 16px; background: var(--sigta-blanco); border: 1px solid var(--sigta-borde); border-radius: 11px; }
+.hf-buscar { flex: 1; min-width: 220px; }
+.hf-buscar input { width: 100%; padding: 9px 12px; border: 1px solid var(--sigta-borde); border-radius: 8px; font-family: inherit; font-size: 13px; color: var(--sigta-texto); outline: none; }
+.hf-buscar input:focus, .hf-fecha input:focus { border-color: var(--sigta-azul); }
+.hf-fecha { display: flex; flex-direction: column; gap: 5px; font-size: 10px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: var(--sigta-texto-suave); }
+.hf-fecha input { padding: 8px 10px; border: 1px solid var(--sigta-borde); border-radius: 8px; font-family: inherit; font-size: 12.5px; color: var(--sigta-texto); outline: none; cursor: pointer; }
+.hf-limpiar { padding: 9px 14px; border: 1px solid var(--sigta-borde); border-radius: 8px; background: var(--sigta-blanco); color: var(--sigta-azul); font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; }
+.hf-limpiar:hover { background: var(--sigta-azul); color: var(--sigta-blanco); }
+.hf-conteo { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--sigta-texto-suave); }
+
+/* ==========================================================
+   SELECTOR COMPACTO + DOS COLUMNAS
+   Mismo patron visual que "Informes de los tecnicos".
+   ========================================================== */
+
+.vista-desem { overflow: visible; gap: 16px; }
+.desem-col-izq { width: 40%; min-width: 320px; display: flex; flex-direction: column; gap: 12px; overflow: visible; }
+.desem-col-der { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+.desem-col-izq .ticket-header-card { flex: 0 1 auto; min-height: 0; overflow-y: auto; }
+.desem-col-der .workflow-card { flex: 1; min-height: 0; }
+.desem-col-der > .ticket-header-card { flex: 1; }
+
+.selector-informe { position: relative; flex-shrink: 0; background: var(--sigta-blanco); border: 1px solid var(--sigta-borde); border-radius: 10px; padding: 10px 12px; }
+.selector-encabezado { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.selector-label { display: block; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--sigta-texto-suave); }
+.selector-trigger { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 9px 12px; font-family: inherit; font-size: 13px; color: var(--sigta-texto); background: #f8fafc; border: 1px solid var(--sigta-borde); border-radius: 8px; cursor: pointer; }
+.selector-trigger:hover, .selector-trigger.abierto { border-color: var(--sigta-azul); }
+.selector-valor { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.selector-valor b { color: var(--sigta-azul); }
+.selector-valor.vacio { color: var(--sigta-texto-suave); }
+.selector-flecha { font-style: normal; color: var(--sigta-texto-suave); transition: transform .2s; }
+.selector-flecha.abierta { transform: rotate(180deg); }
+.selector-panel { position: absolute; z-index: 15; top: calc(100% - 2px); left: 12px; right: 12px; max-height: 340px; display: flex; flex-direction: column; background: var(--sigta-blanco); border: 1px solid var(--sigta-borde); border-radius: 10px; box-shadow: 0 12px 28px rgba(18,58,107,.16); overflow: hidden; }
+.selector-panel .g-buscar { padding: 10px 10px 8px; }
+.selector-panel .g-buscar input { width: 100%; border: 1px solid var(--sigta-borde); border-radius: 8px; padding: 7px 10px; font-family: inherit; font-size: 12px; color: var(--sigta-texto); outline: none; }
+.selector-cabecera { display: grid; grid-template-columns: 105px 1fr 92px; gap: 8px; padding: 7px 12px; font-size: 9.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: var(--sigta-texto-suave); background: #f8fafc; border-top: 1px solid var(--sigta-borde-suave); border-bottom: 1px solid var(--sigta-borde-suave); }
+.selector-lista { overflow-y: auto; padding: 4px; }
+.selector-fila { display: grid; grid-template-columns: 105px 1fr 92px; gap: 8px; align-items: start; width: 100%; text-align: left; padding: 8px; font-family: inherit; background: transparent; border: 0; border-radius: 7px; cursor: pointer; }
+.selector-fila:hover { background: #f1f5f9; }
+.selector-fila.activo { background: var(--sigta-azul-tenue); }
+.selector-fila .c-codigo { font-size: 11.5px; font-weight: 800; color: var(--sigta-azul); }
+.selector-fila .c-titulo { display: block; overflow: hidden; }
+.selector-fila .c-titulo b { display: block; font-size: 12.5px; color: var(--sigta-texto); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.selector-fila .c-titulo small { display: block; margin-top: 2px; font-size: 10.5px; color: var(--sigta-texto-suave); }
+.selector-fila em { align-self: center; font-size: 9px; font-style: normal; text-align: center; padding: 3px 6px; border-radius: 10px; line-height: 1.25; }
+.selector-panel .empty-list { padding: 16px 12px; text-align: center; font-size: 12px; color: var(--sigta-texto-suave); }
+
+@media (max-width: 1050px) {
+  .vista-desem { height: auto; flex-direction: column; }
+  .desem-col-izq { width: 100%; min-width: 0; }
+}
+
 /* Mismo distintivo de icono que el resto de los paneles por rol. */
 aside button .icon-badge { flex-shrink: 0; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
 
