@@ -70,7 +70,7 @@
         class="menu-item"
       >
 
-        <IconoSigta class="icon" nombre="inicio" />
+        <span class="icon-badge" style="background:#F2C40026;color:#F2C400"><IconoSigta nombre="inicio" :tamano="16" /></span>
 
         Inicio
 
@@ -86,7 +86,7 @@
         class="menu-item"
       >
 
-        <IconoSigta class="icon" nombre="solicitudes" />
+        <span class="icon-badge" style="background:#3E7BD626;color:#3E7BD6"><IconoSigta nombre="solicitudes" :tamano="16" /></span>
 
         Mis solicitudes
 
@@ -98,13 +98,13 @@
         :class="{ 'router-link-active': opcionSolicitudesActiva(route, true) }"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="verificacion" />
+        <span class="icon-badge" style="background:#C79A1E26;color:#C79A1E"><IconoSigta nombre="verificacion" :tamano="16" /></span>
         <span class="menu-label">Verificaciones pendientes</span>
         <strong v-if="verificacionesPendientes" class="menu-count">{{ verificacionesPendientes }}</strong>
       </router-link>
 
       <router-link to="/usuario/notificaciones" class="menu-item">
-        <IconoSigta class="icon" nombre="notificaciones" />
+        <span class="icon-badge" style="background:#E08A0026;color:#E08A00"><IconoSigta nombre="notificaciones" :tamano="16" /></span>
         <span class="menu-label">Notificaciones</span>
         <strong v-if="notificacionesPendientes" class="menu-count">{{notificacionesPendientes}}</strong>
       </router-link>
@@ -117,7 +117,7 @@
         class="menu-item"
       >
 
-        <IconoSigta class="icon" nombre="perfil" />
+        <span class="icon-badge" style="background:#7B6FD926;color:#7B6FD9"><IconoSigta nombre="perfil" :tamano="16" /></span>
 
         Mi perfil
 
@@ -127,7 +127,7 @@
         to="/usuario/configuracion"
         class="menu-item"
       >
-        <IconoSigta class="icon" nombre="configuracion" />
+        <span class="icon-badge" style="background:#6B7C9326;color:#6B7C93"><IconoSigta nombre="configuracion" :tamano="16" /></span>
         Configuración
       </router-link>
 
@@ -276,6 +276,10 @@ function confirmarCierreSesion() {
 
 
 <style scoped>
+/* Distintivo del icono: mismo formato y tamano que el panel de
+   Mantenimiento (30x30, radio 8, fondo del color al 15%). */
+.icon-badge { flex-shrink: 0; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+
 
 * {
   box-sizing: border-box;

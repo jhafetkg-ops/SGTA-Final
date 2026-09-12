@@ -3,17 +3,16 @@
     <SolicitanteMenu v-if="!esTecnico" />
     <aside v-else class="technician-nav">
       <div class="tech-brand"><img src="/img/emi.jpg" alt="EMI"><div><b>SIGTA</b><small>Soporte Técnico</small></div></div>
-      <div class="tech-profile"><i>{{iniciales}}</i><div><b>{{nombre}}</b><small>Especialista</small></div></div>
       <p>MI TRABAJO</p>
-      <button @click="irSeccion('resumen')"><span>⌂</span>Dashboard</button>
-      <button @click="irSeccion('misordenes')"><span>OT</span>Mis órdenes</button>
-      <button @click="irSeccion('curso')"><span>TC</span>Trabajos en curso</button>
-      <button @click="irSeccion('cotizaciones')"><span>CO</span>Cotizaciones y requerimientos</button>
-      <button @click="irSeccion('trabajo')"><span>RP</span>Trabajos y anotaciones</button>
-      <button @click="irSeccion('informes')"><span>IF</span>Pruebas e informes</button>
-      <button @click="irSeccion('compras')"><span>CP</span>Seguimiento de compras</button>
-      <button class="active"><span>●</span>Notificaciones <em v-if="pendientes">{{pendientes}}</em></button>
-      <button @click="irSeccion('historial')"><span>HI</span>Historial</button>
+      <button @click="irSeccion('resumen')"><span class="icon-badge" style="background:#F2C40026;color:#F2C400"><IconoSigta nombre="inicio" :tamano="16" /></span>Dashboard</button>
+      <button @click="irSeccion('misordenes')"><span class="icon-badge" style="background:#3E7BD626;color:#3E7BD6"><IconoSigta nombre="tickets" :tamano="16" /></span>Mis órdenes</button>
+      <button @click="irSeccion('curso')"><span class="icon-badge" style="background:#C79A1E26;color:#C79A1E"><IconoSigta nombre="actividades" :tamano="16" /></span>Trabajos en curso</button>
+      <button @click="irSeccion('cotizaciones')"><span class="icon-badge" style="background:#7B6FD926;color:#7B6FD9"><IconoSigta nombre="compras" :tamano="16" /></span>Cotizaciones y requerimientos</button>
+      <button @click="irSeccion('trabajo')"><span class="icon-badge" style="background:#2E9E6B26;color:#2E9E6B"><IconoSigta nombre="editar" :tamano="16" /></span>Trabajos y anotaciones</button>
+      <button @click="irSeccion('informes')"><span class="icon-badge" style="background:#D9538A26;color:#D9538A"><IconoSigta nombre="conformidad" :tamano="16" /></span>Pruebas e informes</button>
+      <button @click="irSeccion('compras')"><span class="icon-badge" style="background:#3E7BD626;color:#3E7BD6"><IconoSigta nombre="almacen" :tamano="16" /></span>Seguimiento de compras</button>
+      <button class="active"><span class="icon-badge" style="background:#E08A0026;color:#E08A00"><IconoSigta nombre="notificaciones" :tamano="16" /></span>Notificaciones <em v-if="pendientes">{{pendientes}}</em></button>
+      <button @click="irSeccion('historial')"><span class="icon-badge" style="background:#6B7C9326;color:#6B7C93"><IconoSigta nombre="historial" :tamano="16" /></span>Historial</button>
       <button class="tech-logout" @click="mostrarLogout=true"><IconoSigta nombre="salir" :tamano="17" />Cerrar sesión</button>
     </aside>
 
@@ -23,9 +22,8 @@
       <button class="back" @click="router.push(rutaVolver)" aria-label="Volver al panel"><span>←</span> Volver al panel</button>
       <div><small>CENTRO DE AVISOS</small><h1>Notificaciones</h1><p>Decisiones y novedades relacionadas con sus tickets.</p></div>
       <button v-if="pendientes" class="read-all" @click="marcarTodas">Marcar todas como leídas</button>
-    
-        <UsuarioHeader @actualizar="cargar" />
-      </header>
+      <div class="header-perfil"><UsuarioHeader @actualizar="cargar" /></div>
+    </header>
     <section class="summary">
       <div><b>{{pendientes}}</b><span>Sin leer</span></div>
       <div class="summary-approved"><b>{{aprobadas}}</b><span>Aprobadas</span></div>
@@ -88,6 +86,8 @@ onMounted(cargar)
 @media(max-width:700px){.page > header{display:grid}.page > header > div{order:1}.page > header .back{order:2;width:auto;justify-self:start}.page > header .read-all{order:3;width:100%;margin:0}}
 </style>
 <style scoped>
+.notification-layout .page > header > .header-perfil{order:4;margin-left:auto;align-self:center}
+.technician-nav > button .icon-badge{flex-shrink:0;width:30px;height:30px;margin-right:11px;border-radius:8px;display:flex;align-items:center;justify-content:center}
 .page > .summary{grid-template-columns:repeat(4,minmax(130px,1fr))}
 .page > .summary::after{display:none;content:none}
 .summary div{border-top:3px solid var(--sigta-azul)}
