@@ -25,6 +25,8 @@
           + Registrar solicitud de compra
         </button>
 
+      
+        <UsuarioHeader @actualizar="cargarSolicitudes" />
       </header>
 
 
@@ -545,6 +547,7 @@
 
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 import {
   computed,
   onMounted,

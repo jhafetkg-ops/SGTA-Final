@@ -5,7 +5,6 @@
         <div class="brand"><b><img src="/img/emi.jpg" alt="EMI"></b><div><strong>SIGTA</strong><small>Mantenimiento</small></div></div>
         <button type="button" class="menu-toggle" :aria-expanded="menuAbierto" aria-label="Mostrar opciones del menú" @click="menuAbierto = !menuAbierto"><span></span><span></span><span></span></button>
       </div>
-      <div class="profile"><i>{{ iniciales }}</i><div><b>{{ nombre }}</b><small>Técnico de Mantenimiento</small></div></div>
       <p>MI TRABAJO</p>
       <button v-for="m in menu" :key="m.id" :class="{active:vista===m.id}" @click="irA(m.id)"><span class="icon-badge" :style="{background:m.color+'26',color:m.color}"><IconoSigta :nombre="m.icono" :tamano="16" /></span>{{ m.nombre }}<em v-if="m.total!==undefined">{{ m.total }}</em></button>
       <div class="sidebar-watermark" aria-hidden="true">
@@ -20,7 +19,9 @@
     <main>
       <header>
         <div><h1>{{ titulo }}</h1><p>{{ subtitulo }}</p></div>
-        <button class="refresh" :disabled="cargando" @click="cargar">↻ Actualizar</button>
+
+      
+        <UsuarioHeader @actualizar="cargar" />
       </header>
 
       <div v-if="errorCarga" class="error-carga"><b>No se pudieron cargar los requerimientos.</b><span>{{ errorCarga }}</span></div>
@@ -277,6 +278,7 @@
 </template>
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import IconoSigta from '../components/IconoSigta.vue'
 import LogoutModal from '../components/LogoutModal.vue'

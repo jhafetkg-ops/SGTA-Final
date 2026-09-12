@@ -29,6 +29,8 @@
 
         </div>
 
+      
+        <UsuarioHeader />
       </header>
 
 
@@ -496,6 +498,7 @@
 
 
 <script setup>
+import UsuarioHeader from './UsuarioHeader.vue'
 import AdminMenu from '../components/AdminMenu.vue'
 
 import {

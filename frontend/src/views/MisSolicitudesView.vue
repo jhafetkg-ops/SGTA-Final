@@ -36,6 +36,8 @@
           ＋ Nueva solicitud
         </button>
 
+      
+        <UsuarioHeader @actualizar="cargarTodo" />
       </header>
 
       <section v-if="!vistaVerificaciones && mostrarCrear" class="create-panel">
@@ -1180,6 +1182,7 @@
 
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 import AdminMenu from '../components/AdminMenu.vue'
 
 import {

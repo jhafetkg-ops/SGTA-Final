@@ -48,6 +48,8 @@
           }}
         </button>
 
+      
+        <UsuarioHeader @actualizar="cargarPreferencias" />
       </header>
 
 
@@ -378,6 +380,7 @@
 
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 
 import {
   onMounted,

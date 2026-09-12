@@ -75,6 +75,8 @@
           <span>Nuevo usuario</span>
         </button>
 
+      
+        <UsuarioHeader @actualizar="cargarDatos" />
       </header>
 
 
@@ -1102,6 +1104,7 @@
 
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 
 import {
   computed,

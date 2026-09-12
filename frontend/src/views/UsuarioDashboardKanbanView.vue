@@ -14,6 +14,8 @@
           </button>
           <button class="primary" @click="mostrarCrear = !mostrarCrear">＋ Nueva solicitud</button>
         </div>
+      
+        <UsuarioHeader @actualizar="cargar" />
       </header>
 
       <section v-if="mostrarCrear" class="create-panel">
@@ -34,7 +36,7 @@
 
       <section class="board-head">
         <div><h2>Mis solicitudes</h2><p>Seleccione una columna para abrir su listado filtrado o una tarjeta para consultar el detalle.</p></div>
-        <button class="refresh" :disabled="cargando" @click="cargar">↻ Actualizar</button>
+
       </section>
 
       <div v-if="error" class="error">{{ error }}</div>
@@ -61,6 +63,7 @@
 </template>
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import SolicitanteMenu from '../components/SolicitanteMenu.vue'

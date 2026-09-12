@@ -5,7 +5,6 @@
         <div class="brand"><b><img src="/img/emi.jpg" alt="EMI"></b><div><strong>SIGTA</strong><small>Soporte Técnico</small></div></div>
         <button type="button" class="menu-toggle" :aria-expanded="menuAbierto" aria-label="Mostrar opciones del menú" @click="menuAbierto = !menuAbierto"><span></span><span></span><span></span></button>
       </div>
-      <div class="profile"><i>{{ iniciales }}</i><div><b>{{ nombre }}</b><small>Especialista</small></div></div>
       <p>MI TRABAJO</p>
       <button v-for="m in menu" :key="m.id" :class="{active:vista===m.id}" @click="irA(m.id)"><span>{{ m.icono }}</span>{{ m.nombre }}<em v-if="m.total!==undefined">{{ m.total }}</em></button>
       <div class="bottom"><button class="logout" @click="mostrarLogout = true"><IconoSigta nombre="salir" :tamano="17" />Cerrar sesión</button></div>
@@ -16,7 +15,9 @@
     <main>
       <header>
         <div><small>SIGTA / SOPORTE / {{ titulo }}</small><h1>{{ titulo }}</h1><p>{{ subtitulo }}</p></div>
-        <div class="header-actions"><button class="notification-bell" title="Notificaciones" @click="router.push('/especialista/notificaciones')">🔔<b v-if="notificacionesPendientes">{{notificacionesPendientes}}</b></button><button class="refresh" :disabled="cargando" @click="cargar">↻ Actualizar</button></div>
+        <div class="header-actions"><button class="notification-bell" title="Notificaciones" @click="router.push('/especialista/notificaciones')">🔔<b v-if="notificacionesPendientes">{{notificacionesPendientes}}</b></button></div>
+      
+        <UsuarioHeader @actualizar="cargar" />
       </header>
 
       <!-- ============================================================
@@ -315,6 +316,7 @@
 </template>
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import LogoutModal from '../components/LogoutModal.vue'

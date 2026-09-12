@@ -23,7 +23,9 @@
       <button class="back" @click="router.push(rutaVolver)" aria-label="Volver al panel"><span>←</span> Volver al panel</button>
       <div><small>CENTRO DE AVISOS</small><h1>Notificaciones</h1><p>Decisiones y novedades relacionadas con sus tickets.</p></div>
       <button v-if="pendientes" class="read-all" @click="marcarTodas">Marcar todas como leídas</button>
-    </header>
+    
+        <UsuarioHeader @actualizar="cargar" />
+      </header>
     <section class="summary">
       <div><b>{{pendientes}}</b><span>Sin leer</span></div>
       <div class="summary-approved"><b>{{aprobadas}}</b><span>Aprobadas</span></div>
@@ -44,6 +46,7 @@
 </template>
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 import {computed,onMounted,ref} from 'vue'
 import {useRoute,useRouter} from 'vue-router'
 import LogoutModal from '../components/LogoutModal.vue'

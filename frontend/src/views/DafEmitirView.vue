@@ -4,43 +4,62 @@
 
     <main class="main-content">
 
-      <div class="gestion-tickets-layout">
-        
-        <div class="gestion-left">
-          <div class="gestion-left-header">
-            <h3>Pendientes de Certificaci&oacute;n</h3>
-            <span class="badge">{{ porCertificar.length }} por emitir</span>
-          </div>
-          <div class="gestion-lista">
-            <article 
-              v-for="r in porCertificar" 
-              :key="r.id" 
-              :class="['ticket-item', itemActivo?.id === r.id ? 'activo' : '', 't-validar']" 
-              @click="abrir(r)"
-            >
-              <div class="top">
-                <span>{{ r.codigo }}</span>
-                <em class="e-validar">Requiere Certificaci&oacute;n</em>
-              </div>
-              <h4>{{ r.titulo }}</h4>
-              <p>Monto Estimado: Bs. {{ r.monto_estimado || 's/d' }}</p>
-            </article>
-            <div v-if="!porCertificar.length" class="empty-list">
-              Bandeja al d&iacute;a. No hay expedientes pendientes de certificaci&oacute;n.
-            </div>
-          </div>
+      <header class="barra-perfil">
+        <div>
+          <h1>Emitir Certificaci&oacute;n</h1>
+          <p>Certificaci&oacute;n presupuestaria de los expedientes de compra evaluados.</p>
         </div>
 
-        <div class="gestion-right">
-          <div v-if="!itemActivo" class="empty" style="margin-top: 40px;">
-            <span style="font-size:30px">&marker;</span>
-            <h3>Seleccione un expediente</h3>
-            <p>Seleccione una solicitud de compra de la lista para emitir su certificaci&oacute;n presupuestaria.</p>
+        <UsuarioHeader @actualizar="cargar" />
+      </header>
+
+      <div class="gestion-tickets-layout vista-cert">
+
+        <!-- ---------- COLUMNA IZQUIERDA: selector + expediente ---------- -->
+        <div class="cert-col-izq">
+
+          <div class="selector-informe selector-cert">
+            <div class="selector-encabezado">
+              <span class="selector-label">Pendientes de Certificaci&oacute;n</span>
+              <span class="badge">{{ porCertificar.length }} por emitir</span>
+            </div>
+
+            <button
+              type="button"
+              :class="['selector-trigger', selectorCertAbierto ? 'abierto' : '']"
+              @click="selectorCertAbierto = !selectorCertAbierto"
+            >
+              <span v-if="itemActivo" class="selector-valor"><b>{{ itemActivo.codigo }}</b> &mdash; {{ itemActivo.titulo }}</span>
+              <span v-else class="selector-valor vacio">Seleccione un expediente</span>
+              <i :class="['selector-flecha', selectorCertAbierto ? 'abierta' : '']">&#9662;</i>
+            </button>
+
+            <div v-if="selectorCertAbierto" class="selector-panel">
+              <div class="g-buscar">
+                <input v-model="busquedaCert" type="text" placeholder="&#128269; Buscar por c&oacute;digo, t&iacute;tulo o solicitante...">
+              </div>
+              <div class="selector-cabecera"><span>C&oacute;digo</span><span>T&iacute;tulo</span><span>Estado</span></div>
+              <div class="selector-lista">
+                <button
+                  v-for="r in certFiltradas"
+                  :key="r.id"
+                  type="button"
+                  :class="['selector-fila', itemActivo?.id === r.id ? 'activo' : '']"
+                  @click="abrir(r); selectorCertAbierto = false"
+                >
+                  <span class="c-codigo">{{ r.codigo }}</span>
+                  <span class="c-titulo"><b>{{ r.titulo }}</b><small>Monto Estimado: Bs. {{ r.monto_estimado || 's/d' }}</small></span>
+                  <em class="e-validar">Requiere Certificaci&oacute;n</em>
+                </button>
+                <div v-if="!certFiltradas.length" class="empty-list">
+                  Bandeja al d&iacute;a. No hay expedientes pendientes de certificaci&oacute;n.
+                </div>
+              </div>
+            </div>
           </div>
-          <div v-else class="gestion-detalle-wrapper">
-            
-            <!-- CABECERA COMPACTA -->
-            <div class="ticket-header-card compact-header">
+
+          <!-- CABECERA COMPACTA -->
+            <div v-if="itemActivo" class="ticket-header-card compact-header">
               <div class="t-head">
                 <h2>{{ itemActivo.titulo }}</h2>
                 <span class="codigo-badge">{{ itemActivo.codigo }}</span>
@@ -62,9 +81,16 @@
                 </div>
               </div>
             </div>
+        </div>
 
-            <!-- FORMULARIO LIBRE (sin pasos bloqueantes) -->
-            <div class="workflow-card">
+        <!-- ---------- COLUMNA DERECHA: emisi&oacute;n ---------- -->
+        <div class="cert-col-der">
+          <div v-if="!itemActivo" class="empty" style="margin-top: 40px;">
+            <span style="font-size:30px">&marker;</span>
+            <h3>Seleccione un expediente</h3>
+            <p>Seleccione una solicitud de compra de la lista para emitir su certificaci&oacute;n presupuestaria.</p>
+          </div>
+                      <div v-else class="workflow-card">
               <div class="wf-header">Emitir Certificaci&oacute;n Presupuestaria</div>
               <div class="cert-scroll-body">
 
@@ -206,7 +232,6 @@
                 </div>
               </div>
             </div>
-          </div>
         </div>
       </div>
     </main>
@@ -225,6 +250,7 @@
 </template>
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 import { ref, computed, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import DafMenu from '../components/DafMenu.vue'
@@ -249,6 +275,19 @@ function cerrarModalExito() {
   mostrarModalExito.value = false
 }
 
+
+/* Selector compacto: solo presentacion. Filtra en memoria la MISMA
+   lista porCertificar y la seleccion sigue llamando a abrir(). */
+const selectorCertAbierto = ref(false)
+const busquedaCert = ref('')
+
+const certFiltradas = computed(() => {
+  const texto = busquedaCert.value.trim().toLowerCase()
+  if (!texto) return porCertificar.value
+  return porCertificar.value.filter(r =>
+    [r.codigo, r.titulo, r.solicitante_nombre].some(v => (v || '').toLowerCase().includes(texto))
+  )
+})
 
 const porCertificar = computed(() => items.value.filter(r => r.estado === 'EVALUADO_PENDIENTE_CERTIFICACION' && !r.certificacion_presupuestaria && r.informe && r.poa && r.proforma && (!['SOPORTE', 'MANTENIMIENTO'].includes(r.origen_modulo) || r.pedido)))
 
@@ -579,10 +618,73 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* ==========================================================
+   SELECTOR COMPACTO + DOS COLUMNAS
+   Mismo patron visual que "Informes de los tecnicos": la bandeja
+   deja de ocupar una columna entera y pasa a un desplegable; el
+   formulario de certificacion se queda con todo el ancho y alto.
+   Los estilos van aqui porque los de aquella pantalla son scoped.
+   ========================================================== */
+
+.vista-cert { overflow: visible; gap: 16px; }
+
+.cert-col-izq {
+  width: 40%;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: visible;
+}
+
+.cert-col-der {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cert-col-izq .ticket-header-card { flex: 0 1 auto; min-height: 0; overflow-y: auto; }
+.cert-col-der .workflow-card { flex: 1; min-height: 0; }
+.cert-col-der > .empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px; margin: 0 !important; }
+
+.selector-informe { position: relative; flex-shrink: 0; background: var(--sigta-blanco); border: 1px solid var(--sigta-borde); border-radius: 10px; padding: 10px 12px; }
+.selector-encabezado { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.selector-label { display: block; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--sigta-texto-suave); }
+.selector-trigger { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 9px 12px; font-family: inherit; font-size: 13px; color: var(--sigta-texto); background: #f8fafc; border: 1px solid var(--sigta-borde); border-radius: 8px; cursor: pointer; }
+.selector-trigger:hover { border-color: var(--sigta-azul); }
+.selector-trigger.abierto { border-color: var(--sigta-azul); }
+.selector-valor { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.selector-valor b { color: var(--sigta-azul); }
+.selector-valor.vacio { color: var(--sigta-texto-suave); }
+.selector-flecha { font-style: normal; color: var(--sigta-texto-suave); transition: transform .2s; }
+.selector-flecha.abierta { transform: rotate(180deg); }
+.selector-panel { position: absolute; z-index: 15; top: calc(100% - 2px); left: 12px; right: 12px; max-height: 340px; display: flex; flex-direction: column; background: var(--sigta-blanco); border: 1px solid var(--sigta-borde); border-radius: 10px; box-shadow: 0 12px 28px rgba(18,58,107,.16); overflow: hidden; }
+.selector-panel .g-buscar { padding: 10px 10px 8px; }
+.selector-panel .g-buscar input { width: 100%; border: 1px solid var(--sigta-borde); border-radius: 8px; padding: 7px 10px; font-family: inherit; font-size: 12px; color: var(--sigta-texto); outline: none; }
+.selector-cabecera { display: grid; grid-template-columns: 105px 1fr 108px; gap: 8px; padding: 7px 12px; font-size: 9.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: var(--sigta-texto-suave); background: #f8fafc; border-top: 1px solid var(--sigta-borde-suave); border-bottom: 1px solid var(--sigta-borde-suave); }
+.selector-lista { overflow-y: auto; padding: 4px; }
+.selector-fila { display: grid; grid-template-columns: 105px 1fr 108px; gap: 8px; align-items: start; width: 100%; text-align: left; padding: 8px; font-family: inherit; background: transparent; border: 0; border-radius: 7px; cursor: pointer; }
+.selector-fila:hover { background: #f1f5f9; }
+.selector-fila.activo { background: var(--sigta-azul-tenue); }
+.selector-fila .c-codigo { font-size: 11.5px; font-weight: 800; color: var(--sigta-azul); }
+.selector-fila .c-titulo { display: block; overflow: hidden; }
+.selector-fila .c-titulo b { display: block; font-size: 12.5px; color: var(--sigta-texto); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.selector-fila .c-titulo small { display: block; margin-top: 2px; font-size: 10.5px; color: var(--sigta-texto-suave); }
+.selector-fila em { align-self: center; font-size: 9px; font-style: normal; text-align: center; padding: 3px 6px; border-radius: 10px; line-height: 1.25; background: #fee2e2; color: #b91c1c; }
+.selector-panel .empty-list { padding: 16px 12px; text-align: center; font-size: 12px; color: var(--sigta-texto-suave); }
+
+@media (max-width: 1050px) {
+  .vista-cert { height: auto; flex-direction: column; }
+  .cert-col-izq { width: 100%; min-width: 0; }
+}
+
 @import '../assets/role-theme.css';
 
 /* ====== GESTIÓN DE TICKETS LAYOUT (from reference) ====== */
-.gestion-tickets-layout { display: flex; gap: 20px; height: calc(100vh - 80px); overflow: hidden; align-items: stretch; }
+.barra-perfil { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 14px; }
+.gestion-tickets-layout { display: flex; gap: 20px; height: calc(100vh - 232px); min-height: 460px; overflow: hidden; align-items: stretch; }
 .gestion-left { width: 35%; display: flex; flex-direction: column; background: var(--sigta-blanco); border: 1px solid var(--sigta-borde); border-radius: 12px; overflow: hidden; }
 .gestion-left-header { padding: 15px 20px; border-bottom: 1px solid var(--sigta-borde-suave); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
 .gestion-left-header h3 { margin: 0; font-size: 14px; color: var(--sigta-texto); }

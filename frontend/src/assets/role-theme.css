@@ -401,9 +401,37 @@
   overflow-x: hidden !important;
   background-image: url('/img/marca-de-agua-body.png') !important;
   background-repeat: no-repeat !important;
-  background-position: top center !important;
-  background-size: 620px auto !important;
+  /* Con background-attachment: fixed el fondo se posiciona respecto a la
+     ventana, no al <main>, asi que "center" lo dejaba corrido hacia la
+     izquierda por el ancho del menu lateral. Se compensa medio sidebar
+     para que quede centrado en el area de contenido. */
+  background-position: calc(50% + var(--sigta-sidebar) / 2) center !important;
+  background-size: 820px auto !important;
   background-attachment: fixed !important;
+}
+
+/* =========================================================
+   MARCA DE AGUA EN EL RESTO DE LOS LAYOUTS
+   El bloque de arriba solo cubre .sigta-role-layout. Estas son
+   las demas familias de pantalla del sistema (admin, portal del
+   solicitante, notificaciones, formularios y el panel del
+   Director); todas montan su menu con el mismo --sigta-sidebar,
+   asi que comparten el mismo centrado.
+========================================================= */
+
+.layout > main,
+.admin-layout > main,
+.usuario-layout > main,
+.notification-layout > main,
+.page-layout > main,
+.dashboard-layout > main,
+.portal-layout > main,
+main.page {
+  background-image: url('/img/marca-de-agua-body.png');
+  background-repeat: no-repeat;
+  background-position: calc(50% + var(--sigta-sidebar) / 2) center;
+  background-size: 820px auto;
+  background-attachment: fixed;
 }
 
 .sigta-role-layout > main > header {

@@ -24,6 +24,7 @@
         <div class="header-actions">
 
           <select
+            v-if="seccion === 'historial'"
             v-model="filtroEstado"
             class="filtro-estado"
           >
@@ -32,24 +33,47 @@
             <option value="RECHAZADA">Solicitudes rechazadas</option>
           </select>
 
-          <button
-            class="refresh-button"
-            type="button"
-            :disabled="cargando"
-            @click="cargarCompras"
-          >
-            {{
-              cargando
-                ? 'Actualizando...'
-                : 'Actualizar'
-            }}
-          </button>
+
 
         </div>
 
+      
+        <UsuarioHeader @actualizar="cargarCompras" />
       </header>
 
+      <!-- =================================================
+           RESUMEN
+           Solo cuenta las compras ya cargadas, por su estado
+           existente. No consulta nada ni cambia el flujo.
+      ================================================== -->
+      <section
+        v-if="seccion === 'dashboard' && !cargando && compras.length"
+        class="daf-resumen"
+      >
+        <button type="button" class="daf-kpi k-espera" @click="irASolicitudes">
+          <span>Pendientes de evaluación</span>
+          <strong>{{ totalPendientes }}</strong>
+        </button>
 
+        <button type="button" class="daf-kpi k-certificar" @click="irACertificar">
+          <span>Pendientes de certificación</span>
+          <strong>{{ totalPorCertificar }}</strong>
+        </button>
+
+        <button type="button" class="daf-kpi k-aprobada" @click="irAHistorial('APROBADA')">
+          <span>Aprobadas</span>
+          <strong>{{ totalAprobadas }}</strong>
+        </button>
+
+        <button type="button" class="daf-kpi k-rechazada" @click="irAHistorial('RECHAZADA')">
+          <span>Rechazadas</span>
+          <strong>{{ totalRechazadas }}</strong>
+        </button>
+      </section>
+
+
+
+      <template v-if="seccion !== 'dashboard'">
       <!-- =================================================
            CARGANDO
       ================================================== -->
@@ -73,7 +97,7 @@
 
 
       <div
-        v-else-if="comprasFiltradas.length === 0"
+        v-else-if="listaVisible.length === 0"
         class="empty"
       >
         No hay {{ etiquetaFiltroVacio(filtroEstado) }}.
@@ -91,7 +115,7 @@
         <div class="request-list">
 
           <article
-            v-for="compra in comprasFiltradas"
+            v-for="compra in listaVisible"
             :key="compra.id"
             class="request"
           >
@@ -173,6 +197,7 @@
         </div>
 
       </section>
+      </template>
 
     </main>
 
@@ -613,15 +638,18 @@
 
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 import IconoSigta from '../components/IconoSigta.vue'
 
 import {
   computed,
   onMounted,
-  ref
+  ref,
+  watch
 } from 'vue'
 
 import {
+  useRoute,
   useRouter
 } from 'vue-router'
 
@@ -664,6 +692,110 @@ const comprasFiltradas =
         === filtroEstado.value
     )
   })
+
+
+/* ==========================================================
+   AGRUPACION VISUAL: SOLICITUDES / HISTORIAL
+   Solo reparte en pantalla las MISMAS compras ya cargadas,
+   usando bucketEstado(), que es la clasificacion que el modulo
+   ya aplicaba. No hay estados nuevos ni consultas nuevas.
+   ========================================================== */
+
+const route = useRoute()
+
+function seccionDe(valor) {
+  return ['historial', 'dashboard'].includes(valor)
+    ? valor
+    : 'solicitudes'
+}
+
+const seccion = ref(seccionDe(route.query.seccion))
+
+/* El menu lateral entra con ?seccion=historial; al cambiar de entrada
+   la pestana visible se sincroniza. Solo afecta que lista se muestra. */
+watch(
+  () => route.query.seccion,
+  valor => {
+    seccion.value = seccionDe(valor)
+  }
+)
+
+const comprasEnGestion = computed(() =>
+  compras.value.filter(
+    compra => bucketEstado(compra.estado) === 'EN_ESPERA'
+  )
+)
+
+const comprasHistorial = computed(() =>
+  comprasFiltradas.value.filter(
+    compra => bucketEstado(compra.estado) !== 'EN_ESPERA'
+  )
+)
+
+/* Conteos del resumen. Se apoyan en bucketEstado() y en el estado
+   crudo de cada compra; las cuatro cifras no se solapan entre si. */
+
+const totalPendientes = computed(() => comprasEnGestion.value.length)
+
+/* Misma condicion que la bandeja de "Emitir Certificación"
+   (DafEmitirView): ademas del estado, el expediente debe estar
+   completo. Contar solo por estado daba un numero mayor que el de
+   esa pantalla. */
+const listaPorCertificar = computed(() =>
+  compras.value.filter(
+    compra =>
+      compra.estado === 'EVALUADO_PENDIENTE_CERTIFICACION'
+      && !compra.certificacion_presupuestaria
+      && compra.informe
+      && compra.poa
+      && compra.proforma
+      && (
+        !['SOPORTE', 'MANTENIMIENTO'].includes(compra.origen_modulo)
+        || compra.pedido
+      )
+  )
+)
+
+const totalPorCertificar = computed(() => listaPorCertificar.value.length)
+
+const totalAprobadas = computed(() =>
+  compras.value.filter(
+    compra =>
+      bucketEstado(compra.estado) === 'APROBADA'
+      &&
+      String(compra.estado || '').toUpperCase()
+      !== 'EVALUADO_PENDIENTE_CERTIFICACION'
+  ).length
+)
+
+const totalRechazadas = computed(() =>
+  compras.value.filter(
+    compra => bucketEstado(compra.estado) === 'RECHAZADA'
+  ).length
+)
+
+
+/* Navegacion del resumen: reutiliza la seccion visual y el
+   filtroEstado que ya existian, y la ruta /daf/emitir que ya existe. */
+function irASolicitudes() {
+  router.push({ path: '/daf/dashboard', query: { seccion: 'solicitudes' } })
+}
+
+function irAHistorial(bucket) {
+  filtroEstado.value = bucket
+  router.push({ path: '/daf/dashboard', query: { seccion: 'historial' } })
+}
+
+function irACertificar() {
+  router.push('/daf/emitir')
+}
+
+
+const listaVisible = computed(() =>
+  seccion.value === 'historial'
+    ? comprasHistorial.value
+    : comprasEnGestion.value
+)
 
 
 // ==========================================================
@@ -1508,6 +1640,67 @@ function cerrarSesion() {
 
 
 <style scoped>
+/* ==========================================================
+   RESUMEN DE SOLICITUDES
+   ========================================================== */
+
+.daf-resumen {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.daf-kpi {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition: box-shadow .2s ease, transform .2s ease;
+  padding: 16px 18px;
+  border: 1px solid var(--sigta-borde);
+  border-top: 3px solid var(--sigta-borde);
+  border-radius: 11px;
+  background: var(--sigta-blanco);
+  box-shadow: 0 3px 12px rgba(11, 40, 79, .05);
+}
+
+.daf-kpi span {
+  display: block;
+  color: var(--sigta-texto-suave);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+  line-height: 1.3;
+  min-height: 26px;
+}
+
+.daf-kpi strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--sigta-texto);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.daf-kpi:hover {
+  box-shadow: 0 10px 22px rgba(11, 40, 79, .12);
+  transform: translateY(-2px);
+}
+
+.k-espera { border-top-color: var(--sigta-mostaza); }
+.k-certificar { border-top-color: var(--sigta-azul-medio); }
+.k-aprobada { border-top-color: var(--sigta-exito); }
+.k-rechazada { border-top-color: var(--sigta-error); }
+
+@media (max-width: 1050px) {
+  .daf-resumen { grid-template-columns: 1fr 1fr; }
+}
+
+
 
 * {
   box-sizing: border-box;

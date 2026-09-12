@@ -21,15 +21,10 @@
           </p>
         </div>
 
-        <button
-          class="refresh-button"
-          type="button"
-          :disabled="cargando"
-          @click="cargarInformes"
-        >
-          {{ cargando ? 'Actualizando...' : 'Actualizar' }}
-        </button>
 
+
+      
+        <UsuarioHeader @actualizar="cargarInformes" />
       </header>
 
       <p v-if="mensajeExito" class="mensaje-exito">
@@ -303,6 +298,7 @@
 
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 
 import { computed, onMounted, ref } from 'vue'
 

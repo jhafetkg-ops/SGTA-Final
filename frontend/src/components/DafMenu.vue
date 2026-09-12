@@ -58,13 +58,41 @@
     <nav @click="menuAbierto = false">
 
       <router-link
+        :to="{ path: '/daf/dashboard', query: { seccion: 'dashboard' } }"
+        active-class=""
+        exact-active-class=""
+        :class="['menu-item', enResumen ? 'router-link-active' : '']"
+      >
+        <IconoSigta class="icon" nombre="reporte" />
+
+        <span>
+          Dashboard
+        </span>
+      </router-link>
+
+      <router-link
         to="/daf/dashboard"
-        class="menu-item"
+        active-class=""
+        exact-active-class=""
+        :class="['menu-item', enDaf && !enHistorial && !enResumen ? 'router-link-active' : '']"
       >
         <IconoSigta class="icon" nombre="compras" />
 
         <span>
           Solicitudes
+        </span>
+      </router-link>
+
+      <router-link
+        :to="{ path: '/daf/dashboard', query: { seccion: 'historial' } }"
+        active-class=""
+        exact-active-class=""
+        :class="['menu-item', enHistorial ? 'router-link-active' : '']"
+      >
+        <IconoSigta class="icon" nombre="reloj" />
+
+        <span>
+          Historial
         </span>
       </router-link>
 
@@ -117,8 +145,21 @@ import {
 } from 'vue'
 
 import {
+  computed
+} from 'vue'
+
+import {
+  useRoute,
   useRouter
 } from 'vue-router'
+
+/* Ambas entradas apuntan a /daf/dashboard, asi que el resaltado no
+   puede salir de router-link-active (marcaria las dos): se decide con
+   el parametro ?seccion. No hay rutas ni permisos nuevos. */
+const route = useRoute()
+const enDaf = computed(() => route.path === '/daf/dashboard')
+const enHistorial = computed(() => enDaf.value && route.query.seccion === 'historial')
+const enResumen = computed(() => enDaf.value && route.query.seccion === 'dashboard')
 
 
 const router =

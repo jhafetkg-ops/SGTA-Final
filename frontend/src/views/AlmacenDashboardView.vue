@@ -5,7 +5,6 @@
         <div class="brand"><b><img src="/img/emi.jpg" alt="EMI"></b><div><strong>SIGTA</strong><small>Almacén y Compras</small></div></div>
         <button type="button" class="menu-toggle" :aria-expanded="menuAbierto" aria-label="Mostrar opciones del menú" @click="menuAbierto = !menuAbierto"><span></span><span></span><span></span></button>
       </div>
-      <div class="profile"><i>{{ iniciales }}</i><div><b>{{ nombre }}</b><small>Encargado de Almacén y Compras</small></div></div>
       <p>CAJA CHICA</p>
       <button v-for="m in menu" :key="m.id" :class="{active:vista===m.id}" @click="irA(m.id)"><span>{{ m.icono }}</span>{{ m.nombre }}<em v-if="m.total!==undefined">{{ m.total }}</em></button>
       <div class="bottom"><button class="logout" @click="mostrarLogout = true"><IconoSigta nombre="salir" :tamano="17" />Cerrar sesión</button></div>
@@ -16,7 +15,9 @@
     <main>
       <header>
         <div><small>SIGTA / COMPRAS / {{ titulo }}</small><h1>{{ titulo }}</h1><p>{{ subtitulo }}</p></div>
-        <button class="refresh" :disabled="cargando" @click="cargar">↻ Actualizar</button>
+
+      
+        <UsuarioHeader @actualizar="cargar" />
       </header>
 
       <!-- ============================ RESUMEN ============================ -->
@@ -369,6 +370,7 @@
 </template>
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import LogoutModal from '../components/LogoutModal.vue'

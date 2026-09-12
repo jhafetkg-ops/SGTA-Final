@@ -62,6 +62,8 @@
           }}
         </span>
 
+      
+        <UsuarioHeader @actualizar="cargarConfiguracion" />
       </header>
 
 
@@ -346,6 +348,7 @@
 
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 
 import {
   onMounted,

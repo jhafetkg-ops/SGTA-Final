@@ -50,21 +50,12 @@
             <option value="RECHAZADA">Solo rechazadas</option>
           </select>
 
-          <button
-            class="refresh-button"
-            type="button"
-            :disabled="cargando"
-            @click="cargarCompras"
-          >
-            {{
-              cargando
-                ? 'Actualizando...'
-                : 'Actualizar'
-            }}
-          </button>
+
 
         </div>
 
+      
+        <UsuarioHeader @actualizar="cargarCompras" />
       </header>
 
 
@@ -607,6 +598,7 @@
 
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 import { coincideProceso } from '../utils/portal'
 import IconoSigta from '../components/IconoSigta.vue'
 

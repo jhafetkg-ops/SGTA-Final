@@ -5,7 +5,6 @@
         <div class="brand"><b><img src="/img/emi.jpg" alt="EMI"></b><div><strong>SIGTA</strong><small>Mantenimiento</small></div></div>
         <button type="button" class="menu-toggle" :aria-expanded="menuAbierto" aria-label="Mostrar opciones del menú" @click="menuAbierto = !menuAbierto"><span></span><span></span><span></span></button>
       </div>
-      <div class="profile"><i>{{ iniciales }}</i><div><b>{{ nombre }}</b><small>Jefe de Mantenimiento</small></div></div>
       <p>GESTIÓN DE MANTENIMIENTO</p>
       <button v-for="m in menu" :key="m.id" :class="{active:vista===m.id}" @click="irA(m.id)"><span class="icon-badge" :style="{background:m.color+'26',color:m.color}"><IconoSigta :nombre="m.icono" :tamano="16" /></span>{{ m.nombre }}<em v-if="m.total!==undefined">{{ m.total }}</em></button>
       <div class="sidebar-watermark" aria-hidden="true">
@@ -20,7 +19,9 @@
     <main>
       <header>
         <div><h1>{{ titulo }}</h1><p>{{ subtitulo }}</p></div>
-        <button class="refresh" :disabled="cargando" @click="cargar">↻ Actualizar</button>
+
+      
+        <UsuarioHeader @actualizar="cargar" />
       </header>
 
       <p v-if="errorCarga" class="load-error">{{ errorCarga }}</p>
@@ -56,16 +57,34 @@
       </section>
 
       <!-- ========================= GESTIÓN DE TICKETS ========================= -->
-      <section v-else-if="vista==='gestion'" class="gestion-tickets-layout">
-        <div class="gestion-left">
-          <div class="gestion-stats">
+      <section v-else-if="vista==='gestion'" class="gestion-tickets-layout vista-compacta vista-gestion">
+
+        <!-- ---------- COLUMNA IZQUIERDA: bandeja + informacion del ticket ---------- -->
+        <div class="gestion-col-izq">
+
+          <!-- Resumen de tickets -->
+          <div class="gestion-left gestion-resumen">
+            <div class="gestion-stats">
             <div class="g-stat"><i class="badge" style="background:#3E7BD626;color:#3E7BD6"><IconoSigta nombre="tickets" :tamano="16" /></i><div><small>Total</small><b>{{ ticketsGestion.length }}</b></div></div>
             <div class="g-stat"><i class="badge" style="background:#DC262626;color:#DC2626"><IconoSigta nombre="tickets" :tamano="16" /></i><div><small>Por validar</small><b>{{ porValidar.length }}</b></div></div>
             <div class="g-stat"><i class="badge" style="background:#C79A1E26;color:#C79A1E"><IconoSigta nombre="actividades" :tamano="16" /></i><div><small>Por priorizar</small><b>{{ porClasificar.length }}</b></div></div>
             <div class="g-stat"><i class="badge" style="background:#3E7BD626;color:#3E7BD6"><IconoSigta nombre="usuarios" :tamano="16" /></i><div><small>Por designar</small><b>{{ porDesignar.length }}</b></div></div>
           </div>
+          </div>
 
-          <div class="gestion-filtros">
+          <!-- Unidad de busqueda y seleccion de ticket -->
+          <div class="bloque-seleccion">
+
+            <div class="selector-informe selector-ticket">
+            <span class="selector-label">Ticket seleccionado</span>
+            <button type="button" :class="['selector-trigger', selectorTicketAbierto ? 'abierto' : '']" @click="selectorTicketAbierto = !selectorTicketAbierto">
+              <span v-if="itemActivo" class="selector-valor"><b>{{ itemActivo.codigo }}</b> — {{ itemActivo.titulo }}</span>
+              <span v-else class="selector-valor vacio">Seleccione un ticket · {{ ticketsGestion.length }} en bandeja</span>
+              <i :class="['selector-flecha', selectorTicketAbierto ? 'abierta' : '']">▾</i>
+            </button>
+
+            <div v-if="selectorTicketAbierto" class="selector-panel">
+              <div class="gestion-filtros">
             <div class="g-buscar"><IconoSigta nombre="solicitudes" :tamano="15" /><input v-model="busquedaTickets" type="text" placeholder="Buscar por código, título o solicitante..."></div>
             <select v-model="filtroEstadoTickets">
               <option value="TODOS">Todos los estados</option>
@@ -74,38 +93,28 @@
               <option value="DESIGNAR">Por designar</option>
             </select>
           </div>
-
-          <div class="gestion-lista">
-            <article v-for="r in ticketsPaginados" :key="r.id" :class="['ticket-item', itemActivo?.id === r.id ? 'activo' : '', r.estado_codigo === 'RECIBIDO' ? 't-validar' : (!r.prioridad_jefatura ? 't-clasificar' : 't-designar')]" @click="abrir(r)">
-              <div class="top">
-                <span>{{ r.codigo }}</span>
-                <em v-if="r.estado_codigo === 'RECIBIDO'" class="e-validar">Paso 1: Por Validar</em>
-                <em v-else-if="!r.prioridad_jefatura" class="e-clasificar">Paso 2: Por Priorizar</em>
-                <em v-else class="e-designar">Paso 3: Por Designar</em>
+              <div class="selector-cabecera"><span>Código</span><span>Título</span><span>Estado</span></div>
+              <div class="selector-lista">
+                <button v-for="r in ticketsPaginados" :key="r.id" type="button" :class="['selector-fila', itemActivo?.id === r.id ? 'activo' : '']" @click="abrir(r); selectorTicketAbierto = false">
+                  <span class="c-codigo">{{ r.codigo }}</span>
+                  <span class="c-titulo">{{ r.titulo }}</span>
+                  <em v-if="r.estado_codigo === 'RECIBIDO'" class="e-validar">Paso 1: Por Validar</em>
+                  <em v-else-if="!r.prioridad_jefatura" class="e-clasificar">Paso 2: Por Priorizar</em>
+                  <em v-else class="e-designar">Paso 3: Por Designar</em>
+                </button>
+                <div v-if="!ticketsFiltrados.length" class="empty-list">{{ ticketsGestion.length ? 'Ningún ticket coincide con la búsqueda.' : 'Bandeja al día. No hay tickets pendientes.' }}</div>
               </div>
-              <h4>{{ r.titulo }}</h4>
-              <p>📍 {{ r.ubicacion || 's/d' }} • 🧑 {{ r.solicitante_nombre || 's/d' }}</p>
-            </article>
-            <div v-if="!ticketsFiltrados.length" class="empty-list">{{ ticketsGestion.length ? 'Ningún ticket coincide con la búsqueda.' : 'Bandeja al día. No hay tickets pendientes.' }}</div>
-          </div>
-
-          <div v-if="totalPaginasTickets > 1" class="gestion-paginacion">
+              <div v-if="totalPaginasTickets > 1" class="gestion-paginacion">
             <button type="button" :disabled="paginaTickets===1" @click="paginaTickets--">‹</button>
             <span>Página {{ paginaTickets }} de {{ totalPaginasTickets }}</span>
             <button type="button" :disabled="paginaTickets===totalPaginasTickets" @click="paginaTickets++">›</button>
           </div>
-        </div>
-
-        <div class="gestion-right">
-          <div v-if="!itemActivo" class="empty">
-            <span>←</span>
-            <h3>Seleccione un ticket</h3>
-            <p>Seleccione un ticket de la lista para gestionar su flujo operativo.</p>
+            </div>
           </div>
-          <div v-else class="gestion-detalle-wrapper">
-              
-              <!-- Encabezado del Ticket -->
-              <div class="ticket-header-card">
+          </div>
+
+          <!-- Informacion del ticket (movida a la columna izquierda) -->
+              <div v-if="itemActivo" class="ticket-header-card">
                 <div class="t-head">
                   <h2>{{ itemActivo.titulo }}</h2>
                   <span class="codigo-badge">{{ itemActivo.codigo }}</span>
@@ -132,9 +141,16 @@
                   </div>
                 </div>
               </div>
+        </div>
 
-            <!-- Flujo Operativo -->
-            <div class="workflow-card">
+        <!-- ---------- COLUMNA DERECHA: consola de gestion ---------- -->
+        <div class="gestion-right">
+          <div v-if="!itemActivo" class="empty">
+            <span>←</span>
+            <h3>Seleccione un ticket</h3>
+            <p>Seleccione un ticket de la lista para gestionar su flujo operativo.</p>
+          </div>
+                      <div v-else class="workflow-card">
               <div class="wf-header">Consola de Gestión (Flujo)</div>
               <div class="wf-body">
                 
@@ -189,40 +205,42 @@
 
               </div>
             </div>
-          </div>
         </div>
       </section>
 
       <!-- ===================== 4. VIABILIDAD COMPRA (NUEVO MAESTRO-DETALLE) ===================== -->
-      <div v-else-if="vista==='compra'" class="gestion-tickets-layout">
-        
-        <!-- Panel Izquierdo: Lista -->
-        <div class="gestion-left">
-          <div class="gestion-left-header">
-            <h3>Compras Pendientes</h3>
-            <span class="badge">{{ porEvaluarCompra.length }} por evaluar</span>
-          </div>
-          <div class="gestion-lista">
-            <article v-for="r in porEvaluarCompra" :key="r.id" :class="['ticket-item', itemActivo?.id === r.id ? 'activo' : '', 't-validar']" @click="abrir(r)">
-              <div class="top"><span>{{ r.codigo }}</span><em class="e-validar">Por Evaluar</em></div>
-              <h4>{{ r.titulo }}</h4>
-              <p>📍 {{ r.ubicacion || 's/d' }} • 📦 {{ r.producto_requerido || 's/d' }}</p>
-            </article>
-            <div v-if="!porEvaluarCompra.length" class="empty-list">Bandeja al día. No hay requerimientos por evaluar.</div>
-          </div>
-        </div>
+      <div v-else-if="vista==='compra'" class="gestion-tickets-layout vista-compacta vista-compra">
 
-        <!-- Panel Derecho: Flujo y Expediente -->
-        <div class="gestion-right">
-          <div v-if="!itemActivo" class="empty">
-            <span style="font-size:30px">📦</span>
-            <h3>Seleccione un requerimiento</h3>
-            <p>Seleccione un requerimiento de compra de la lista para gestionar su expediente y enviarlo a la DAF.</p>
+        <!-- ---------- COLUMNA IZQUIERDA: selector compacto + detalles ---------- -->
+        <div class="compra-col-izq">
+
+          <div class="selector-informe selector-compra">
+            <div class="selector-encabezado">
+              <span class="selector-label">Compras Pendientes</span>
+              <span class="badge">{{ porEvaluarCompra.length }} por evaluar</span>
+            </div>
+            <button type="button" :class="['selector-trigger', selectorCompraAbierto ? 'abierto' : '']" @click="selectorCompraAbierto = !selectorCompraAbierto">
+              <span v-if="itemActivo" class="selector-valor"><b>{{ itemActivo.codigo }}</b> — {{ itemActivo.titulo }}</span>
+              <span v-else class="selector-valor vacio">Seleccione un requerimiento</span>
+              <i :class="['selector-flecha', selectorCompraAbierto ? 'abierta' : '']">▾</i>
+            </button>
+
+            <div v-if="selectorCompraAbierto" class="selector-panel">
+              <div class="g-buscar"><IconoSigta nombre="solicitudes" :tamano="15" /><input v-model="busquedaCompra" type="text" placeholder="Buscar por código, título o solicitante..."></div>
+              <div class="selector-cabecera"><span>Código</span><span>Título</span><span>Estado</span></div>
+              <div class="selector-lista">
+                <button v-for="r in comprasFiltradas" :key="r.id" type="button" :class="['selector-fila', itemActivo?.id === r.id ? 'activo' : '']" @click="abrir(r); selectorCompraAbierto = false">
+                  <span class="c-codigo">{{ r.codigo }}</span>
+                  <span class="c-titulo"><b>{{ r.titulo }}</b><small>📍 {{ r.ubicacion || 's/d' }} • 📦 {{ r.producto_requerido || 's/d' }}</small></span>
+                  <em class="e-validar">Por Evaluar</em>
+                </button>
+                <div v-if="!comprasFiltradas.length" class="empty-list">{{ porEvaluarCompra.length ? 'Ningún requerimiento coincide con la búsqueda.' : 'Bandeja al día. No hay requerimientos por evaluar.' }}</div>
+              </div>
+            </div>
           </div>
-          <div v-else class="gestion-detalle-wrapper">
-            
-            <!-- Encabezado del Requerimiento -->
-            <div class="ticket-header-card">
+
+          <!-- Detalles del componente solicitado (columna izquierda) -->
+            <div v-if="itemActivo" class="ticket-header-card">
               <div class="t-head">
                 <h2>{{ itemActivo.titulo }}</h2>
                 <span class="codigo-badge">{{ itemActivo.codigo }}</span>
@@ -251,9 +269,16 @@
                 </div>
               </div>
             </div>
+        </div>
 
-            <!-- Flujo Operativo -->
-            <div class="workflow-card">
+        <!-- ---------- COLUMNA DERECHA: armado del expediente ---------- -->
+        <div class="compra-col-der">
+          <div v-if="!itemActivo" class="empty">
+            <span style="font-size:30px">📦</span>
+            <h3>Seleccione un requerimiento</h3>
+            <p>Seleccione un requerimiento de compra de la lista para gestionar su expediente y enviarlo a la DAF.</p>
+          </div>
+                      <div v-else class="workflow-card">
               <div class="wf-header">Armado de Expediente para la DAF</div>
               <div class="wf-body">
                 <div v-if="!formCompra.viable" class="wf-step active">
@@ -323,7 +348,6 @@
                 </template>
               </div>
             </div>
-          </div>
         </div>
       </div>
 
@@ -350,61 +374,80 @@
       <section v-else-if="vista==='informe'">
         <div class="instruction"><b>Conformidad e informe final</b><span>Informe la conformidad del mantenimiento y elabore el informe que se elevará a la Dirección.</span></div>
 
-        <div class="gestion-tickets-layout">
-          <div class="gestion-left">
-            <div class="gestion-left-header">
-              <h3>Informes pendientes</h3>
-              <span class="badge">{{ pendientesInforme.length }} requiere acción</span>
+        <div class="gestion-tickets-layout vista-compacta vista-informe">
+
+          <!-- ---------- COLUMNA IZQUIERDA: selector + informacion ---------- -->
+          <div class="informe-col-izq">
+
+            <!-- Selector compacto (reemplaza visualmente a la bandeja) -->
+            <div class="selector-informe">
+              <span class="selector-label">Informe seleccionado</span>
+              <button type="button" class="selector-trigger" @click="selectorInformeAbierto = !selectorInformeAbierto">
+                <span v-if="itemActivo" class="selector-valor"><b>{{ itemActivo.codigo }}</b> — {{ itemActivo.titulo }}</span>
+                <span v-else class="selector-valor vacio">Seleccione un informe · {{ pendientesInforme.length }} requiere acción</span>
+                <i :class="['selector-flecha', selectorInformeAbierto ? 'abierta' : '']">▾</i>
+              </button>
+
+              <div v-if="selectorInformeAbierto" class="selector-panel">
+                <div class="g-buscar"><IconoSigta nombre="solicitudes" :tamano="15" /><input v-model="busquedaInforme" type="text" placeholder="Buscar por código, título o solicitante..."></div>
+                <div class="selector-cabecera"><span>Código</span><span>Título</span><span>Estado</span></div>
+                <div class="selector-lista">
+                  <button v-for="r in informesFiltrados" :key="r.id" type="button" :class="['selector-fila', itemActivo?.id === r.id ? 'activo' : '']" @click="abrir(r); selectorInformeAbierto = false">
+                    <span class="c-codigo">{{ r.codigo }}</span>
+                    <span class="c-titulo">{{ r.titulo }}</span>
+                    <em :class="r.estado_codigo === 'CONFORMIDAD_INFORMADA' ? 'e-designar' : 'e-clasificar'">{{ r.estado_codigo === 'CONFORMIDAD_INFORMADA' ? 'Por informar' : 'Por conformar' }}</em>
+                  </button>
+                  <div v-if="!informesFiltrados.length" class="empty-list">{{ pendientesInforme.length ? 'Ningún informe coincide con la búsqueda.' : 'Bandeja al día. No hay casos esperando conformidad ni informe final.' }}</div>
+                </div>
+              </div>
             </div>
-            <div class="gestion-lista">
-              <article v-for="r in pendientesInforme" :key="r.id" :class="['ticket-item', itemActivo?.id === r.id ? 'activo' : '', r.estado_codigo === 'CONFORMIDAD_INFORMADA' ? 't-designar' : 't-clasificar']" @click="abrir(r)">
-                <div class="top"><span>{{ r.codigo }}</span><em :class="r.estado_codigo === 'CONFORMIDAD_INFORMADA' ? 'e-designar' : 'e-clasificar'">{{ r.estado_codigo === 'CONFORMIDAD_INFORMADA' ? 'Por informar' : 'Por conformar' }}</em></div>
-                <h4>{{ r.titulo }}</h4>
-                <p>👤 {{ r.solicitante_nombre || 's/d' }} · {{ r.estado_codigo === 'CONFORMIDAD_INFORMADA' ? 'Elaborar informe final' : 'Confirmar conformidad' }}</p>
-              </article>
-              <div v-if="!pendientesInforme.length" class="empty-list">Bandeja al día. No hay casos esperando conformidad ni informe final.</div>
+
+            <!-- Informacion del informe seleccionado -->
+            <div v-if="!itemActivo" class="empty">
+              <span>↑</span>
+              <h3>Seleccione un requerimiento</h3>
+              <p>Elija un caso en el selector para informar la conformidad y elevar su informe final paso a paso.</p>
+            </div>
+
+            <div v-else class="ticket-header-card">
+              <div class="t-head"><h2>{{ itemActivo.titulo }}</h2><span class="codigo-badge">{{ itemActivo.codigo }}</span></div>
+              <p class="t-meta"><span>👤 <b>Solicitante:</b> {{ itemActivo.solicitante_nombre || 's/d' }}</span><span>📍 <b>Ubicación:</b> {{ itemActivo.ubicacion || 's/d' }}</span></p>
+              <div class="t-content">
+                <div class="desc-box"><strong>Informe del técnico</strong><p>{{itemActivo.informe_trabajo}}</p><strong>Resumen técnico del caso</strong><p>{{ itemActivo.descripcion || 'Sin descripción registrada.' }}</p><p v-if="itemActivo.trabajo_realizado"><b>Trabajo realizado:</b> {{ itemActivo.trabajo_realizado }}</p><p v-if="itemActivo.resultado_pruebas"><b>Pruebas técnicas:</b> {{ itemActivo.resultado_pruebas }}</p></div>
+                <div v-if="itemActivo.fotografia_trabajo_url" class="evidence-box"><div class="evidence-info"><strong>Informe adjunto / evidencia del trabajo</strong><span>Evidencia registrada por el técnico</span></div><a class="evidence-btn" :href="itemActivo.fotografia_trabajo_url" target="_blank" rel="noopener">Ver evidencia ↗</a></div>
+              </div>
             </div>
           </div>
 
-          <div class="gestion-right">
+          <!-- ---------- COLUMNA DERECHA: flujo de conformidad ---------- -->
+          <div class="informe-col-der">
             <div v-if="!itemActivo" class="empty">
-              <span>←</span>
-              <h3>Seleccione un requerimiento</h3>
-              <p>Elija un caso de la bandeja para informar la conformidad y elevar su informe final paso a paso.</p>
+              <span>📝</span>
+              <h3>Flujo de conformidad</h3>
+              <p>Los pasos de conformidad e informe final se mostrarán aquí al elegir un caso.</p>
             </div>
 
-            <div v-else class="gestion-detalle-wrapper">
-              <div class="ticket-header-card">
-                <div class="t-head"><h2>{{ itemActivo.titulo }}</h2><span class="codigo-badge">{{ itemActivo.codigo }}</span></div>
-                <p class="t-meta"><span>👤 <b>Solicitante:</b> {{ itemActivo.solicitante_nombre || 's/d' }}</span><span>📍 <b>Ubicación:</b> {{ itemActivo.ubicacion || 's/d' }}</span></p>
-                <div class="t-content">
-                  <div class="desc-box"><strong>Informe del técnico</strong><p>{{itemActivo.informe_trabajo}}</p><strong>Resumen técnico del caso</strong><p>{{ itemActivo.descripcion || 'Sin descripción registrada.' }}</p><p v-if="itemActivo.trabajo_realizado"><b>Trabajo realizado:</b> {{ itemActivo.trabajo_realizado }}</p><p v-if="itemActivo.resultado_pruebas"><b>Pruebas técnicas:</b> {{ itemActivo.resultado_pruebas }}</p></div>
-                  <div v-if="itemActivo.fotografia_trabajo_url" class="evidence-box"><div class="evidence-info"><strong>Informe adjunto / evidencia del trabajo</strong><span>Evidencia registrada por el técnico</span></div><a class="evidence-btn" :href="itemActivo.fotografia_trabajo_url" target="_blank" rel="noopener">Ver evidencia ↗</a></div>
-                </div>
-              </div>
-
-              <div class="workflow-card">
-                <div class="wf-header">Flujo de conformidad e informe final</div><div v-if="itemActivo.estado_codigo==='INFORME_REGISTRADO' && !itemActivo.verificado_en" class="wf-body"><h4>Revisar informe y funcionamiento</h4><div class="actions"><button class="reject" @click="verificar(itemActivo,false)">No resuelto</button><button class="primary" @click="verificar(itemActivo,true)">Problema resuelto</button></div></div>
-                <div class="wf-body">
-                  <div :class="['wf-step', itemActivo.estado_codigo === 'CONFORMIDAD_INFORMADA' ? 'completed' : 'active']">
-                    <div class="step-num">1</div>
-                    <div class="step-content">
-                      <h4>Confirmar conformidad <span v-if="itemActivo.estado_codigo === 'CONFORMIDAD_INFORMADA'" class="step-badge">✓ Completada</span></h4>
-                      <p v-if="itemActivo.estado_codigo !== 'CONFORMIDAD_INFORMADA'">Revise la reparación, las pruebas y el detalle del trabajo antes de confirmar la conformidad.</p>
-                      <p v-else>La conformidad fue registrada el {{ fecha(itemActivo.conformidad_en) }}. Ya puede elaborar el informe final.</p>
-                      <div v-if="itemActivo.estado_codigo !== 'CONFORMIDAD_INFORMADA'" class="step-actions"><button class="primary flex-btn" :disabled="procesando || !itemActivo.verificado_en" @click="conformar(itemActivo)">Confirmar y continuar</button></div>
-                    </div>
+            <div v-else class="workflow-card">
+              <div class="wf-header">Revisión y cierre del informe</div><div v-if="itemActivo.estado_codigo==='INFORME_REGISTRADO' && !itemActivo.verificado_en" class="wf-body"><h4>Revisar informe y funcionamiento</h4><div class="actions"><button class="reject" @click="verificar(itemActivo,false)">No resuelto</button><button class="primary" @click="verificar(itemActivo,true)">Problema resuelto</button></div></div>
+              <div class="wf-body">
+                <div :class="['wf-step', itemActivo.estado_codigo === 'CONFORMIDAD_INFORMADA' ? 'completed' : 'active']">
+                  <div class="step-num">1</div>
+                  <div class="step-content">
+                    <h4>Confirmar conformidad <span v-if="itemActivo.estado_codigo === 'CONFORMIDAD_INFORMADA'" class="step-badge">✓ Completada</span></h4>
+                    <p v-if="itemActivo.estado_codigo !== 'CONFORMIDAD_INFORMADA'">Revise la reparación, las pruebas y el detalle del trabajo antes de confirmar la conformidad.</p>
+                    <p v-else>La conformidad fue registrada el {{ fecha(itemActivo.conformidad_en) }}. Ya puede elaborar el informe final.</p>
+                    <div v-if="itemActivo.estado_codigo !== 'CONFORMIDAD_INFORMADA'" class="step-actions"><button class="primary flex-btn" :disabled="procesando || !itemActivo.verificado_en" @click="conformar(itemActivo)">Confirmar y continuar</button></div>
                   </div>
+                </div>
 
-                  <div :class="['wf-step', itemActivo.estado_codigo !== 'CONFORMIDAD_INFORMADA' ? 'locked' : 'active']">
-                    <div class="step-num">2</div>
-                    <div class="step-content">
-                      <h4>Elaborar, validar y elevar informe final</h4>
-                      <p>Registre el cierre del caso. Al validarlo, el informe será enviado a la Dirección para su recepción.</p>
-                      <div v-if="itemActivo.estado_codigo === 'CONFORMIDAD_INFORMADA'">
-                        <label class="campo">Informe final<textarea v-model="formInforme.informe_final" rows="6" placeholder="Resuma el diagnóstico, trabajo realizado, componentes utilizados, pruebas y resultado final."></textarea></label>
-                        <div class="step-actions"><button class="primary flex-btn" :disabled="procesando || !formInforme.informe_final.trim()" @click="elaborarInforme">{{ procesando ? 'Validando...' : 'Validar y elevar a la Dirección' }}</button></div>
-                      </div>
+                <div :class="['wf-step', itemActivo.estado_codigo !== 'CONFORMIDAD_INFORMADA' ? 'locked' : 'active']">
+                  <div class="step-num">2</div>
+                  <div class="step-content">
+                    <h4>Elaborar, validar y elevar informe final</h4>
+                    <p>Registre el cierre del caso. Al validarlo, el informe será enviado a la Dirección para su recepción.</p>
+                    <div v-if="itemActivo.estado_codigo === 'CONFORMIDAD_INFORMADA'">
+                      <label class="campo">Informe final<textarea v-model="formInforme.informe_final" rows="6" placeholder="Resuma el diagnóstico, trabajo realizado, componentes utilizados, pruebas y resultado final."></textarea></label>
+                      <div class="step-actions"><button class="primary flex-btn" :disabled="procesando || !formInforme.informe_final.trim()" @click="elaborarInforme">{{ procesando ? 'Validando...' : 'Validar y elevar a la Dirección' }}</button></div>
                     </div>
                   </div>
                 </div>
@@ -415,15 +458,34 @@
       </section>
 
       <!-- ====================== REPORTE MENSUAL ====================== -->
-      <section v-else-if="vista==='reporte'">
+      <section v-else-if="vista==='reporte'" class="vista-reporte">
         <div class="instruction"><b>Reporte mensual</b><span>Consolidado de los mantenimientos finalizados en el periodo.</span></div>
-        <div class="panel">
+
+        <div class="panel reporte-filtros">
           <div class="actions" style="border:0;margin:0">
             <label class="campo">Año<input v-model="periodo.anio" type="number" min="2020" max="2100"></label>
             <label class="campo">Mes<input v-model="periodo.mes" type="number" min="1" max="12"></label>
             <button class="primary" :disabled="procesando" @click="cargarReporte">Consultar</button>
           </div>
-          <p v-if="reporte" class="copy"><b>{{ reporte.total_finalizados }}</b> mantenimiento(s) finalizado(s) en {{ reporte.mes }}/{{ reporte.anio }}.</p>
+        </div>
+
+        <div v-if="reporte" class="reporte-cabecera">
+          <div class="panel reporte-kpi">
+            <p v-if="reporte" class="copy"><b>{{ reporte.total_finalizados }}</b> mantenimiento(s) finalizado(s) en {{ reporte.mes }}/{{ reporte.anio }}.</p>
+          </div>
+
+          <div v-if="reporte.total_finalizados" class="panel reporte-grafico">
+            <span class="rg-titulo">Finalizados por día</span>
+            <div class="rg-barras">
+              <div v-for="d in reportePorDia" :key="`rg-${d.dia}`" class="rg-col" :title="`${d.dia}: ${d.total}`">
+                <div class="rg-pista"><div :class="['rg-barra', d.total ? 'con-dato' : '']" :style="{ height: (d.total / reporteMaxDia * 100) + '%' }"></div></div>
+                <small>{{ d.dia % 5 === 0 || d.dia === 1 ? d.dia : '' }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="reporte" class="panel reporte-lista">
           <article v-for="r in (reporte?.requerimientos || [])" :key="`rep-${r.id}`" class="reporte-item">
             <b>{{ r.codigo }}</b> — {{ r.titulo }} <small>({{ fecha(r.finalizado_en) }})</small>
           </article>
@@ -467,6 +529,7 @@
 </template>
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import IconoSigta from '../components/IconoSigta.vue'
@@ -532,6 +595,32 @@ const porVerificar = computed(() => items.value.filter(r => r.estado_codigo === 
 const porConformar = computed(() => items.value.filter(r => r.estado_codigo === 'INFORME_REGISTRADO' && !!r.verificado_en))
 const porInformar = computed(() => items.value.filter(r => r.estado_codigo === 'CONFORMIDAD_INFORMADA' && !r.informe_elevado_en))
 const pendientesInforme = computed(() => [...porVerificar.value, ...porConformar.value, ...porInformar.value])
+
+/* Selector compacto de la bandeja de "Informes de los técnicos".
+   Estado exclusivamente visual: controla el desplegable y filtra en
+   memoria la MISMA lista `pendientesInforme`. No altera la carga de
+   datos, la seleccion (`abrir`) ni el flujo de conformidad. */
+const selectorInformeAbierto = ref(false)
+const busquedaInforme = ref('')
+const selectorTicketAbierto = ref(false)  /* solo abre/cierra el desplegable de Gestion de tickets */
+const selectorCompraAbierto = ref(false)  /* solo abre/cierra el desplegable de Solicitar compra */
+const busquedaCompra = ref('')
+
+const comprasFiltradas = computed(() => {
+  const texto = busquedaCompra.value.trim().toLowerCase()
+  if (!texto) return porEvaluarCompra.value
+  return porEvaluarCompra.value.filter(r =>
+    [r.codigo, r.titulo, r.solicitante_nombre].some(v => (v || '').toLowerCase().includes(texto))
+  )
+})
+
+const informesFiltrados = computed(() => {
+  const texto = busquedaInforme.value.trim().toLowerCase()
+  if (!texto) return pendientesInforme.value
+  return pendientesInforme.value.filter(r =>
+    [r.codigo, r.titulo, r.solicitante_nombre].some(v => (v || '').toLowerCase().includes(texto))
+  )
+})
 
 const menu = computed(() => [
   { id: 'resumen', icono: 'inicio', nombre: 'Dashboard', color: '#F2C400' },
@@ -770,6 +859,25 @@ async function cargarReporte() {
   }
 }
 
+/* Derivados unicamente para la representacion visual del reporte.
+   No consultan nada ni tocan el flujo Anio -> Mes -> Consultar: leen el
+   mismo objeto `reporte` que ya dejo cargado cargarReporte(). */
+const reportePorDia = computed(() => {
+  const filas = reporte.value?.requerimientos || []
+  const dias = reporte.value ? new Date(reporte.value.anio, reporte.value.mes, 0).getDate() : 0
+  const conteo = new Array(dias).fill(0)
+  filas.forEach(r => {
+    const f = r.finalizado_en ? new Date(r.finalizado_en) : null
+    if (f && !isNaN(f.getTime())) {
+      const d = f.getDate()
+      if (d >= 1 && d <= dias) conteo[d - 1] += 1
+    }
+  })
+  return conteo.map((total, i) => ({ dia: i + 1, total }))
+})
+
+const reporteMaxDia = computed(() => Math.max(1, ...reportePorDia.value.map(d => d.total)))
+
 let intervaloActualizacion = null
 
 onMounted(() => {
@@ -888,4 +996,233 @@ textarea { width: 100%; border: 1px solid var(--sigta-borde); border-radius: 6px
 .load-error { margin: -10px 0 18px; padding: 12px 14px; border-left: 4px solid var(--sigta-error); border-radius: 7px; background: var(--sigta-error-fondo); color: var(--sigta-error); font-size: 13px; font-weight: 700; }
 
 @media(max-width:1050px){.stats{grid-template-columns:1fr 1fr}.panels{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}.gestion-tickets-layout{flex-direction:column;height:auto}.gestion-left{width:100%;height:300px}}@media(max-width:760px){aside{position:static;width:100%}main{margin:0;padding:20px}.stats,.cards,.process-grid{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column;gap:12px}.detalle-fila{grid-template-columns:1fr}.p-options{grid-template-columns:1fr 1fr}}
+
+/* ==================================================================
+   AJUSTE VISUAL COMPARTIDO - PANTALLAS MAESTRO-DETALLE
+   Alcance: .vista-compacta (Gestion de tickets, Solicitar compra,
+   Informes de los tecnicos). Ninguna regla toca las clases base,
+   de modo que las demas vistas y dashboards quedan igual que antes.
+   Filosofia: listado secundario compacto -> contenido principal
+   protagonista -> menos espacio muerto y menos scroll.
+   ================================================================== */
+
+/* ---------- 1. PANEL IZQUIERDO (listado secundario) ---------- */
+.vista-compacta .gestion-left { width: 27%; min-width: 250px; }
+.vista-compacta .gestion-left-header { padding: 11px 15px; }
+.vista-compacta .gestion-lista { padding: 8px; gap: 6px; }
+.vista-compacta .ticket-item { padding: 9px 11px; }
+.vista-compacta .ticket-item .top span { font-size: 11px; }
+.vista-compacta .ticket-item .top em { font-size: 9px; padding: 3px 7px; }
+.vista-compacta .ticket-item h4 { margin: 4px 0 2px; font-size: 12.5px; line-height: 1.3; }
+.vista-compacta .ticket-item p { font-size: 10.5px; line-height: 1.35; }
+.vista-compacta .empty-list { padding: 18px 14px; }
+.vista-compacta .gestion-paginacion { padding: 7px 10px; font-size: 11px; }
+.vista-compacta .gestion-paginacion button { width: 24px; height: 24px; font-size: 13px; }
+
+/* ---------- 2. CABECERA DEL ELEMENTO (resumen compacto) ---------- */
+.vista-compacta .gestion-detalle-wrapper { gap: 12px; }
+.vista-compacta .ticket-header-card { padding: 14px 18px; }
+.vista-compacta .t-head { margin-bottom: 6px; }
+.vista-compacta .t-head h2 { font-size: 17px; }
+.vista-compacta .codigo-badge { font-size: 12px; padding: 3px 9px; }
+.vista-compacta .t-meta { margin: 0 0 10px; font-size: 12px; flex-wrap: wrap; row-gap: 4px; }
+.vista-compacta .t-content { gap: 10px; }
+.vista-compacta .desc-box { padding: 10px 14px; }
+.vista-compacta .desc-box strong { margin-bottom: 4px; }
+.vista-compacta .desc-box p { font-size: 12.5px; line-height: 1.45; }
+.vista-compacta .evidence-box { padding: 9px 14px; }
+.vista-compacta .evidence-btn { padding: 7px 13px; }
+
+/* ---------- 3. TARJETA DE FLUJO (contenido principal) ---------- */
+.vista-compacta .workflow-card { box-shadow: 0 6px 18px rgba(0,0,0,.07); }
+.vista-compacta .wf-header { display: flex; align-items: center; gap: 10px; padding: 12px 18px; font-size: 14.5px; color: var(--sigta-azul); }
+.vista-compacta .wf-header::before { content: ''; width: 4px; height: 17px; border-radius: 3px; background: var(--sigta-mostaza); flex-shrink: 0; }
+.vista-compacta .wf-body { padding: 16px 18px; }
+.vista-compacta .wf-body::before { left: 34px; top: 26px; bottom: 26px; }
+.vista-compacta .wf-step { margin-bottom: 12px; }
+.vista-compacta .step-num { width: 32px; height: 32px; font-size: 13px; border-width: 3px; }
+.vista-compacta .step-content { margin-left: 14px; padding: 11px 14px; }
+.vista-compacta .step-content h4 { margin: 0 0 3px; font-size: 14px; gap: 10px; }
+.vista-compacta .step-content p { margin: 0 0 8px; font-size: 11.5px; line-height: 1.4; }
+.vista-compacta .step-badge { font-size: 9.5px; padding: 3px 7px; }
+.vista-compacta .adjunto { margin-bottom: 6px; }
+.vista-compacta .campo { margin: 8px 0; }
+.vista-compacta .step-content input[type=file] { width: 100%; margin-top: 6px; padding: 7px 9px; font-size: 11.5px; font-family: inherit; color: var(--sigta-texto-suave); background: #f8fafc; border: 1px dashed var(--sigta-borde); border-radius: 7px; cursor: pointer; }
+.vista-compacta .step-content textarea { margin-bottom: 10px; font-size: 12.5px; }
+.vista-compacta .step-content .full-select { margin-bottom: 10px; padding: 8px 10px; font-size: 12.5px; }
+.vista-compacta .step-btn { padding: 10px; font-size: 13px; }
+.vista-compacta .p-options { gap: 8px; margin-bottom: 10px; }
+.vista-compacta .p-options label { padding: 7px 6px; font-size: 11.5px; }
+
+/* ---------- 4. AJUSTES PROPIOS DE CADA SECCION ---------- */
+
+/* Gestion de tickets: cabecera del panel izquierdo mas densa
+   para que la lista gane la altura que sobraba */
+.vista-gestion .gestion-stats { gap: 6px; padding: 10px 10px 0; }
+.vista-gestion .g-stat { padding: 6px 8px; gap: 7px; }
+.vista-gestion .g-stat i.badge { width: 24px; height: 24px; border-radius: 6px; }
+.vista-gestion .g-stat b { font-size: 14px; }
+.vista-gestion .gestion-filtros { gap: 6px; padding: 9px 10px; }
+.vista-gestion .g-buscar { padding: 6px 9px; }
+.vista-gestion .g-buscar input,
+.vista-gestion .gestion-filtros select { font-size: 11.5px; }
+.vista-gestion .gestion-filtros select { padding: 6px 9px; }
+
+/* Solicitar compra: los 4 datos del componente en fila,
+   aprovechando el ancho en lugar de apilarse */
+.vista-compra .desc-box { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 5px 18px; }
+.vista-compra .desc-box strong { grid-column: 1 / -1; }
+
+/* Informes de los tecnicos: dos columnas.
+   Izquierda = selector compacto + informacion. Derecha = flujo.
+   El desplegable se superpone, por eso la fila permite overflow. */
+.vista-informe { height: calc(100vh - 232px); min-height: 460px; overflow: visible; gap: 16px; }
+.vista-informe .informe-col-izq { width: 47%; min-width: 320px; display: flex; flex-direction: column; gap: 12px; overflow: visible; }
+.vista-informe .informe-col-der { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+.vista-informe .informe-col-izq .ticket-header-card { flex: 1; min-height: 0; overflow-y: auto; }
+.vista-informe .informe-col-izq .empty,
+.vista-informe .informe-col-der .empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; margin: 0; }
+.vista-informe .informe-col-der .workflow-card { flex: 1; min-height: 0; }
+.vista-informe .desc-box strong + p { margin-bottom: 8px; }
+.vista-informe .desc-box strong ~ strong { margin-top: 4px; display: block; }
+/* La tarjeta de flujo tiene dos .wf-body hermanos: el bloque de
+   revision y el de los pasos. La regla base da flex:1 a los dos, asi
+   que se repartian la altura a medias y el primero (titulo + dos
+   botones) dejaba un hueco enorme. Aqui el bloque de revision pasa a
+   ocupar solo lo que mide su contenido y los pasos se quedan con el
+   resto; la linea guia vertical tampoco se dibuja en ese bloque. */
+.vista-informe .wf-body:not(:last-child) { flex: 0 0 auto; overflow: visible; padding-bottom: 14px; border-bottom: 1px solid var(--sigta-borde-suave); }
+.vista-informe .wf-body:not(:last-child)::before { content: none; }
+.vista-informe .wf-body:last-child { padding-top: 14px; }
+.vista-informe .wf-body .actions { margin-top: 0; padding-top: 10px; gap: 10px; }
+.vista-informe .wf-body > h4 { margin: 0 0 4px; font-size: 14px; }
+.vista-informe .wf-body .actions button { padding: 10px 6px; }
+
+/* Selector compacto de informe */
+.selector-informe { position: relative; flex-shrink: 0; background: var(--sigta-blanco); border: 1px solid var(--sigta-borde); border-radius: 10px; padding: 10px 12px; }
+.selector-label { display: block; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--sigta-texto-suave); margin-bottom: 6px; }
+.selector-trigger { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 9px 12px; font-family: inherit; font-size: 13px; color: var(--sigta-texto); background: #f8fafc; border: 1px solid var(--sigta-borde); border-radius: 8px; cursor: pointer; }
+.selector-trigger:hover { border-color: var(--sigta-azul); }
+.selector-valor { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.selector-valor b { color: var(--sigta-azul); }
+.selector-valor.vacio { color: var(--sigta-texto-suave); }
+.selector-flecha { font-style: normal; color: var(--sigta-texto-suave); transition: transform .2s; }
+.selector-flecha.abierta { transform: rotate(180deg); }
+.selector-panel { position: absolute; z-index: 15; top: calc(100% - 2px); left: 12px; right: 12px; max-height: 320px; display: flex; flex-direction: column; background: var(--sigta-blanco); border: 1px solid var(--sigta-borde); border-radius: 10px; box-shadow: 0 12px 28px rgba(18,58,107,.16); overflow: hidden; }
+.selector-panel .g-buscar { margin: 10px 10px 8px; padding: 7px 10px; }
+.selector-panel .g-buscar input { font-size: 12px; }
+.selector-cabecera { display: grid; grid-template-columns: 105px 1fr 88px; gap: 8px; padding: 7px 12px; font-size: 9.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: var(--sigta-texto-suave); background: #f8fafc; border-top: 1px solid var(--sigta-borde-suave); border-bottom: 1px solid var(--sigta-borde-suave); }
+.selector-lista { overflow-y: auto; padding: 4px; }
+.selector-fila { display: grid; grid-template-columns: 105px 1fr 88px; gap: 8px; align-items: center; width: 100%; text-align: left; padding: 8px 8px; font-family: inherit; background: transparent; border: 0; border-radius: 7px; cursor: pointer; }
+.selector-fila:hover { background: #f1f5f9; }
+.selector-fila.activo { background: var(--sigta-azul-tenue); }
+.selector-fila .c-codigo { font-size: 11.5px; font-weight: 800; color: var(--sigta-azul); }
+.selector-fila .c-titulo { font-size: 12.5px; color: var(--sigta-texto); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.selector-fila em { font-size: 9px; font-style: normal; text-align: center; padding: 3px 6px; border-radius: 10px; line-height: 1.3; }
+.selector-panel .empty-list { padding: 16px 12px; }
+
+/* ---------- 5. ESPACIO SOBRANTE EN GESTION DE TICKETS Y SOLICITAR COMPRA ----------
+   Dos causas detectadas, ambas de estilo:
+   a) .gestion-left se estiraba a toda la altura de la fila (align-items:
+      stretch) aunque la bandeja tuviera cuatro tarjetas, dejando una caja
+      blanca casi vacia. Ahora mide lo que mide su contenido y solo llega
+      al tope -conservando su scroll interno- cuando hay muchos elementos.
+   b) el estado vacio era una caja con 65px de relleno pegada al borde
+      superior; ahora se centra y ocupa la columna de forma natural.
+   La tarjeta de flujo mantiene su flex:1 a proposito: es lo que permite
+   que .wf-body haga scroll cuando el expediente tiene muchos pasos. */
+.vista-gestion .gestion-right > .empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px; margin: 0; }
+
+/* Solicitar compra: mismo patron que Informes de los tecnicos.
+   Izquierda = selector compacto + detalles del componente.
+   Derecha = armado del expediente, protagonista a toda la altura. */
+.vista-compra { overflow: visible; gap: 16px; }
+.vista-compra .compra-col-izq { width: 42%; min-width: 320px; display: flex; flex-direction: column; gap: 12px; overflow: visible; }
+.vista-compra .compra-col-der { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+.vista-compra .compra-col-izq .ticket-header-card { flex: 0 1 auto; min-height: 0; overflow-y: auto; }
+.vista-compra .compra-col-der .workflow-card { flex: 1; min-height: 0; }
+.vista-compra .compra-col-der > .empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px; margin: 0; }
+.selector-compra .selector-encabezado { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.selector-compra .selector-label { margin-bottom: 0; }
+.selector-compra .selector-cabecera,
+.selector-compra .selector-fila { grid-template-columns: 105px 1fr 84px; }
+.selector-compra .selector-fila { align-items: start; }
+.selector-compra .c-titulo { display: block; overflow: hidden; }
+.selector-compra .c-titulo b { display: block; font-size: 12.5px; color: var(--sigta-texto); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.selector-compra .c-titulo small { display: block; margin-top: 2px; font-size: 10.5px; color: var(--sigta-texto-suave); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.selector-compra .selector-fila em { align-self: center; }
+
+/* Gestion de tickets: la informacion del ticket pasa a la columna
+   izquierda, debajo de la bandeja, y la consola se queda sola a la
+   derecha ocupando toda la altura disponible.
+   La bandeja mide lo que mide su contenido y se topa al 52% cuando hay
+   muchos tickets (su scroll interno es el de .gestion-lista, intacto);
+   la informacion toma el resto con scroll propio. */
+.vista-gestion .gestion-col-izq { width: 40%; min-width: 330px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.vista-gestion .gestion-col-izq .gestion-left { width: 100%; min-width: 0; align-self: stretch; flex: 0 0 auto; max-height: none; }
+.vista-gestion .gestion-resumen .gestion-stats { padding: 10px; }
+
+/* Selector de ticket: mismo componente visual que el de informes, con
+   el buscador y el <select> de estados existentes dentro del panel. */
+.selector-ticket .selector-panel { max-height: 430px; }
+
+/* Unidad de busqueda + filtro + seleccion de ticket: un solo bloque.
+   El buscador y el <select> de estados conservan su markup; solo pasan
+   a compartir contenedor con el selector, y el panel desplegable deja
+   de flotar para quedar pegado al disparador. */
+.bloque-seleccion { flex: 0 0 auto; background: var(--sigta-blanco); border: 1px solid var(--sigta-borde); border-radius: 12px; }
+.bloque-seleccion .gestion-filtros { padding: 12px 12px 11px; border-bottom: 1px solid var(--sigta-borde-suave); }
+.bloque-seleccion .selector-informe { border: 0; border-radius: 0; padding: 11px 12px 12px; background: transparent; }
+.bloque-seleccion .selector-trigger.abierto { border-color: var(--sigta-azul); border-bottom-color: var(--sigta-borde); border-radius: 8px 8px 0 0; }
+.bloque-seleccion .selector-panel { position: static; margin-top: -1px; max-height: 330px; border-radius: 0 0 8px 8px; box-shadow: none; }
+.bloque-seleccion .selector-panel .selector-cabecera { border-top: 0; }
+/* el buscador y el filtro de estados viven dentro del desplegable,
+   igual que en Informes de los tecnicos y Solicitar compra */
+.selector-panel .gestion-filtros { padding: 10px; gap: 6px; border-bottom: 1px solid var(--sigta-borde-suave); }
+.selector-panel .gestion-filtros .g-buscar { margin: 0; padding: 7px 10px; }
+.selector-panel .gestion-filtros .g-buscar input,
+.selector-panel .gestion-filtros select { font-size: 12px; }
+.selector-panel .gestion-filtros select { padding: 7px 9px; }
+.selector-ticket .selector-cabecera,
+.selector-ticket .selector-fila { grid-template-columns: 96px 1fr 104px; }
+.selector-ticket .selector-fila em { white-space: normal; line-height: 1.25; }
+.selector-ticket .gestion-paginacion { border-top: 1px solid var(--sigta-borde-suave); padding: 7px 10px; }
+.vista-gestion .gestion-col-izq .ticket-header-card { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.vista-gestion .gestion-right > .workflow-card { flex: 1; min-height: 0; }
+
+/* ---------- REPORTE MENSUAL ----------
+   Solo presentacion: filtros en una barra, el total como cifra
+   protagonista y una grafica de barras construida con los mismos
+   requerimientos que la consulta ya devuelve. */
+.vista-reporte .reporte-filtros { padding: 14px 18px; margin-bottom: 14px; }
+.vista-reporte .reporte-filtros .actions { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.vista-reporte .reporte-filtros .campo { margin: 0; width: 120px; }
+.vista-reporte .reporte-filtros .campo input { margin-top: 5px; }
+.vista-reporte .reporte-filtros button { flex: 0 0 auto; padding: 9px 22px; border-radius: 7px; border: 0; cursor: pointer; }
+
+.vista-reporte .reporte-cabecera { display: grid; grid-template-columns: minmax(220px, 1fr) 2.2fr; gap: 14px; margin-bottom: 14px; align-items: stretch; }
+.vista-reporte .reporte-kpi { display: flex; flex-direction: column; justify-content: center; padding: 18px 22px; border-left: 4px solid var(--sigta-mostaza); }
+.vista-reporte .reporte-kpi .copy { font-size: 13px; line-height: 1.5; color: var(--sigta-texto-suave); }
+.vista-reporte .reporte-kpi .copy b { display: block; font-size: 44px; line-height: 1; font-weight: 800; color: var(--sigta-azul); margin-bottom: 6px; }
+
+.vista-reporte .reporte-grafico { padding: 14px 18px 10px; display: flex; flex-direction: column; }
+.rg-titulo { display: block; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--sigta-texto-suave); margin-bottom: 12px; }
+.rg-barras { display: flex; align-items: flex-end; gap: 3px; flex: 1; min-height: 116px; }
+.rg-col { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.rg-pista { width: 100%; height: 96px; display: flex; align-items: flex-end; background: linear-gradient(to top, var(--sigta-borde-suave) 1px, transparent 1px) 0 100% / 100% 24px repeat-y; border-radius: 3px; }
+.rg-barra { width: 100%; min-height: 2px; border-radius: 3px 3px 0 0; background: var(--sigta-borde); transition: height .25s ease; }
+.rg-barra.con-dato { background: var(--sigta-azul); }
+.rg-col small { font-size: 9px; color: var(--sigta-texto-suave); height: 11px; line-height: 11px; }
+
+.vista-reporte .reporte-lista { padding: 6px 20px 14px; }
+.vista-reporte .reporte-item { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; padding: 11px 0; }
+.vista-reporte .reporte-item:first-child { border-top: 0; }
+.vista-reporte .reporte-item b { color: var(--sigta-azul); font-size: 12px; background: var(--sigta-azul-tenue); padding: 3px 9px; border-radius: 6px; }
+.vista-reporte .reporte-item small { margin-left: auto; color: var(--sigta-texto-suave); font-size: 11.5px; white-space: nowrap; }
+
+@media (max-width: 1050px) { .vista-reporte .reporte-cabecera { grid-template-columns: 1fr; } }
+
+/* ---------- 6. RESPONSIVE: se respeta el apilado original ---------- */
+@media (max-width: 1050px) { .vista-compra { height: auto; flex-direction: column; } .vista-compra .compra-col-izq { width: 100%; min-width: 0; } .vista-compacta .gestion-left { width: 100%; min-width: 0; align-self: stretch; max-height: none; } .vista-gestion .gestion-col-izq { width: 100%; min-width: 0; } .vista-gestion .gestion-col-izq .gestion-left { max-height: none; } .vista-gestion .gestion-col-izq .ticket-header-card { overflow: visible; } .vista-informe { height: auto; flex-direction: column; } .vista-informe .informe-col-izq { width: 100%; min-width: 0; } .vista-informe .informe-col-izq .ticket-header-card { flex: none; overflow: visible; } }
+@media (max-width: 760px) { .vista-compra .desc-box { grid-template-columns: 1fr; } }
 </style>

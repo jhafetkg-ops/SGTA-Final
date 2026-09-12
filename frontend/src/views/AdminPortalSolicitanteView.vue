@@ -31,6 +31,8 @@
           Abrir portal
         </button>
 
+      
+        <UsuarioHeader @actualizar="cargarTodo" />
       </header>
 
 
@@ -178,6 +180,7 @@
 
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 
 import {
   computed,

@@ -66,13 +66,7 @@
             </div>
           </div>
 
-          <div class="user-box">
-            <div class="user-avatar">{{ inicialesUsuario }}</div>
-            <div>
-              <strong>{{ usuario?.nombre || usuario?.nombre_completo || 'Director' }}</strong>
-              <span>{{ usuario?.email || 'admin@emi.edu.bo' }}</span>
-            </div>
-          </div>
+          <UsuarioHeader @actualizar="cargarResumen" />
 
         </div>
       </div>
@@ -489,6 +483,7 @@
 
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 
 import {
   computed,

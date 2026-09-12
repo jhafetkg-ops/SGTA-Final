@@ -9,7 +9,7 @@
 
     <LogoutModal :visible="mostrarLogout" @cancelar="mostrarLogout=false" @confirmar="confirmarSalida" />
     <main>
-      <header><div><h1>{{titulo}}</h1><p>{{subtitulo}}</p></div><div class="header-actions"><div class="user-box"><div class="user-avatar">{{ iniciales }}</div><div><strong>{{ nombre }}</strong><span>Jefe de UTIC</span></div></div><button class="refresh" @click="cargar">↻ Actualizar</button></div></header>
+      <header><div><h1>{{titulo}}</h1><p>{{subtitulo}}</p></div><div class="header-actions"><UsuarioHeader @actualizar="cargar" /></div></header>
 
       <section v-if="vista==='dashboard'">
         <div class="hero"><div><small>GESTIÓN OPERATIVA</small><h2>{{saludo}}, {{primerNombre}}</h2><p>Resumen de tickets que requieren seguimiento de la Jefatura UTIC.</p></div><b>UTIC</b></div>
@@ -53,6 +53,7 @@
 </template>
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 import {computed,onMounted,reactive,ref} from 'vue'
 import {useRouter} from 'vue-router'
 import LogoutModal from '../components/LogoutModal.vue'

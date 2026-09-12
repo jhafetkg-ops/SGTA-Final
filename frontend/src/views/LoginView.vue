@@ -553,13 +553,7 @@ if (emailRecordado) {
 
   padding: 20px;
 
-  background:
-    linear-gradient(
-      135deg,
-      var(--sigta-azul) 0%,
-      var(--sigta-azul) 55%,
-      var(--sigta-texto-suave) 100%
-    );
+  background: var(--sigta-azul);
 
   font-family: var(--sigta-fuente);
 }

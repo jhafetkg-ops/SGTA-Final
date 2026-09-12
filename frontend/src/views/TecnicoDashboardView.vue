@@ -5,10 +5,6 @@
         <div class="brand"><span><img src="/img/emi.jpg" alt="EMI"></span><div><b>SIGTA</b><small>Gestión técnica</small></div></div>
         <button type="button" class="menu-toggle" :aria-expanded="menuAbierto" aria-label="Mostrar opciones del menú" @click="menuAbierto = !menuAbierto"><span></span><span></span><span></span></button>
       </div>
-      <div class="profile">
-        <div class="avatar">{{ iniciales }}</div>
-        <div><strong>{{ nombre }}</strong><span>{{ etiquetaRol }}</span></div>
-      </div>
       <p class="nav-label">CENTRO DE TRABAJO</p>
       <button :class="{ active: modulo === 'resumen' }" @click="modulo = 'resumen'; menuAbierto = false"><i>⌂</i> Resumen</button>
       <button :class="{ active: modulo === 'soporte' }" @click="modulo = 'soporte'; menuAbierto = false"><i>ST</i> Soporte técnico <em>{{ conteos.soporte }}</em></button>
@@ -22,7 +18,9 @@
     <main>
       <header>
         <div><span class="crumb">SIGTA / {{ etiquetaRol }} / {{ tituloModulo }}</span><h1>{{ titulo }}</h1><p>{{ subtitulo }}</p></div>
-        <div class="header-actions"><button class="icon-btn" title="Actualizar" @click="cargarDatos">↻</button><div class="today"><small>HOY</small><strong>{{ fechaActual }}</strong></div></div>
+        <div class="header-actions"><div class="today"><small>HOY</small><strong>{{ fechaActual }}</strong></div></div>
+      
+        <UsuarioHeader @actualizar="cargarDatos" />
       </header>
 
       <div v-if="error" class="alert">{{ error }}</div>
@@ -74,6 +72,7 @@
 </template>
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import LogoutModal from '../components/LogoutModal.vue'

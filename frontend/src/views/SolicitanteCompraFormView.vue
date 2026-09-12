@@ -6,6 +6,8 @@
         <span>SIGTA / Portal Solicitante / Compras</span>
         <h1>Registrar solicitud de compra</h1>
         <p>Registre el requerimiento de adquisición y adjunte el expediente para su evaluación.</p>
+      
+        <UsuarioHeader @actualizar="cargarAreas" />
       </header>
 
       <form class="form-card" @submit.prevent="guardar">
@@ -58,6 +60,7 @@
 </template>
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import SolicitanteMenu from '../components/SolicitanteMenu.vue'

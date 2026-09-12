@@ -22,19 +22,10 @@
           </p>
         </div>
 
-        <button
-          class="refresh-button"
-          type="button"
-          :disabled="cargando"
-          @click="cargarTodo"
-        >
-          {{
-            cargando
-              ? 'Actualizando...'
-              : 'Actualizar'
-          }}
-        </button>
 
+
+      
+        <UsuarioHeader @actualizar="cargarTodo" />
       </header>
 
 
@@ -1851,6 +1842,7 @@
 
 
 <script setup>
+import UsuarioHeader from '../components/UsuarioHeader.vue'
 
 import {
   computed,
