@@ -8,7 +8,7 @@
         <div class="logo-placeholder"><img src="/img/emi.jpg" alt="EMI" class="logo-img"></div>
 
         <div class="brand-text">
-          <h1>SIGTA</h1>
+          <h1>SIA</h1>
           <p>Escuela Militar de Ingeniería</p>
           <span>Unidad Académica Santa Cruz</span>
         </div>
@@ -124,11 +124,11 @@
 
       <footer v-if="!mostrarMenuUsuario">
         <p>
-          Sistema Integral de Gestión de Tickets y Aprobaciones
+          Sistema Integrado de Atención
         </p>
 
         <span>
-          SIGTA · EMI Santa Cruz
+          SIA · EMI Santa Cruz
         </span>
       </footer>
 

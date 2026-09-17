@@ -11,7 +11,7 @@
         </div>
 
         <div class="brand-text">
-          <h1>SIGTA</h1>
+          <h1>SIA</h1>
 
           <p>
             Escuela Militar de Ingeniería
@@ -175,12 +175,11 @@
       <footer>
 
         <p>
-          Sistema Integral de Gestión
-          de Tickets y Aprobaciones
+          Sistema Integrado de Atención
         </p>
 
         <span>
-          SIGTA · EMI Santa Cruz
+          SIA · EMI Santa Cruz
         </span>
 
       </footer>

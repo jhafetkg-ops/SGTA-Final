@@ -40,7 +40,7 @@
           </h1>
 
           <p>
-            Administre el canal institucional utilizado por SIGTA
+            Administre el canal institucional utilizado por SIA
             para recuperación y notificaciones.
           </p>
 
@@ -139,7 +139,7 @@
             </strong>
 
             <p>
-              SIGTA mantiene autenticación local;
+              SIA mantiene autenticación local;
               el correo se utiliza únicamente
               como medio de notificación.
             </p>
@@ -171,7 +171,7 @@
 
             <p>
               Datos del servidor de correo autorizado
-              para enviar mensajes desde SIGTA.
+              para enviar mensajes desde SIA.
             </p>
 
           </div>
@@ -213,9 +213,9 @@
                 <input
                   v-model="form.usuario"
                   type="email"
-                  placeholder="sigta@emi.edu.bo"
+                  placeholder="sia@emi.edu.bo"
                 />
-                <small>Cuenta autorizada para enviar mensajes desde SIGTA.</small>
+                <small>Cuenta autorizada para enviar mensajes desde SIA.</small>
               </div>
 
               <div class="field">
@@ -274,7 +274,7 @@
                   <input v-model="form.activo" type="checkbox" />
                   <div>
                     <strong>Habilitar notificaciones</strong>
-                    <span>Permitir que SIGTA utilice este canal de correo.</span>
+                    <span>Permitir que SIA utilice este canal de correo.</span>
                   </div>
                 </label>
               </section>

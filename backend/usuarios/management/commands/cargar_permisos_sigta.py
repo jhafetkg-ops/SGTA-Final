@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
     help = (
         "Crea roles, permisos y asignaciones "
-        "iniciales de SIGTA según los procesos definidos."
+        "iniciales de SIA según los procesos definidos."
     )
 
     # ======================================================
@@ -35,14 +35,14 @@ class Command(BaseCommand):
             "nombre": "Director",
             "descripcion": (
                 "Administra usuarios, roles, permisos, áreas, "
-                "auditoría y configuración general de SIGTA."
+                "auditoría y configuración general de SIA."
             ),
             "es_global": True,
         },
 
         {
             "codigo": "SUPERUSER",
-            "nombre": "Admin (superuser)",
+            "nombre": "Admin",
             "descripcion": (
                 "Administración técnica del sistema: usuarios, "
                 "roles y permisos, auditoría, correo SMTP y "
@@ -159,7 +159,7 @@ class Command(BaseCommand):
             "nombre": "Ver dashboard administrativo",
             "descripcion": (
                 "Permite visualizar el panel general "
-                "de administración de SIGTA."
+                "de administración de SIA."
             ),
             "modulo": "GENERAL",
         },
@@ -628,7 +628,7 @@ class Command(BaseCommand):
             "nombre": "Consultar auditoría",
             "descripcion": (
                 "Permite consultar el historial "
-                "de acciones de SIGTA."
+                "de acciones de SIA."
             ),
             "modulo": "AUDITORIA",
         },
@@ -652,7 +652,7 @@ class Command(BaseCommand):
             "nombre": "Configurar preferencias",
             "descripcion": (
                 "Permite modificar parámetros "
-                "generales de SIGTA."
+                "generales de SIA."
             ),
             "modulo": "CONFIGURACION",
         },
@@ -791,7 +791,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.WARNING(
-                "Configurando roles y permisos SIGTA..."
+                "Configurando roles y permisos SIA..."
             )
         )
 
@@ -1049,7 +1049,7 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                "Roles y permisos SIGTA configurados correctamente."
+                "Roles y permisos SIA configurados correctamente."
             )
         )
 

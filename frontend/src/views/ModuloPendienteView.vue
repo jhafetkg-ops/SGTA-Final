@@ -12,7 +12,7 @@
       </h1>
 
       <p>
-        Este módulo forma parte de SIGTA y
+        Este módulo forma parte de SIA y
         será habilitado en la siguiente etapa
         de implementación.
       </p>
@@ -64,7 +64,7 @@ const titulo = computed(() => {
     return 'Mi Perfil'
   }
 
-  return 'SIGTA'
+  return 'SIA'
 })
 </script>
 

@@ -1,7 +1,7 @@
 <template>
   <div class="layout sigta-role-layout">
     <aside :class="{abierto:menuAbierto}">
-      <div class="brand"><b><img src="/img/emi.jpg" alt="EMI"></b><div><strong>SIGTA</strong><small>Soporte Técnico</small></div><button class="toggle" @click="menuAbierto=!menuAbierto">☰</button></div>
+      <div class="brand"><b><img src="/img/emi.jpg" alt="EMI"></b><div><strong>SIA</strong><small>Soporte Técnico</small></div><button class="toggle" @click="menuAbierto=!menuAbierto">☰</button></div>
       <p>GESTIÓN DE TICKETS</p>
       <button v-for="m in menu" :key="m.id" :class="{active:vista===m.id}" @click="vista=m.id;menuAbierto=false"><IconoSigta class="nav-icon" :nombre="m.icono" :tamano="17" />{{m.nombre}}<em v-if="m.total!==undefined">{{m.total}}</em></button>
       <div class="bottom"><button class="logout" @click="mostrarLogout=true"><IconoSigta :tamano="17" nombre="salir" />Cerrar sesión</button></div>

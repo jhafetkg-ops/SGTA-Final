@@ -29,7 +29,7 @@
 
           <p>
             Parámetros institucionales,
-            operativos y de seguridad de SIGTA.
+            operativos y de seguridad de SIA.
           </p>
 
         </div>
@@ -100,7 +100,7 @@
 
               <p>
                 Información general visible
-                dentro de SIGTA.
+                dentro de SIA.
               </p>
 
             </div>
@@ -119,7 +119,7 @@
               <input
                 v-model="form.nombre_sistema"
                 type="text"
-                placeholder="SIGTA"
+                placeholder="SIA"
               />
 
             </div>
@@ -352,7 +352,7 @@
           </span>
 
           <strong>
-            Preferencias generales de SIGTA
+            Preferencias generales de SIA
           </strong>
 
           <p>
@@ -438,7 +438,7 @@ const form =
   reactive({
 
     nombre_sistema:
-      'SIGTA',
+      'SIA',
 
     institucion:
       'Escuela Militar de Ingeniería',

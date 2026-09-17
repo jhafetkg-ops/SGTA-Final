@@ -33,7 +33,7 @@
 
           <p>
             Auditoría de accesos y actividades
-            realizadas dentro de SIGTA.
+            realizadas dentro de SIA.
           </p>
 
         </div>
@@ -301,7 +301,7 @@
               </strong>
 
               <span>
-                Los accesos y operaciones de SIGTA
+                Los accesos y operaciones de SIA
                 se registran automáticamente.
               </span>
 

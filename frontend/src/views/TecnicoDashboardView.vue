@@ -2,7 +2,7 @@
   <div class="workbench sigta-role-layout">
     <aside class="sidebar" :class="{ abierto: menuAbierto }">
       <div class="brand-row">
-        <div class="brand"><span><img src="/img/emi.jpg" alt="EMI"></span><div><b>SIGTA</b><small>Gestión técnica</small></div></div>
+        <div class="brand"><span><img src="/img/emi.jpg" alt="EMI"></span><div><b>SIA</b><small>Gestión técnica</small></div></div>
         <button type="button" class="menu-toggle" :aria-expanded="menuAbierto" aria-label="Mostrar opciones del menú" @click="menuAbierto = !menuAbierto"><span></span><span></span><span></span></button>
       </div>
       <p class="nav-label">CENTRO DE TRABAJO</p>
@@ -17,7 +17,7 @@
 
     <main>
       <header>
-        <div><span class="crumb">SIGTA / {{ etiquetaRol }} / {{ tituloModulo }}</span><h1>{{ titulo }}</h1><p>{{ subtitulo }}</p></div>
+        <div><span class="crumb">SIA / {{ etiquetaRol }} / {{ tituloModulo }}</span><h1>{{ titulo }}</h1><p>{{ subtitulo }}</p></div>
         <div class="header-actions"><div class="today"><small>HOY</small><strong>{{ fechaActual }}</strong></div></div>
       
         <UsuarioHeader @actualizar="cargarDatos" />

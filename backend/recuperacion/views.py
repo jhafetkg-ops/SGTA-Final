@@ -67,16 +67,16 @@ def enviar_codigo_correo(
 ):
 
     asunto = (
-        "SIGTA - Código de recuperación"
+        "SIA - Código de recuperación"
     )
 
 
     texto = f"""
-SIGTA - Escuela Militar de Ingeniería
+SIA - Escuela Militar de Ingeniería
 
 Hola {usuario.nombre_completo}:
 
-Se solicitó recuperar la contraseña de su cuenta SIGTA.
+Se solicitó recuperar la contraseña de su cuenta SIA.
 
 Código de verificación:
 
@@ -86,7 +86,7 @@ Este código tiene una vigencia de 10 minutos.
 
 Si usted no realizó esta solicitud, puede ignorar este mensaje.
 
-SIGTA
+SIA
 Escuela Militar de Ingeniería
 Unidad Académica Santa Cruz
 """
@@ -111,7 +111,7 @@ Unidad Académica Santa Cruz
                 margin:0;
                 font-size:28px;
             ">
-                SIGTA
+                SIA
             </h1>
 
             <p style="
@@ -148,7 +148,7 @@ Unidad Académica Santa Cruz
             <p>
                 Recibimos una solicitud para
                 recuperar el acceso a su cuenta
-                de SIGTA.
+                de SIA.
             </p>
 
 
@@ -205,7 +205,7 @@ Unidad Académica Santa Cruz
             font-size:11px;
         ">
 
-            SIGTA · EMI Santa Cruz
+            SIA · EMI Santa Cruz
 
         </div>
 

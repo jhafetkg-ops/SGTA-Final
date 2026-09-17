@@ -4,7 +4,7 @@
     <main>
       <header class="head">
         <div>
-          <p class="eyebrow">MI PORTAL SIGTA</p>
+          <p class="eyebrow">MI PORTAL SIA</p>
           <h1>{{ saludo }}, {{ nombre }}</h1>
           <p>Consulte el avance cuando lo necesite y atienda las solicitudes que requieren su validación.</p>
         </div>

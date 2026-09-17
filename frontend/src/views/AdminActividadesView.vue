@@ -27,10 +27,6 @@
         <UsuarioHeader @actualizar="cargarInformes" />
       </header>
 
-      <p v-if="mensajeExito" class="mensaje-exito">
-        {{ mensajeExito }}
-      </p>
-
       <p v-if="errorCarga" class="mensaje-error">
         {{ errorCarga }}
       </p>
@@ -275,9 +271,9 @@
             class="btn-recibir"
             type="button"
             :disabled="procesando"
-            @click="recibirInforme"
+            @click="confirmandoRecibir = true"
           >
-            {{ procesando ? 'Registrando...' : 'Recibir y finalizar proceso' }}
+            Recibir y finalizar proceso
           </button>
 
           <button
@@ -293,6 +289,61 @@
       </div>
     </div>
 
+
+    <!-- =================================================
+         CONFIRMAR RECEPCIÓN DEL INFORME
+    ================================================== -->
+
+    <div
+      v-if="confirmandoRecibir"
+      class="detalle-modal-backdrop confirmar-overlay"
+      @click.self="!procesando && (confirmandoRecibir = false)"
+    >
+      <div class="confirmar-modal">
+
+        <div class="confirmar-icono">!</div>
+
+        <h3>¿Confirmar recepción del informe?</h3>
+
+        <p>
+          El requerimiento <strong>{{ informeSeleccionado?.codigo }}</strong>
+          quedará finalizado y el solicitante verá su estado como concluido.
+          Esta acción no se puede deshacer.
+        </p>
+
+        <div class="confirmar-acciones">
+
+          <button
+            type="button"
+            class="btn-cerrar"
+            :disabled="procesando"
+            @click="confirmandoRecibir = false"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="button"
+            class="btn-recibir"
+            :disabled="procesando"
+            @click="recibirInforme"
+          >
+            {{ procesando ? 'Registrando...' : 'Sí, recibir y finalizar' }}
+          </button>
+
+        </div>
+
+      </div>
+    </div>
+
+
+    <TarjetaGuardado
+      :visible="mostrarGuardado"
+      :texto="textoGuardado"
+      :tipo="tipoGuardado"
+      @cerrar="ocultarGuardado"
+    />
+
   </div>
 </template>
 
@@ -307,6 +358,12 @@ import AdminMenu
 
 import IconoSigta
   from '../components/IconoSigta.vue'
+
+import TarjetaGuardado
+  from '../components/TarjetaGuardado.vue'
+
+import { usarGuardado }
+  from '../utils/guardado.js'
 
 
 const jefatura =
@@ -324,11 +381,19 @@ const procesando =
 const errorCarga =
   ref('')
 
-const mensajeExito =
-  ref('')
+const {
+  mostrar: mostrarGuardado,
+  texto: textoGuardado,
+  tipo: tipoGuardado,
+  animar,
+  ocultar: ocultarGuardado,
+} = usarGuardado()
 
 const informeSeleccionado =
   ref(null)
+
+const confirmandoRecibir =
+  ref(false)
 
 
 const informesMantenimiento =
@@ -546,7 +611,6 @@ async function cargarInformes() {
 
 function verDetalle(informe) {
 
-  mensajeExito.value = ''
   informeSeleccionado.value = informe
 }
 
@@ -554,6 +618,7 @@ function verDetalle(informe) {
 function cerrarDetalle() {
 
   informeSeleccionado.value = null
+  confirmandoRecibir.value = false
 }
 
 
@@ -592,12 +657,15 @@ async function recibirInforme() {
 
     cerrarDetalle()
     await cargarInformes()
-    mensajeExito.value = informe.jefatura === 'MANTENIMIENTO'
-      ? 'Informe recibido. El requerimiento quedó finalizado y el solicitante ya verá su estado como concluido.'
-      : 'Informe recibido. El proceso de soporte quedó finalizado.'
+    animar(
+      informe.jefatura === 'MANTENIMIENTO'
+        ? 'Informe recibido. El requerimiento quedó finalizado y el solicitante ya verá su estado como concluido.'
+        : 'Informe recibido. El proceso de soporte quedó finalizado.'
+    )
   } catch (error) {
     console.error('No fue posible recibir el informe.', error)
     errorCarga.value = error.message
+    confirmandoRecibir.value = false
   } finally {
     procesando.value = false
   }
@@ -1086,6 +1154,66 @@ onMounted(cargarInformes)
 .btn-recibir:disabled {
   opacity: .65;
   cursor: not-allowed;
+}
+
+
+/* =========================================================
+   CONFIRMAR RECEPCIÓN
+========================================================= */
+
+.confirmar-overlay {
+  z-index: 210;
+}
+
+
+.confirmar-modal {
+  width: min(420px, 100%);
+  padding: 28px 26px;
+  border-radius: 14px;
+  background: var(--sigta-blanco);
+  text-align: center;
+}
+
+
+.confirmar-icono {
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--sigta-mostaza-suave);
+  color: var(--sigta-mostaza-oscuro);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+
+.confirmar-modal h3 {
+  margin: 0 0 10px;
+  color: var(--sigta-texto);
+  font-size: 18px;
+}
+
+
+.confirmar-modal p {
+  margin: 0 0 22px;
+  color: var(--sigta-texto-suave);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+
+.confirmar-acciones {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+
+.confirmar-acciones .btn-recibir {
+  margin-right: 0;
 }
 
 

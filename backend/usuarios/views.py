@@ -261,7 +261,7 @@ class EsAdministradorSIGTA(
 
     message = (
         "No tiene permisos para administrar "
-        "la configuración de identidad de SIGTA."
+        "la configuración de identidad de SIA."
     )
 
 

@@ -103,7 +103,7 @@
           </strong>
 
           <small>
-            Registrados en SIGTA
+            Registrados en SIA
           </small>
 
           </div>
@@ -643,7 +643,7 @@
                 {{
                   editando
                     ? 'Modifique los datos permitidos del usuario.'
-                    : 'Registre una nueva cuenta institucional en SIGTA.'
+                    : 'Registre una nueva cuenta institucional en SIA.'
                 }}
 
               </p>
@@ -934,7 +934,7 @@
             <IconoSigta nombre="validar" :tamano="46" />
           </div>
           <h2>¡Usuario creado!</h2>
-          <p>La cuenta institucional quedó registrada en SIGTA.</p>
+          <p>La cuenta institucional quedó registrada en SIA.</p>
           <dl class="confirm-user-data">
             <div><dt>Correo:</dt><dd>{{ datosCreacion.correo }}</dd></div>
             <div v-if="datosCreacion.password"><dt>Contraseña temporal:</dt><dd>{{ datosCreacion.password }}</dd></div>
@@ -970,8 +970,8 @@
           </dl>
           <div class="confirm-warning" :class="accionConfirmacion">
             {{ accionConfirmacion === 'inactivar'
-              ? 'El usuario no podrá acceder a SIGTA mientras se encuentre inactivo.'
-              : 'El usuario recuperará el acceso a SIGTA.' }}
+              ? 'El usuario no podrá acceder a SIA mientras se encuentre inactivo.'
+              : 'El usuario recuperará el acceso a SIA.' }}
           </div>
           <div class="modal-actions">
             <button type="button" class="btn-cancel" :disabled="procesandoEstado" @click="cerrarConfirmacion">Cancelar</button>

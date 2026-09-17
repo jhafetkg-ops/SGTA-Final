@@ -3,7 +3,7 @@
     <SolicitanteMenu />
     <main class="page-content">
       <header class="page-header">
-        <span>SIGTA / Portal Solicitante / Compras</span>
+        <span>SIA / Portal Solicitante / Compras</span>
         <h1>Registrar solicitud de compra</h1>
         <p>Registre el requerimiento de adquisición y adjunte el expediente para su evaluación.</p>
       

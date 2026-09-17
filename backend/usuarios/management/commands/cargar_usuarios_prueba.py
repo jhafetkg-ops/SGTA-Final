@@ -18,7 +18,7 @@ CLAVE_PRUEBA = "Hola123*"
 class Command(BaseCommand):
 
     help = (
-        "Crea/actualiza las cuentas de prueba de SIGTA para "
+        "Crea/actualiza las cuentas de prueba de SIA para "
         "los roles que todavía no tenían credenciales en "
         "CREDENCIALES_PRUEBA.md, y una cuenta nueva pendiente "
         "de cambio de contraseña para probar HU-01/HU-02."
@@ -27,7 +27,7 @@ class Command(BaseCommand):
     USUARIOS = [
         {
             "email": "superuser@emi.edu.bo",
-            "nombre_completo": "Admin (superuser)",
+            "nombre_completo": "Admin",
             "rol": "SUPERUSER",
             "password": CLAVE_PRUEBA,
             "must_change_password": False,

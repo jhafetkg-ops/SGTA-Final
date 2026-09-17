@@ -2,7 +2,7 @@
   <div class="layout sigta-role-layout">
     <aside :class="{ abierto: menuAbierto }">
       <div class="brand-row">
-        <div class="brand"><b><img src="/img/emi.jpg" alt="EMI"></b><div><strong>SIGTA</strong><small>Mantenimiento</small></div></div>
+        <div class="brand"><b><img src="/img/emi.jpg" alt="EMI"></b><div><strong>SIA</strong><small>Mantenimiento</small></div></div>
         <button type="button" class="menu-toggle" :aria-expanded="menuAbierto" aria-label="Mostrar opciones del menú" @click="menuAbierto = !menuAbierto"><span></span><span></span><span></span></button>
       </div>
       <p>MI TRABAJO</p>

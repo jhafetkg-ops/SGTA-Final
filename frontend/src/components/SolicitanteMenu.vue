@@ -17,11 +17,11 @@
         <div>
 
           <h2>
-            SIGTA
+            SIA
           </h2>
 
           <span>
-            Sistema Integral de Gestión
+            Sistema Integrado de Atención
           </span>
 
         </div>

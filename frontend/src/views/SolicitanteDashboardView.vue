@@ -15,7 +15,7 @@
         <div>
 
           <h1>
-            Bienvenido a SIGTA
+            Bienvenido a SIA
           </h1>
 
           <p>

@@ -33,7 +33,7 @@
         <!-- ESTADO 2: CONFIRMACIÓN -->
         <template v-if="fase === 'confirmacion'">
           <h2>¿Cerrar sesión?</h2>
-          <p>Estás a punto de salir de SIGTA. ¿Deseas continuar?</p>
+          <p>Estás a punto de salir de SIA. ¿Deseas continuar?</p>
 
           <div class="lm-acciones">
             <button type="button" class="lm-btn lm-cancelar" @click="onCancelar">

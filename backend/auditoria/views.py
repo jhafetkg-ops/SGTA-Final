@@ -287,7 +287,7 @@ def preferencias_view(request):
             pk=1,
             defaults={
                 "nombre_sistema":
-                    "SIGTA",
+                    "SIA",
 
                 "institucion":
                     "Escuela Militar de Ingeniería",
@@ -359,7 +359,7 @@ def preferencias_view(request):
         modulo="Preferencias",
         detalle=(
             "El administrador modificó "
-            "los parámetros generales de SIGTA."
+            "los parámetros generales de SIA."
         ),
         nivel="INFO",
     )

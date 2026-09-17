@@ -15,7 +15,7 @@
 
           <p>
             Administración técnica del sistema: usuarios, roles y
-            permisos, auditoría y configuración de SIGTA.
+            permisos, auditoría y configuración de SIA.
           </p>
         </div>
 
@@ -60,7 +60,7 @@
 
             <span>
               Definir qué puede visualizar y ejecutar
-              cada rol dentro de SIGTA.
+              cada rol dentro de SIA.
             </span>
           </div>
         </button>
@@ -120,7 +120,7 @@
 
             <span>
               Configurar parámetros generales del
-              funcionamiento de SIGTA.
+              funcionamiento de SIA.
             </span>
           </div>
         </button>
@@ -183,6 +183,10 @@ const router =
 ========================================================= */
 
 .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
   margin-bottom: 22px;
 }
 
@@ -319,6 +323,11 @@ const router =
 
   .main {
     padding: 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 

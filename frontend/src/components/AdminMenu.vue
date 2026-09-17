@@ -14,10 +14,10 @@
         </div>
 
         <div class="brand-text">
-          <h2>SIGTA</h2>
+          <h2>SIA</h2>
 
           <span>
-            Sistema Integral de Gestión
+            Sistema Integrado de Atención
           </span>
           <small class="brand-lema">Disciplina · Ciencia · Desarrollo</small>
         </div>

@@ -122,7 +122,7 @@ class PreferenciaSistema(models.Model):
 
     nombre_sistema = models.CharField(
         max_length=100,
-        default="SIGTA"
+        default="SIA"
     )
 
     institucion = models.CharField(

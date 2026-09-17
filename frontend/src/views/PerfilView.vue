@@ -5,7 +5,7 @@
       <header class="topbar">
         <div>
           <h1>Mi perfil</h1>
-          <p>Consulte y actualice la información de su cuenta registrada en SIGTA.</p>
+          <p>Consulte y actualice la información de su cuenta registrada en SIA.</p>
         </div>
       </header>
 

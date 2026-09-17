@@ -25,7 +25,7 @@ class UsuarioAdmin(UserAdmin):
 
     fieldsets = UserAdmin.fieldsets + (
         (
-            'SIGTA',
+            'SIA',
             {
                 'fields': (
                     'nombre_completo',

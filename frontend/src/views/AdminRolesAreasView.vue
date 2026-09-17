@@ -30,7 +30,7 @@
           <p>
             Administre la estructura organizacional
             y determine qué puede visualizar y ejecutar
-            cada rol dentro de SIGTA.
+            cada rol dentro de SIA.
           </p>
 
         </div>
@@ -70,7 +70,7 @@
           <div class="sc-body">
             <span>Roles</span>
             <strong>{{ roles.length }}</strong>
-            <small>Registrados en SIGTA</small>
+            <small>Registrados en SIA</small>
           </div>
         </article>
 
@@ -379,7 +379,7 @@
               </span>
 
               <h2>
-                Permisos de SIGTA
+                Permisos de SIA
               </h2>
 
               <p>
@@ -2719,7 +2719,10 @@ function cerrarSesion() {
 ========================================================= */
 
 .page-header {
-
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
   margin-bottom: 22px;
 }
 
@@ -3099,11 +3102,24 @@ function cerrarSesion() {
 
 .blue-button {
 
-  border: none;
+  border: 1px solid var(--sigta-azul);
 
   background: var(--sigta-azul-tenue);
 
   color: var(--sigta-azul);
+
+  transition: background .15s ease, color .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+
+.blue-button:hover {
+
+  background: var(--sigta-azul);
+
+  color: white;
+
+  transform: translateY(-1px);
+
+  box-shadow: 0 4px 10px rgba(0,42,92,.18);
 }
 
 
@@ -3115,6 +3131,19 @@ function cerrarSesion() {
   background: white;
 
   color: var(--sigta-texto-suave);
+
+  transition: border-color .15s ease, color .15s ease, background .15s ease, transform .15s ease;
+}
+
+.secondary-button:hover {
+
+  border-color: var(--sigta-azul);
+
+  color: var(--sigta-azul);
+
+  background: var(--sigta-azul-tenue);
+
+  transform: translateY(-1px);
 }
 
 
@@ -4269,6 +4298,13 @@ function cerrarSesion() {
   .content {
 
     padding: 16px;
+  }
+
+
+  .page-header {
+
+    flex-direction: column;
+    align-items: flex-start;
   }
 
 

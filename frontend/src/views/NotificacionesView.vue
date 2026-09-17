@@ -3,7 +3,7 @@
     <SolicitanteMenu v-if="!esTecnico" />
     <aside v-else class="technician-nav">
       <div class="brand-row">
-        <div class="brand"><b><img src="/img/emi.jpg" alt="EMI"></b><div><strong>SIGTA</strong><small>Soporte Técnico</small></div></div>
+        <div class="brand"><b><img src="/img/emi.jpg" alt="EMI"></b><div><strong>SIA</strong><small>Soporte Técnico</small></div></div>
       </div>
       <p>MI TRABAJO</p>
       <button @click="irSeccion('resumen')"><IconoSigta class="nav-icon" nombre="panel" :tamano="17" />Dashboard</button>

@@ -13,7 +13,7 @@
         </div>
 
         <div class="brand-text">
-          <h1>SIGTA</h1>
+          <h1>SIA</h1>
 
           <strong>
             Escuela Militar de Ingeniería
@@ -120,7 +120,7 @@
         </h2>
 
         <p class="description">
-          Ingrese su correo institucional registrado en SIGTA.
+          Ingrese su correo institucional registrado en SIA.
           Le enviaremos un código de verificación para continuar.
         </p>
 
@@ -515,7 +515,7 @@
 
         <p class="description">
           Su contraseña fue modificada correctamente.
-          Ya puede utilizarla para iniciar sesión en SIGTA.
+          Ya puede utilizarla para iniciar sesión en SIA.
         </p>
 
 
@@ -550,12 +550,11 @@
       <footer>
 
         <p>
-          Sistema Integral de Gestión
-          de Tickets y Aprobaciones
+          Sistema Integrado de Atención
         </p>
 
         <strong>
-          SIGTA · EMI Santa Cruz
+          SIA · EMI Santa Cruz
         </strong>
 
       </footer>

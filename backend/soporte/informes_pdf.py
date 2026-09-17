@@ -198,7 +198,7 @@ def _documento_pdf(titulo, subtitulo, ticket, secciones, meta, compra=None):
         logo_id = agregar(f"<< /Type /XObject /Subtype /Image /Width 1 /Height 1 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length {len(datos_logo)} >>\nstream\n".encode() + datos_logo + b"\nendstream")
     ids = []
     for numero, comandos in enumerate(paginas, 1):
-        pie = f"BT /F1 7 Tf 42 36 Td (SIGTA - Expediente {_pdf_text(ticket.codigo)}) Tj ET BT /F1 7 Tf 500 36 Td (Página {numero} de {len(paginas)}) Tj ET"
+        pie = f"BT /F1 7 Tf 42 36 Td (SIA - Expediente {_pdf_text(ticket.codigo)}) Tj ET BT /F1 7 Tf 500 36 Td (Página {numero} de {len(paginas)}) Tj ET"
         flujo = ("\n".join(comandos) + "\n" + pie).encode("latin-1")
         contenido = agregar(b"<< /Length %d >>\nstream\n" % len(flujo) + flujo + b"\nendstream")
         ids.append(agregar(f"<< /Type /Page /Parent {arbol} 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 {f1} 0 R /F2 {f2} 0 R >> /XObject << /Logo {logo_id} 0 R >> >> /Contents {contenido} 0 R >>".encode()))
